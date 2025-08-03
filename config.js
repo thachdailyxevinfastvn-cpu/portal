@@ -1,0 +1,14 @@
+// =================================================================
+// == FILE CẤU HÌNH TRUNG TÂM (CONFIG.JS) ==
+// =================================================================
+// Nơi đây chứa tất cả các đường link và các biến quan trọng.
+// Khi cần thay đổi, bạn chỉ cần chỉnh sửa ở file này.
+// Các trang khác sẽ tự động cập nhật theo.
+// =================================================================
+
+// URL của Google Apps Script để xử lý dữ liệu người dùng và các tác vụ khác.
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqbTYlcrY-MED3mG14QlZHlViX8eo2yiZgIPTqrJ7BcAaFKYKGLWJCDAbe6paxzUyT/exec';
+
+// Bạn có thể thêm các URL hoặc cấu hình khác ở đây trong tương lai.
+// Ví dụ:
+// const ANOTHER_API_URL = 'https://link-api-khac.com/data';

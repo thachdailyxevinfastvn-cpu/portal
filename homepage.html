@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Nạp file cấu hình -->
+    <script src="config.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .team-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .team-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Header và Menu -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-blue-600">Portal</a>
+            
+            <!-- Menu cho Desktop -->
+            <div class="hidden md:flex items-center space-x-4">
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Trang chủ</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Kho xe</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Xe đã bán</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Chính sách</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Ngân hàng</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">KPI</a>
+                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Tạo văn bản</a>
+            </div>
+
+            <!-- Thông tin người dùng -->
+            <div class="flex items-center">
+                <div id="user-profile" class="flex items-center space-x-3">
+                     <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
+                     <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
+                </div>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </button>
+                 <!-- Nút menu mobile -->
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Xe đã bán</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+        </div>
+    </header>
+
+    <!-- Nội dung chính -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Lời chào -->
+        <section class="text-center">
+            <h1 id="welcome-message" class="text-4xl md:text-5xl font-extrabold text-gray-800"></h1>
+            <p class="mt-4 text-lg text-gray-600">Chúc bạn một ngày làm việc hiệu quả!</p>
+        </section>
+
+        <!-- Our Team -->
+        <section class="mt-16">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Our Team</h2>
+            <div id="team-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+                <!-- Thẻ thành viên sẽ được chèn vào đây bằng JavaScript -->
+                <div id="team-loader" class="col-span-full text-center p-8">
+                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                     <p class="mt-4 text-gray-500">Đang tải danh sách team...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- CẤU HÌNH ---
+        // Biến APPS_SCRIPT_URL giờ đây được lấy từ file config.js
+        // Không cần định nghĩa ở đây nữa.
+
+        // --- DOM Elements ---
+        const userFullNameDisplay = document.getElementById('user-fullname');
+        const userAvatarDisplay = document.getElementById('user-avatar');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const logoutBtn = document.getElementById('logout-btn');
+        const teamGrid = document.getElementById('team-grid');
+        const teamLoader = document.getElementById('team-loader');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        // --- Hàm gọi API (JSONP) ---
+        async function handleApiRequest(payload) {
+             if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL) {
+                console.error('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.');
+                return null;
+            }
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP request failed'));
+                };
+                const params = new URLSearchParams({ ...payload, callback: callbackName });
+                script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+                document.body.appendChild(script);
+            });
+        }
+
+        // --- Hàm hiển thị Team ---
+        async function displayTeam() {
+            const result = await handleApiRequest({ action: 'getAllUsers' });
+            if (result && result.success) {
+                teamLoader.remove(); // Xóa loader
+                result.users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'team-card bg-white p-4 rounded-lg shadow text-center';
+                    card.innerHTML = `
+                        <img src="${user.imageUrl || 'https://placehold.co/150x150/EBF4FF/76A9FA?text=User'}" 
+                             alt="${user.fullName}" 
+                             class="w-24 h-24 rounded-full mx-auto object-cover mb-4 border-4 border-gray-200"
+                             onerror="this.onerror=null;this.src='https://placehold.co/150x150/EBF4FF/76A9FA?text=Error';">
+                        <h3 class="font-bold text-gray-800">${user.fullName}</h3>
+                    `;
+                    teamGrid.appendChild(card);
+                });
+            } else {
+                teamLoader.innerHTML = '<p class="text-red-500">Không thể tải danh sách team.</p>';
+            }
+        }
+
+        // --- Hàm xử lý khi tải trang ---
+        window.addEventListener('load', () => {
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (!userDataString) {
+                // Nếu chưa đăng nhập, quay về trang login
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const userData = JSON.parse(userDataString);
+            
+            // Hiển thị thông tin người dùng
+            userFullNameDisplay.textContent = userData.fullName;
+            userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            welcomeMessage.textContent = `Chào mừng trở lại, ${userData.fullName}!`;
+
+            // Tải danh sách team
+            displayTeam();
+        });
+        
+        // --- Xử lý đăng xuất ---
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        });
+
+        // --- Xử lý menu mobile ---
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+    </script>
+</body>
+</html>
