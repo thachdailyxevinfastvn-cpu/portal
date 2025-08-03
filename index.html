@@ -6,7 +6,6 @@
     <title>Webapp Đăng nhập Hiện đại</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Không cần Axios nữa -->
     <!-- Tải Font Inter từ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -109,7 +108,6 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // !!! DÁN URL TỪ LẦN TRIỂN KHAI MỚI NHẤT CỦA APPS SCRIPT VÀO ĐÂY !!!
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfEfPzo4f2d_gY6Uckd3S4Rc7gw8vlPHX3uEhHJdywRBJvkdxyjnbWysb3QfbtqpQ4/exec';
 
         // --- DOM Elements ---
@@ -161,7 +159,8 @@
 
         // --- HÀM GỌI API DÙNG KỸ THUẬT JSONP ĐỂ TRÁNH LỖI CORS ---
         async function handleApiRequest(payload, button) {
-            if (APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbzfEfPzo4f2d_gY6Uckd3S4Rc7gw8vlPHX3uEhHJdywRBJvkdxyjnbWysb3QfbtqpQ4/exec')) {
+            // *** DÒNG NÀY ĐÃ ĐƯỢC SỬA LẠI CHO ĐÚNG ***
+            if (APPS_SCRIPT_URL.includes('DÁN_URL')) {
                 showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
                 return null;
             }
