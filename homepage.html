@@ -31,7 +31,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Khoảng cách đã được rút ngắn */
             padding-top: 80px; 
             padding-bottom: 60px;
             overflow: hidden;
@@ -102,13 +101,14 @@
         .card.right-2 { z-index: 1; transform: translateX(400px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
         .card.hidden { opacity: 0; pointer-events: none; }
 
-        .member-info { text-align: center; margin-top: 40px; transition: all 0.5s ease-out; }
-        .member-name { color: rgb(8, 42, 123); font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; position: relative; display: inline-block; }
+        .member-info { text-align: center; margin-top: 20px; transition: all 0.5s ease-out; }
+        .member-name { color: rgb(8, 42, 123); font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; position: relative; display: inline-block; }
+        .member-role { color: #848696; font-size: 1.2rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
         .member-name::before, .member-name::after { content: ""; position: absolute; top: 100%; width: 100px; height: 2px; background: rgb(8, 42, 123); }
         .member-name::before { left: -120px; }
         .member-name::after { right: -120px; }
 
-        .dots { display: flex; justify-content: center; gap: 10px; margin-top: 60px; }
+        .dots { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(8, 42, 123, 0.2); cursor: pointer; transition: all 0.3s ease; }
         .dot.active { background: rgb(8, 42, 123); transform: scale(1.2); }
 
@@ -270,7 +270,7 @@
                 </div>
                 <div class="member-info">
                     <h2 class="member-name"></h2>
-                    <p class="member-role">Thành viên</p>
+                    <p class="member-role"></p>
                 </div>
                 <div class="dots"></div>
             `;
@@ -329,6 +329,7 @@
 
                 setTimeout(() => {
                     memberName.textContent = teamData[currentIndex].fullName;
+                    memberRole.textContent = teamData[currentIndex].role || 'Thành viên';
                     memberName.style.opacity = "1";
                     memberRole.style.opacity = "1";
                 }, 300);
@@ -387,7 +388,11 @@
                     const loggedInUser = users.splice(loggedInUserIndex, 1)[0];
                     users.unshift(loggedInUser);
                 }
-                teamData = users; // Gán dữ liệu đã được sắp xếp lại
+                teamData = users.map(user => ({
+                    fullName: user.fullName,
+                    imageUrl: user.imageUrl,
+                    role: user.role
+                }));
                 buildAndInitCarousel();
             } else {
                 teamLoader.innerHTML = '<p class="text-red-500">Không thể tải danh sách team.</p>';
