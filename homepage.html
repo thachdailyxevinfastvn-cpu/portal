@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Nạp file cấu hình -->
     <script src="config.js"></script>
     <style>
         body { 
@@ -135,13 +134,12 @@
 </head>
 <body class="bg-gray-50">
 
-    <!-- Header và Menu -->
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="#" class="text-2xl font-bold text-blue-600">Portal</a>
             <div class="hidden md:flex items-center space-x-4">
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Trang chủ</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Kho xe</a>
+                <a href="homepage.html" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Trang chủ</a>
+                <a href="khoxe.html" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Kho xe</a>
                 <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Xe đã bán</a>
                 <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Chính sách</a>
                 <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Ngân hàng</a>
@@ -162,8 +160,8 @@
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+            <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Xe đã bán</a>
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
@@ -172,22 +170,18 @@
         </div>
     </header>
 
-    <!-- Nội dung chính -->
     <main class="container mx-auto px-6 py-8">
-        <!-- Lời chào -->
         <section class="text-center">
             <h1 id="welcome-message" class="text-4xl md:text-5xl font-extrabold text-gray-800"></h1>
             <p id="typing-slogan" class="mt-4 text-lg text-gray-600 h-6"></p>
         </section>
 
-        <!-- Our Team - Giao diện Carousel -->
         <section id="our-team-section" class="carousel-section">
             <div id="team-loader" class="text-center p-8">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                 <p class="mt-4 text-gray-500">Đang tải danh sách team...</p>
             </div>
-            <!-- Nội dung carousel sẽ được tạo bằng JS -->
-        </section>
+            </section>
     </main>
 
     <script>
