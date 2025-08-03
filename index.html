@@ -108,7 +108,7 @@
 
     <script>
         // --- CẤU HÌNH ---
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfEfPzo4f2d_gY6Uckd3S4Rc7gw8vlPHX3uEhHJdywRBJvkdxyjnbWysb3QfbtqpQ4/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwE6A-5S2gvHEY8YPbUbXMsF7rd_siZGqyGSHSetjMKFstdfG7YYAT1mCJjS2grV9p_/exec';
 
         // --- DOM Elements ---
         const loginScreen = document.getElementById('login-screen');
@@ -160,7 +160,7 @@
         // --- HÀM GỌI API DÙNG KỸ THUẬT JSONP ĐỂ TRÁNH LỖI CORS ---
         async function handleApiRequest(payload, button) {
             // *** DÒNG NÀY ĐÃ ĐƯỢC SỬA LẠI CHO ĐÚNG ***
-            if (APPS_SCRIPT_URL.includes('DÁN_URL')) {
+            if (APPS_SCRIPT_URL.includes('')) {
                 showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
                 return null;
             }
