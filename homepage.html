@@ -94,12 +94,12 @@
             object-fit: cover;
         }
 
-        /* SỬA LỖI: Giảm khoảng cách translateX để các thẻ gần nhau hơn trên desktop */
+        /* SỬA LỖI: Áp dụng khoảng cách của mobile cho desktop */
         .card.center { z-index: 10; transform: scale(1.1) translateZ(0); filter: none; }
-        .card.left-2 { z-index: 1; transform: translateX(-340px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
-        .card.left-1 { z-index: 5; transform: translateX(-170px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
-        .card.right-1 { z-index: 5; transform: translateX(170px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
-        .card.right-2 { z-index: 1; transform: translateX(340px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
+        .card.left-2 { z-index: 1; transform: translateX(-250px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
+        .card.left-1 { z-index: 5; transform: translateX(-120px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
+        .card.right-1 { z-index: 5; transform: translateX(120px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
+        .card.right-2 { z-index: 1; transform: translateX(250px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
         .card.hidden { opacity: 0; pointer-events: none; }
 
         .member-info { text-align: center; margin-top: 20px; transition: all 0.5s ease-out; }
@@ -121,6 +121,7 @@
         @media (max-width: 768px) {
             .about-title { font-size: 4.5rem; }
             .card { width: 200px; height: 280px; }
+            /* Giữ nguyên các giá trị này cho mobile */
             .card.left-2 { transform: translateX(-250px) scale(0.8) translateZ(-300px); }
             .card.left-1 { transform: translateX(-120px) scale(0.9) translateZ(-100px); }
             .card.right-1 { transform: translateX(120px) scale(0.9) translateZ(-100px); }
