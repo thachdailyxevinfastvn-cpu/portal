@@ -6,6 +6,8 @@
     <title>Webapp Đăng nhập Hiện đại</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải thư viện Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Tải Font Inter từ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,7 +15,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .transition-all { transition: all 0.3s ease-in-out; }
-        /* Style cho nút khi đang tải */
         .button-loading::after {
             content: '';
             display: inline-block;
@@ -109,8 +110,8 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // !!! DÁN URL ỨNG DỤNG WEB APPS SCRIPT CỦA BẠN VÀO ĐÂY !!!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxb6ClbUpISrGDk_z2-Fg2cDuQUAuymtEPFgusnyC8nvCB81OqpwPZvRkLqO1Re9djg/exec'; // Đã điền sẵn URL từ hình ảnh của bạn
+        // !!! Đảm bảo URL này là URL từ lần triển khai MỚI NHẤT của Apps Script !!!
+        const APPS_SCRIPT_URL = 'DÁN_URL_APPS_SCRIPT_MỚI_NHẤT_CỦA_BẠN_VÀO_ĐÂY';
 
         // --- DOM Elements ---
         const loginScreen = document.getElementById('login-screen');
@@ -159,35 +160,36 @@
             }
         }
 
+        // --- VIẾT LẠI HÀM GỌI API DÙNG AXIOS ---
         async function handleApiRequest(payload, button) {
-            if (APPS_SCRIPT_URL.includes('DÁN_URL_CỦA_BẠN_VÀO_ĐÂY')) {
+            if (APPS_SCRIPT_URL.includes('DÁN_URL')) {
                 showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
                 return null;
             }
 
             setLoading(button, true);
             try {
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    redirect: "follow",
-                    body: JSON.stringify(payload),
-                    headers: {
-                        // Dòng này đã được sửa để khắc phục lỗi với Google Apps Script
-                        "Content-Type": "text/plain;charset=utf-8", 
-                    },
-                });
-                const result = await response.json();
-                return result;
+                // Axios sẽ tự động xử lý việc chuyển đổi payload thành JSON
+                const response = await axios.post(APPS_SCRIPT_URL, payload);
+                // Dữ liệu trả về từ Apps Script sẽ nằm trong response.data
+                return response.data;
             } catch (error) {
-                console.error("Lỗi khi gọi API:", error);
-                showMessage('Đã có lỗi mạng xảy ra. Vui lòng thử lại.', false);
+                console.error("Lỗi khi gọi API bằng Axios:", error);
+                if (error.response) {
+                    console.error("Server đã phản hồi với lỗi:", error.response.status, error.response.data);
+                } else if (error.request) {
+                    console.error("Yêu cầu đã được gửi nhưng không nhận được phản hồi:", error.request);
+                } else {
+                    console.error('Lỗi khi thiết lập yêu cầu:', error.message);
+                }
+                showMessage('Lỗi mạng hoặc máy chủ. Vui lòng kiểm tra Console (F12).', false);
                 return null;
             } finally {
                 setLoading(button, false);
             }
         }
         
-        // --- Event Listeners ---
+        // --- Event Listeners (Không thay đổi) ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
