@@ -265,7 +265,6 @@
         }
 
         function initCarouselLogic() {
-            const carouselContainer = document.querySelector(".carousel-container");
             const cards = document.querySelectorAll(".card");
             const dots = document.querySelectorAll(".dot");
             const memberName = document.querySelector(".member-name");
@@ -274,25 +273,12 @@
             const rightArrow = document.querySelector(".nav-arrow.right");
             let currentIndex = 0;
             let isAnimating = false;
-            let autoScrollInterval = null;
-
-            // --- CÁC HÀM ĐIỀU KHIỂN AUTO SCROLL ---
-            function startAutoScroll() {
-                // Dừng interval cũ trước khi bắt đầu cái mới để tránh bị chồng chéo
-                clearInterval(autoScrollInterval);
-                autoScrollInterval = setInterval(() => {
-                    updateCarousel(currentIndex + 1);
-                }, 2000); // Tự động trượt sau mỗi 2 giây
-            }
-
-            function stopAutoScroll() {
-                clearInterval(autoScrollInterval);
-            }
+            
+            // --- ĐÃ LOẠI BỎ CÁC HÀM VÀ BIẾN LIÊN QUAN ĐẾN AUTO SCROLL ---
 
             function updateCarousel(newIndex) {
                 if (isAnimating || cards.length === 0) return;
                 isAnimating = true;
-                stopAutoScroll(); // Dừng auto scroll mỗi khi có tương tác
 
                 currentIndex = (newIndex + cards.length) % cards.length;
 
@@ -321,7 +307,6 @@
 
                 setTimeout(() => { 
                     isAnimating = false; 
-                    startAutoScroll(); // Bắt đầu lại auto scroll sau khi animation hoàn tất
                 }, 800);
             }
 
@@ -339,7 +324,6 @@
             let touchStartX = 0;
             document.addEventListener("touchstart", (e) => { 
                 touchStartX = e.changedTouches[0].screenX;
-                stopAutoScroll(); // Dừng khi người dùng bắt đầu chạm
             });
             document.addEventListener("touchend", (e) => {
                 const touchEndX = e.changedTouches[0].screenX;
@@ -347,14 +331,8 @@
                 if (Math.abs(diff) > 50) {
                     if (diff > 0) updateCarousel(currentIndex + 1); // Vuốt sang trái
                     else updateCarousel(currentIndex - 1); // Vuốt sang phải
-                } else {
-                    startAutoScroll(); // Nếu không vuốt đủ xa, bắt đầu lại
                 }
             });
-
-            // Dừng auto scroll khi di chuột vào và bắt đầu lại khi di chuột ra
-            carouselContainer.addEventListener('mouseenter', stopAutoScroll);
-            carouselContainer.addEventListener('mouseleave', startAutoScroll);
 
             // Bắt đầu lần đầu tiên
             updateCarousel(0);
