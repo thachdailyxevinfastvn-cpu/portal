@@ -6,8 +6,7 @@
     <title>Webapp Đăng nhập Hiện đại</title>
     <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tải thư viện Axios -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Không cần Axios nữa -->
     <!-- Tải Font Inter từ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,8 +109,8 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // !!! Đảm bảo URL này là URL từ lần triển khai MỚI NHẤT của Apps Script !!!
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwk0QUDeotPvmtY618yR2UeKxM3x1mA18_FG0V5KsBvFhyF3ev8Oz4OBZzHnp_2_9QS/exec';
+        // !!! DÁN URL TỪ LẦN TRIỂN KHAI MỚI NHẤT CỦA APPS SCRIPT VÀO ĐÂY !!!
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfEfPzo4f2d_gY6Uckd3S4Rc7gw8vlPHX3uEhHJdywRBJvkdxyjnbWysb3QfbtqpQ4/exec';
 
         // --- DOM Elements ---
         const loginScreen = document.getElementById('login-screen');
@@ -160,33 +159,42 @@
             }
         }
 
-        // --- VIẾT LẠI HÀM GỌI API DÙNG AXIOS ---
+        // --- HÀM GỌI API DÙNG KỸ THUẬT JSONP ĐỂ TRÁNH LỖI CORS ---
         async function handleApiRequest(payload, button) {
-            if (APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbwk0QUDeotPvmtY618yR2UeKxM3x1mA18_FG0V5KsBvFhyF3ev8Oz4OBZzHnp_2_9QS/exec')) {
+            if (APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbzfEfPzo4f2d_gY6Uckd3S4Rc7gw8vlPHX3uEhHJdywRBJvkdxyjnbWysb3QfbtqpQ4/exec')) {
                 showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
                 return null;
             }
 
             setLoading(button, true);
-            try {
-                // Axios sẽ tự động xử lý việc chuyển đổi payload thành JSON
-                const response = await axios.post(APPS_SCRIPT_URL, payload);
-                // Dữ liệu trả về từ Apps Script sẽ nằm trong response.data
-                return response.data;
-            } catch (error) {
-                console.error("Lỗi khi gọi API bằng Axios:", error);
-                if (error.response) {
-                    console.error("Server đã phản hồi với lỗi:", error.response.status, error.response.data);
-                } else if (error.request) {
-                    console.error("Yêu cầu đã được gửi nhưng không nhận được phản hồi:", error.request);
-                } else {
-                    console.error('Lỗi khi thiết lập yêu cầu:', error.message);
-                }
-                showMessage('Lỗi mạng hoặc máy chủ. Vui lòng kiểm tra Console (F12).', false);
-                return null;
-            } finally {
-                setLoading(button, false);
-            }
+
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    setLoading(button, false);
+                    resolve(data);
+                };
+
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    setLoading(button, false);
+                    showMessage('Lỗi mạng hoặc URL API không hợp lệ.', false);
+                    reject(new Error('JSONP request failed'));
+                };
+
+                const params = new URLSearchParams({
+                    ...payload,
+                    callback: callbackName
+                });
+                script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+
+                document.body.appendChild(script);
+            });
         }
         
         // --- Event Listeners (Không thay đổi) ---
