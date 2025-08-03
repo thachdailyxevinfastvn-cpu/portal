@@ -75,8 +75,10 @@
             border-radius: 20px;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            /* SỬA LỖI: Chuyển động mượt mà hơn */
-            transition: all 1s cubic-bezier(0.65, 0, 0.35, 1);
+            /* SỬA LỖI: Tinh chỉnh transition để mượt mà hơn */
+            transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1),
+                        opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1),
+                        filter 0.8s cubic-bezier(0.65, 0, 0.35, 1);
             cursor: pointer;
         }
 
@@ -307,7 +309,7 @@
 
                 setTimeout(() => { 
                     isAnimating = false; 
-                }, 800);
+                }, 1000); // Tăng nhẹ thời gian chờ animation để khớp với transition 1s
             }
 
             // --- LẮNG NGHE CÁC SỰ KIỆN TƯƠNG TÁC ---
