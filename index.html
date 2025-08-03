@@ -108,7 +108,7 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // !!! DÁN URL TỪ LẦN TRIỂN KHAI MỚI NHẤT CỦA APPS SCRIPT VÀO ĐÂY !!!
+        // URL đã được thêm trực tiếp vào đây.
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbziunmP192POl_tjXHvsShD7DyO1_DRo-B_867k30oEIl7vBOIJbPJl12ytdB4XEBeJ/exec';
 
         // --- DOM Elements ---
@@ -160,12 +160,6 @@
 
         // --- HÀM GỌI API DÙNG KỸ THUẬT JSONP ĐỂ TRÁNH LỖI CORS ---
         async function handleApiRequest(payload, button) {
-            // *** DÒNG NÀY ĐÃ ĐƯỢC SỬA LẠI CHO ĐÚNG ***
-            if (APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbziunmP192POl_tjXHvsShD7DyO1_DRo-B_867k30oEIl7vBOIJbPJl12ytdB4XEBeJ/exec')) {
-                showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
-                return null;
-            }
-
             setLoading(button, true);
 
             return new Promise((resolve, reject) => {
@@ -197,7 +191,7 @@
             });
         }
         
-        // --- Event Listeners (Không thay đổi) ---
+        // --- Event Listeners ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('username').value;
