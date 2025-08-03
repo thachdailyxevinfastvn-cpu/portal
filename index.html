@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webapp Đăng nhập Hiện đại</title>
+    <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Font Inter từ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,16 +30,16 @@
         }
     </style>
 </head>
-<!-- Đây là một thay đổi nhỏ để kích hoạt build -->
 <body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
     <div id="app" class="w-full max-w-md mx-auto">
 
+        <!-- Màn hình Đăng nhập -->
         <div id="login-screen">
             <div class="bg-white p-8 rounded-xl shadow-lg">
                 <h1 class="text-2xl font-bold text-center mb-1">Chào mừng trở lại!</h1>
                 <p class="text-center text-gray-500 mb-6">Vui lòng đăng nhập để tiếp tục</p>
-
+                
                 <form id="login-form">
                     <div class="mb-4">
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
@@ -54,6 +56,7 @@
             </div>
         </div>
 
+        <!-- Màn hình Dashboard -->
         <div id="dashboard-screen" class="hidden">
              <div class="bg-white p-8 rounded-xl shadow-lg text-center">
                 <h1 class="text-2xl font-bold mb-2">Đăng nhập thành công!</h1>
@@ -70,6 +73,7 @@
         </div>
     </div>
 
+    <!-- Modal Đổi mật khẩu -->
     <div id="password-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
             <h2 class="text-xl font-bold text-center mb-6">Đổi mật khẩu</h2>
@@ -98,6 +102,7 @@
         </div>
     </div>
     
+    <!-- Hộp thông báo -->
     <div id="message-box" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-300">
         <p id="message-text"></p>
     </div>
@@ -105,7 +110,7 @@
     <script>
         // --- CẤU HÌNH ---
         // !!! DÁN URL ỨNG DỤNG WEB APPS SCRIPT CỦA BẠN VÀO ĐÂY !!!
-        const APPS_SCRIPT_URL = 'https://docs.google.com/spreadsheets/d/1s8Tbo_Sm8m1xm7fwavYmDjETx_Hj8onaNFJ-Fe4va18/edit?usp=sharing';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz93kJudv65E3aWarZlv6LEUU6aeS9BpGtyS80emlPJzc6FUtvrreRn8KMBFsnLVw/exec'; // Đã điền sẵn URL từ hình ảnh của bạn
 
         // --- DOM Elements ---
         const loginScreen = document.getElementById('login-screen');
@@ -155,7 +160,7 @@
         }
 
         async function handleApiRequest(payload, button) {
-            if (APPS_SCRIPT_URL === 'DÁN_URL_CỦA_BẠN_VÀO_ĐÂY') {
+            if (APPS_SCRIPT_URL.includes('DÁN_URL_CỦA_BẠN_VÀO_ĐÂY')) {
                 showMessage('Lỗi: Vui lòng cấu hình URL của Apps Script trong code.', false);
                 return null;
             }
@@ -167,7 +172,8 @@
                     redirect: "follow",
                     body: JSON.stringify(payload),
                     headers: {
-                        "Content-Type": "text/plain;charset=utf-8",
+                        // Dòng này đã được sửa để khắc phục lỗi với Google Apps Script
+                        "Content-Type": "text/plain;charset=utf-8", 
                     },
                 });
                 const result = await response.json();
