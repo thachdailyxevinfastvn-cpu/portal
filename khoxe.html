@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Xe - VinFast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Màu nền xám nhạt */
+        }
+        .tab-active {
+            border-color: #1d4ed8; /* Màu xanh đậm của VinFast */
+            color: #1d4ed8;
+            background-color: #eff6ff;
+        }
+        .car-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .car-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        /* Giao diện tối */
+        .dark body {
+            background-color: #111827;
+        }
+        .dark .tab-active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #1f2937;
+        }
+        /* Hiệu ứng loading */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #1d4ed8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        .dark .loader {
+            border-left-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800 dark:text-gray-200">
+
+    <div id="app" class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-10">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        <i class="fas fa-warehouse mr-2 text-blue-700 dark:text-blue-500"></i>
+                        Trang Kho Xe
+                    </h1>
+                    <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- Loading State -->
+            <div id="loading-state" class="flex flex-col items-center justify-center py-20">
+                <div class="loader"></div>
+                <p class="mt-4 text-lg font-medium text-gray-600 dark:text-gray-400">Đang tải dữ liệu từ các kho...</p>
+            </div>
+
+            <!-- Content Loaded -->
+            <div id="content-wrapper" class="hidden">
+                <!-- Warehouse Tabs -->
+                <div class="mb-6">
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav id="warehouse-tabs" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs"></nav>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                     <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="search-input" placeholder="Tìm theo dòng xe, phiên bản, số VIN..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <!-- Car Grid -->
+                <div>
+                    <h2 id="warehouse-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white"></h2>
+                    <div id="car-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Car cards will be inserted here -->
+                    </div>
+                    <div id="no-results" class="hidden text-center py-16">
+                        <i class="fas fa-box-open text-5xl text-gray-400"></i>
+                        <p class="mt-4 text-lg font-medium text-gray-600 dark:text-gray-400">Không tìm thấy xe phù hợp.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tải tệp cấu hình trước logic chính của trang -->
+    <script src="config.js"></script>
+    
+    <script>
+        // --- DOM ELEMENTS ---
+        const loadingState = document.getElementById('loading-state');
+        const contentWrapper = document.getElementById('content-wrapper');
+        const warehouseTabsContainer = document.getElementById('warehouse-tabs');
+        const carGrid = document.getElementById('car-grid');
+        const warehouseTitle = document.getElementById('warehouse-title');
+        const searchInput = document.getElementById('search-input');
+        const noResults = document.getElementById('no-results');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = themeToggleBtn.querySelector('i');
+
+        // --- APP STATE ---
+        let allData = {};
+        let activeWarehouse = '';
+        let currentSearchTerm = '';
+
+        // --- THEME LOGIC ---
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        };
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // --- DATA FETCHING & RENDERING ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme on load
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+            
+            // Kiểm tra xem biến từ config.js đã tồn tại chưa
+            if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
+                showError('Vui lòng kiểm tra lại tệp config.js và biến KHO_XE_APPS_SCRIPT_URL.');
+                return;
+            }
+            fetchData();
+        });
+
+        async function fetchData() {
+            try {
+                // Sử dụng biến từ tệp config.js
+                const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
+                if (!response.ok) {
+                    throw new Error(`Lỗi mạng: ${response.statusText}`);
+                }
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(`Lỗi từ Google Script: ${data.message}`);
+                }
+                allData = data;
+                initializeApp();
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                showError(error.message);
+            }
+        }
+        
+        function showError(message) {
+            loadingState.innerHTML = `
+                <div class="text-center text-red-500">
+                    <i class="fas fa-exclamation-triangle text-4xl"></i>
+                    <p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${message}</p>
+                </div>
+            `;
+        }
+
+        function initializeApp() {
+            loadingState.classList.add('hidden');
+            contentWrapper.classList.remove('hidden');
+
+            const warehouses = Object.keys(allData);
+            if (warehouses.length === 0) {
+                carGrid.innerHTML = '<p>Không có kho nào được tìm thấy.</p>';
+                return;
+            }
+
+            renderTabs(warehouses);
+            // Set the first warehouse as active by default
+            setActiveWarehouse(warehouses[0]);
+
+            searchInput.addEventListener('input', (e) => {
+                currentSearchTerm = e.target.value.toLowerCase();
+                renderCars();
+            });
+        }
+
+        function renderTabs(warehouses) {
+            warehouseTabsContainer.innerHTML = '';
+            warehouses.forEach(name => {
+                const tab = document.createElement('button');
+                tab.className = 'whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-400 hover:border-blue-500';
+                tab.textContent = name;
+                tab.dataset.warehouse = name;
+                tab.addEventListener('click', () => setActiveWarehouse(name));
+                warehouseTabsContainer.appendChild(tab);
+            });
+        }
+
+        function setActiveWarehouse(name) {
+            activeWarehouse = name;
+            // Update tab styles
+            document.querySelectorAll('#warehouse-tabs button').forEach(tab => {
+                if (tab.dataset.warehouse === name) {
+                    tab.classList.add('tab-active');
+                } else {
+                    tab.classList.remove('tab-active');
+                }
+            });
+            // Render cars for the new active warehouse
+            renderCars();
+        }
+
+        function renderCars() {
+            if (!activeWarehouse) return;
+
+            warehouseTitle.innerHTML = `Xe trong kho: <span class="text-blue-700 dark:text-blue-500">${activeWarehouse}</span>`;
+            const cars = allData[activeWarehouse] || [];
+            
+            const filteredCars = cars.filter(car => {
+                const dongXe = (car.dong_xe || '').toLowerCase();
+                const phienBan = (car.phien_ban || '').toLowerCase();
+                const soVin = (car.so_vin || '').toLowerCase();
+                return dongXe.includes(currentSearchTerm) || 
+                       phienBan.includes(currentSearchTerm) ||
+                       soVin.includes(currentSearchTerm);
+            });
+
+            carGrid.innerHTML = '';
+            if (filteredCars.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                filteredCars.forEach(car => {
+                    const card = createCarCard(car);
+                    carGrid.appendChild(card);
+                });
+            }
+        }
+
+        function createCarCard(car) {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'car-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border border-gray-200 dark:border-gray-700';
+            
+            const colorName = car.ngoai_that || 'Không xác định';
+            const colorClass = getColorClass(colorName);
+
+            // Sử dụng các key đã được chuẩn hóa từ Google Script
+            const dongXe = car.dong_xe || 'N/A';
+            const phienBan = car.phien_ban || 'N/A';
+            const soVin = car.so_vin || 'N/A';
+            const noiThat = car.noi_that || 'N/A';
+            const trangThai = car.trang_thai || 'N/A';
+
+            cardElement.innerHTML = `
+                <div class="p-5">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white truncate" title="${dongXe}">${dongXe}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate" title="${phienBan}">${phienBan}</p>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-500 dark:text-gray-400">Số VIN</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-300">${soVin}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-500 dark:text-gray-400">Nội thất</span>
+                            <span class="text-gray-700 dark:text-gray-300">${noiThat}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-500 dark:text-gray-400">Ngoại thất</span>
+                            <div class="flex items-center gap-2">
+                                <span class="w-4 h-4 rounded-full ${colorClass} border border-gray-300 dark:border-gray-600"></span>
+                                <span class="text-gray-700 dark:text-gray-300">${colorName}</span>
+                            </div>
+                        </div>
+                         <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-500 dark:text-gray-400">Trạng thái</span>
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">${trangThai}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return cardElement;
+        }
+
+        function getColorClass(colorName) {
+            const lowerColor = colorName.toLowerCase();
+            // Đây là nơi bạn ánh xạ tên màu từ Google Sheet sang các lớp màu của Tailwind CSS
+            // Tôi đã thêm một số màu phổ biến, bạn có thể bổ sung thêm nếu cần
+            if (lowerColor.includes('trắng') || lowerColor.includes('white')) return 'bg-gray-200';
+            if (lowerColor.includes('đỏ') || lowerColor.includes('red')) return 'bg-red-600';
+            if (lowerColor.includes('xanh') || lowerColor.includes('blue')) return 'bg-blue-600';
+            if (lowerColor.includes('đen') || lowerColor.includes('black')) return 'bg-black';
+            if (lowerColor.includes('bạc') || lowerColor.includes('silver')) return 'bg-slate-400';
+            if (lowerColor.includes('xám') || lowerColor.includes('grey')) return 'bg-gray-500';
+            if (lowerColor.includes('cam') || lowerColor.includes('orange')) return 'bg-orange-500';
+            if (lowerColor.includes('vàng') || lowerColor.includes('yellow')) return 'bg-yellow-400';
+            if (lowerColor.includes('xanh lá')) return 'bg-green-500';
+            // Màu mặc định nếu không khớp
+            return 'bg-gray-400';
+        }
+
+    </script>
+
+</body>
+</html>
