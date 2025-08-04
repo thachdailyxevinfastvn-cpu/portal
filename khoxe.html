@@ -284,30 +284,47 @@
 
             const pivotData = data.reduce((acc, row) => {
                 if (row.loai_xe && row.ngoai_that_tv) {
-                    if (!acc[row.loai_xe]) {
-                        acc[row.loai_xe] = {};
-                    }
+                    if (!acc[row.loai_xe]) acc[row.loai_xe] = {};
                     acc[row.loai_xe][row.ngoai_that_tv] = (acc[row.loai_xe][row.ngoai_that_tv] || 0) + 1;
                 }
                 return acc;
             }, {});
+            
+            const columnTotals = colors.reduce((acc, color) => {
+                acc[color] = carModels.reduce((sum, model) => sum + (pivotData[model]?.[color] || 0), 0);
+                return acc;
+            }, {});
+
+            const grandTotal = Object.values(columnTotals).reduce((sum, count) => sum + count, 0);
 
             const headerRow = `
                 <tr class="bg-gray-100">
                     <th class="p-3 text-left text-sm font-semibold text-gray-600 rounded-tl-lg">Loại Xe</th>
                     ${colors.map(color => `<th class="p-3 text-center text-sm font-semibold text-gray-600" style="${getColorStyle(color)}">${color}</th>`).join('')}
+                    <th class="p-3 text-right text-sm font-semibold text-gray-600 rounded-tr-lg">Tổng Hàng</th>
                 </tr>
             `;
 
-            const bodyRows = carModels.map(model => `
+            const bodyRows = carModels.map(model => {
+                const rowTotal = colors.reduce((sum, color) => sum + (pivotData[model]?.[color] || 0), 0);
+                return `
                 <tr class="border-t border-gray-200">
                     <td class="p-3 font-bold text-gray-800">${model}</td>
                     ${colors.map(color => {
                         const count = pivotData[model]?.[color] || 0;
                         return `<td class="p-3 text-center font-medium ${count > 0 ? 'text-blue-600' : 'text-gray-400'}">${count > 0 ? count : '-'}</td>`;
                     }).join('')}
+                    <td class="p-3 text-right font-bold text-gray-800">${rowTotal}</td>
                 </tr>
-            `).join('');
+            `}).join('');
+
+            const footerRow = `
+                <tr class="bg-gray-200 border-t-2 border-gray-300">
+                    <td class="p-3 font-bold text-gray-800 rounded-bl-lg">Tổng Cột</td>
+                    ${colors.map(color => `<td class="p-3 text-center font-bold text-blue-700">${columnTotals[color] || 0}</td>`).join('')}
+                    <td class="p-3 text-right font-extrabold text-red-600 rounded-br-lg">${grandTotal}</td>
+                </tr>
+            `;
 
             summarySection.innerHTML = `
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Báo cáo nhanh</h2>
@@ -316,6 +333,7 @@
                         <table class="w-full">
                             <thead>${headerRow}</thead>
                             <tbody>${bodyRows}</tbody>
+                            <tfoot>${footerRow}</tfoot>
                         </table>
                     </div>
                 </div>
