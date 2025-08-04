@@ -392,8 +392,8 @@
         function getColorStyle(colorName) {
             if (!colorName || typeof colorName !== 'string') return '';
             
-            // Lấy màu đầu tiên nếu có dấu gạch chéo (ví dụ: "Vàng/trắng" -> "Vàng")
-            const firstColorPart = colorName.split('/')[0].trim();
+            // Lấy màu đầu tiên nếu có dấu gạch chéo hoặc các ký tự khác
+            const firstColorPart = colorName.split(/[/\s-]/)[0].trim();
             const lowerColor = firstColorPart.toLowerCase();
 
             let color = '#374151'; // default gray
