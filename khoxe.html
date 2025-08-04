@@ -49,9 +49,6 @@
         .table-container::-webkit-scrollbar-thumb:hover {
             background: #8895a7;
         }
-        .text-white-bordered {
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -64,8 +61,11 @@
                 <div class="hidden md:flex items-center space-x-2">
                     <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                     <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Kho xe</a>
-                    <a href="#" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Xe đã bán</a>
-                    <a href="#" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
+                    <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
+                    <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
+                    <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                    <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
+                    <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
                 </div>
                 <div class="flex items-center">
                     <div id="user-profile" class="flex items-center space-x-3">
@@ -80,8 +80,11 @@
             <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
                 <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
                 <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Kho xe</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Xe đã bán</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+                <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
+                <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+                <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+                <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+                <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
             </div>
         </header>
 
@@ -368,6 +371,7 @@
                     const cells = headerKeys.map(key => {
                         const value = row[key] || '';
                         let style = '';
+                        // Áp dụng màu cho cả cột ngoại thất và nội thất
                         if (key === 'ngoai_that_tv' || key === 'noi_that_tv') {
                             style = getColorStyle(value);
                         }

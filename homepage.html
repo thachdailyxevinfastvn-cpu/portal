@@ -14,7 +14,11 @@
             font-family: 'Inter', sans-serif; 
             background-color: #f5f5f5;
         }
-        /* Hiệu ứng gõ chữ */
+        .nav-link-active {
+            background-color: #eef2ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
         #typing-slogan::after {
             content: '|';
             animation: blink 0.7s infinite;
@@ -22,8 +26,6 @@
         @keyframes blink {
             50% { opacity: 0; }
         }
-        
-        /* CSS cho Carousel được tích hợp vào đây */
         .carousel-section {
             position: relative;
             display: flex;
@@ -34,7 +36,6 @@
             padding-bottom: 60px;
             overflow: hidden;
         }
-
         .about-title {
             font-size: 6rem;
             font-weight: 900;
@@ -53,7 +54,6 @@
             color: transparent;
             z-index: 0;
         }
-
         .carousel-container {
             width: 100%;
             max-width: 1200px;
@@ -61,7 +61,6 @@
             position: relative;
             perspective: 1000px;
         }
-
         .carousel-track {
             width: 100%;
             height: 100%;
@@ -72,7 +71,6 @@
             transform-style: preserve-3d;
             transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1);
         }
-
         .card {
             position: absolute;
             width: 280px;
@@ -86,41 +84,33 @@
                         filter 0.8s cubic-bezier(0.65, 0, 0.35, 1);
             cursor: pointer;
         }
-
         .card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-
-        /* SỬA LỖI: Áp dụng khoảng cách của mobile cho desktop */
         .card.center { z-index: 10; transform: scale(1.1) translateZ(0); filter: none; }
         .card.left-2 { z-index: 1; transform: translateX(-250px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
         .card.left-1 { z-index: 5; transform: translateX(-120px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
         .card.right-1 { z-index: 5; transform: translateX(120px) scale(0.9) translateZ(-100px); opacity: 0.9; filter: grayscale(80%) blur(1px); }
         .card.right-2 { z-index: 1; transform: translateX(250px) scale(0.8) translateZ(-300px); opacity: 0.7; filter: grayscale(100%) blur(2px); }
         .card.hidden { opacity: 0; pointer-events: none; }
-
         .member-info { text-align: center; margin-top: 20px; transition: all 0.5s ease-out; }
         .member-name { color: rgb(8, 42, 123); font-size: 2.5rem; font-weight: 700; margin-bottom: 5px; position: relative; display: inline-block; }
         .member-role { color: #848696; font-size: 1.2rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; }
         .member-name::before, .member-name::after { content: ""; position: absolute; top: 100%; width: 100px; height: 2px; background: rgb(8, 42, 123); }
         .member-name::before { left: -120px; }
         .member-name::after { right: -120px; }
-
         .dots { display: flex; justify-content: center; gap: 10px; margin-top: 30px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(8, 42, 123, 0.2); cursor: pointer; transition: all 0.3s ease; }
         .dot.active { background: rgb(8, 42, 123); transform: scale(1.2); }
-
         .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(8, 42, 123, 0.6); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 20; transition: all 0.3s ease; font-size: 1.5rem; border: none; outline: none; padding-bottom: 4px; }
         .nav-arrow:hover { background: rgba(0, 0, 0, 0.8); transform: translateY(-50%) scale(1.1); }
         .nav-arrow.left { left: 20px; padding-right: 3px; }
         .nav-arrow.right { right: 20px; padding-left: 3px; }
-
         @media (max-width: 768px) {
             .about-title { font-size: 4.5rem; }
             .card { width: 200px; height: 280px; }
-            /* Giữ nguyên các giá trị này cho mobile */
             .card.left-2 { transform: translateX(-250px) scale(0.8) translateZ(-300px); }
             .card.left-1 { transform: translateX(-120px) scale(0.9) translateZ(-100px); }
             .card.right-1 { transform: translateX(120px) scale(0.9) translateZ(-100px); }
@@ -136,15 +126,15 @@
 
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-blue-600">Portal</a>
-            <div class="hidden md:flex items-center space-x-4">
-                <a href="homepage.html" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Trang chủ</a>
-                <a href="khoxe.html" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Kho xe</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Xe đã bán</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Chính sách</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Ngân hàng</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">KPI</a>
-                <a href="#" class="px-3 py-2 text-gray-700 font-medium rounded hover:bg-gray-100">Tạo văn bản</a>
+            <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Trang chủ</a>
+                <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
+                <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
+                <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
+                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
+                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
             </div>
             <div class="flex items-center">
                 <div id="user-profile" class="flex items-center space-x-3">
@@ -160,13 +150,13 @@
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Trang chủ</a>
             <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Xe đã bán</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
-            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+            <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
+            <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+            <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
         </div>
     </header>
 
