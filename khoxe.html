@@ -35,7 +35,6 @@
             height: 48px;
             animation: spin 1s linear infinite;
         }
-        /* Custom scrollbar for table */
         .table-container::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -50,6 +49,9 @@
         .table-container::-webkit-scrollbar-thumb:hover {
             background: #8895a7;
         }
+        .text-white-bordered {
+            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -57,7 +59,7 @@
     <div class="flex flex-col min-h-screen">
         <!-- Header & Navigation -->
         <header class="bg-white shadow-md sticky top-0 z-50">
-            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+             <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
                 <div class="hidden md:flex items-center space-x-2">
                     <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
@@ -102,31 +104,41 @@
                     </div>
                 </div>
 
-                <!-- Search and Actions -->
-                <div class="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                     <div class="relative w-full sm:w-1/2 lg:w-1/3">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
+                <!-- Summary Section -->
+                <div id="summary-section" class="mb-6"></div>
+
+                <!-- Search and Filters -->
+                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+                        <div class="md:col-span-1 lg:col-span-1">
+                            <label for="filter-loai-xe" class="block text-sm font-medium text-gray-700 mb-1">Loại xe</label>
+                            <select id="filter-loai-xe" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Tất cả</option>
+                            </select>
                         </div>
-                        <input type="text" id="search-input" placeholder="Tìm kiếm trong bảng này..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="export-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 flex items-center gap-2">
-                            <i class="fas fa-file-excel"></i>
-                            <span>Xuất Excel</span>
-                        </button>
+                        <div class="md:col-span-1 lg:col-span-1">
+                            <label for="filter-ngoai-that" class="block text-sm font-medium text-gray-700 mb-1">Ngoại thất</label>
+                            <select id="filter-ngoai-that" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Tất cả</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-1 lg:col-span-2">
+                            <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm chung</label>
+                             <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-gray-400"></i>
+                                </div>
+                                <input type="text" id="search-input" placeholder="Tìm theo Số VIN, Tên KH, TVBH..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Data Table -->
                 <div id="table-container" class="bg-white rounded-lg shadow-md overflow-auto table-container">
                     <table id="data-table" class="w-full text-sm text-left text-gray-600">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0">
-                            <!-- Table headers will be inserted here -->
-                        </thead>
-                        <tbody>
-                            <!-- Table rows will be inserted here -->
-                        </tbody>
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10"></thead>
+                        <tbody></tbody>
                     </table>
                 </div>
                 <div id="no-results" class="hidden text-center py-16 bg-white rounded-lg shadow-md">
@@ -137,7 +149,6 @@
         </main>
     </div>
 
-    <!-- Tải tệp cấu hình và thư viện bên ngoài -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="config.js"></script>
     
@@ -152,20 +163,20 @@
         const loadingState = document.getElementById('loading-state');
         const contentWrapper = document.getElementById('content-wrapper');
         const warehouseTabsContainer = document.getElementById('warehouse-tabs');
+        const summarySection = document.getElementById('summary-section');
         const searchInput = document.getElementById('search-input');
+        const filterLoaiXe = document.getElementById('filter-loai-xe');
+        const filterNgoaiThat = document.getElementById('filter-ngoai-that');
         const dataTable = document.getElementById('data-table');
         const noResults = document.getElementById('no-results');
-        const exportBtn = document.getElementById('export-btn');
 
         // --- APP STATE ---
         let allData = {};
         let activeSheetName = '';
-        let currentSearchTerm = '';
         const sheetOrder = ["CHƯA VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ", "ĐÃ GIAO XE"];
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            // User Auth Check
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
                 window.location.href = 'index.html'; 
@@ -175,24 +186,17 @@
             userFullNameDisplay.textContent = userData.fullName;
             userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
 
-            // Mobile Menu Toggle
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-            // Config Check and Data Fetch
             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
-                showError('Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL. Vui lòng kiểm tra tệp config.js.');
+                showError('Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL.');
                 return;
             }
             fetchData();
 
-            // Event Listeners
-            searchInput.addEventListener('input', e => {
-                currentSearchTerm = e.target.value.toLowerCase();
-                renderTable();
+            [searchInput, filterLoaiXe, filterNgoaiThat].forEach(el => {
+                el.addEventListener('input', () => renderTable());
             });
-            exportBtn.addEventListener('click', exportActiveTableToExcel);
         });
 
         // --- DATA HANDLING ---
@@ -211,13 +215,7 @@
         }
         
         function showError(message) {
-            loadingState.innerHTML = `
-                <div class="text-center text-red-500 p-8 bg-white rounded-lg shadow-md">
-                    <i class="fas fa-exclamation-triangle text-4xl"></i>
-                    <p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p>
-                    <p class="text-sm text-gray-600">${message}</p>
-                </div>
-            `;
+            loadingState.innerHTML = `<div class="text-center text-red-500 p-8 bg-white rounded-lg shadow-md"><i class="fas fa-exclamation-triangle text-4xl"></i><p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p><p class="text-sm text-gray-600">${message}</p></div>`;
             loadingState.classList.remove('hidden');
             contentWrapper.classList.add('hidden');
         }
@@ -225,14 +223,12 @@
         function initializeApp() {
             loadingState.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
-            
             if (Object.keys(allData).length === 0) {
                 showError("Không có dữ liệu nào được trả về từ Google Sheet.");
                 return;
             }
-
             renderTabs();
-            setActiveTab(sheetOrder[0]); // Mặc định chọn tab đầu tiên
+            setActiveTab(sheetOrder[0]);
         }
 
         // --- RENDERING ---
@@ -241,7 +237,6 @@
             sheetOrder.forEach(sheetName => {
                 const sheetInfo = allData[sheetName];
                 if (!sheetInfo) return;
-
                 const tab = document.createElement('button');
                 tab.className = 'whitespace-nowrap py-3 px-3 sm:px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700 hover:border-blue-300 transition-colors duration-200';
                 tab.textContent = sheetInfo.displayName;
@@ -256,88 +251,131 @@
             document.querySelectorAll('#warehouse-tabs button').forEach(tab => {
                 tab.classList.toggle('tab-active', tab.dataset.sheetName === sheetName);
             });
+            const currentData = allData[activeSheetName]?.data || [];
+            populateFilters(currentData);
+            renderSummaryTable(currentData);
             renderTable();
+        }
+        
+        function populateFilters(data) {
+            const loaiXeSet = new Set();
+            const ngoaiThatSet = new Set();
+            data.forEach(row => {
+                if(row.loai_xe) loaiXeSet.add(row.loai_xe);
+                if(row.ngoai_that_tv) ngoaiThatSet.add(row.ngoai_that_tv);
+            });
+
+            filterLoaiXe.innerHTML = '<option value="">Tất cả loại xe</option>';
+            [...loaiXeSet].sort().forEach(val => filterLoaiXe.innerHTML += `<option value="${val}">${val}</option>`);
+
+            filterNgoaiThat.innerHTML = '<option value="">Tất cả ngoại thất</option>';
+            [...ngoaiThatSet].sort().forEach(val => filterNgoaiThat.innerHTML += `<option value="${val}">${val}</option>`);
+        }
+
+        function renderSummaryTable(data) {
+            if (!data || data.length === 0) {
+                summarySection.innerHTML = '';
+                return;
+            }
+            const summary = data.reduce((acc, row) => {
+                const key = `${row.loai_xe || 'N/A'} - ${row.ngoai_that_tv || 'N/A'}`;
+                if (row.loai_xe && row.ngoai_that_tv) {
+                   acc[key] = (acc[key] || 0) + 1;
+                }
+                return acc;
+            }, {});
+
+            const sortedSummary = Object.entries(summary).sort((a, b) => a[0].localeCompare(b[0]));
+
+            if (sortedSummary.length === 0) {
+                summarySection.innerHTML = '';
+                return;
+            }
+
+            let tableHTML = `
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Báo cáo nhanh</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            `;
+            sortedSummary.forEach(([key, count]) => {
+                const [car, color] = key.split(' - ');
+                tableHTML += `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+                        <p class="font-semibold text-gray-700">${car}</p>
+                        <p class="text-sm text-gray-500" style="${getColorStyle(color)}">${color}</p>
+                        <p class="text-2xl font-bold text-right text-blue-600">${count}</p>
+                    </div>
+                `;
+            });
+            tableHTML += '</div>';
+            summarySection.innerHTML = tableHTML;
         }
 
         function renderTable() {
             if (!activeSheetName || !allData[activeSheetName]) {
-                dataTable.querySelector('thead').innerHTML = '';
-                dataTable.querySelector('tbody').innerHTML = '';
                 noResults.classList.remove('hidden');
                 return;
             }
 
             const { headers, data } = allData[activeSheetName];
             const headerKeys = Object.keys(headers);
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedLoaiXe = filterLoaiXe.value;
+            const selectedNgoaiThat = filterNgoaiThat.value;
 
-            // Filter data based on search term
-            const filteredData = data.filter(row => 
-                Object.values(row).some(value => 
-                    String(value).toLowerCase().includes(currentSearchTerm)
-                )
-            );
+            const filteredData = data.filter(row => {
+                const generalMatch = searchTerm === '' || Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm));
+                const loaiXeMatch = selectedLoaiXe === '' || row.loai_xe === selectedLoaiXe;
+                const ngoaiThatMatch = selectedNgoaiThat === '' || row.ngoai_that_tv === selectedNgoaiThat;
+                return generalMatch && loaiXeMatch && ngoaiThatMatch;
+            });
 
-            // Render Headers
             const thead = dataTable.querySelector('thead');
             thead.innerHTML = `<tr>${headerKeys.map(key => `<th scope="col" class="px-6 py-3">${headers[key]}</th>`).join('')}</tr>`;
 
-            // Render Body
             const tbody = dataTable.querySelector('tbody');
             if (filteredData.length > 0) {
-                tbody.innerHTML = filteredData.map(row => 
-                    `<tr class="bg-white border-b hover:bg-gray-50">
-                        ${headerKeys.map(key => `<td class="px-6 py-4">${row[key] || ''}</td>`).join('')}
-                    </tr>`
-                ).join('');
+                tbody.innerHTML = filteredData.map(row => {
+                    const cells = headerKeys.map(key => {
+                        const value = row[key] || '';
+                        let style = '';
+                        if (key === 'ngoai_that_tv' || key === 'noi_that_tv') {
+                            style = getColorStyle(value);
+                        }
+                        return `<td class="px-6 py-4" style="${style}">${value}</td>`;
+                    }).join('');
+                    return `<tr class="bg-white border-b hover:bg-gray-50">${cells}</tr>`;
+                }).join('');
                 noResults.classList.add('hidden');
-                dataTable.classList.remove('hidden');
+                dataTable.parentElement.classList.remove('hidden');
             } else {
                 tbody.innerHTML = '';
                 noResults.classList.remove('hidden');
-                dataTable.classList.add('hidden');
+                dataTable.parentElement.classList.add('hidden');
             }
         }
 
         // --- UTILITY ---
-        function exportActiveTableToExcel() {
-            if (!activeSheetName || !allData[activeSheetName]) {
-                alert("Không có dữ liệu để xuất.");
-                return;
-            }
-
-            const { displayName, headers, data } = allData[activeSheetName];
+        function getColorStyle(colorName) {
+            if (!colorName || typeof colorName !== 'string') return '';
+            const lowerColor = colorName.toLowerCase();
+            let color = '#374151'; // default gray
+            let isWhite = false;
             
-            const filteredData = data.filter(row => 
-                Object.values(row).some(value => 
-                    String(value).toLowerCase().includes(currentSearchTerm)
-                )
-            );
-
-            if (filteredData.length === 0) {
-                alert("Không có dữ liệu phù hợp với bộ lọc để xuất.");
-                return;
-            }
-
-            const headerValues = Object.values(headers);
-            const headerKeys = Object.keys(headers);
-
-            // Chuyển đổi dữ liệu đối tượng thành mảng theo đúng thứ tự tiêu đề
-            const dataToExport = filteredData.map(row => {
-                return headerKeys.map(key => row[key] || '');
-            });
-
-            // Thêm hàng tiêu đề vào đầu
-            const worksheetData = [headerValues, ...dataToExport];
+            if (lowerColor.includes('trắng')) { color = '#FFFFFF'; isWhite = true; }
+            else if (lowerColor.includes('đỏ')) color = '#DC2626';
+            else if (lowerColor.includes('xanh')) color = '#2563EB';
+            else if (lowerColor.includes('đen')) color = '#111827';
+            else if (lowerColor.includes('bạc')) color = '#9CA3AF';
+            else if (lowerColor.includes('xám')) color = '#6B7280';
+            else if (lowerColor.includes('cam')) color = '#F97316';
+            else if (lowerColor.includes('vàng')) color = '#F59E0B';
             
-            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, displayName);
-
-            // Tạo tên file
-            const fileName = `KhoXe_${displayName.replace(/\s/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+            let style = `color: ${color}; font-weight: 500;`;
+            if (isWhite) {
+                style += 'text-shadow: 0 0 3px #000, 0 0 1px #000;';
+            }
+            return style;
         }
-
     </script>
 </body>
 </html>
