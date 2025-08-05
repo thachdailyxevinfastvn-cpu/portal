@@ -66,9 +66,9 @@
         </header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="grid grid-cols-12 gap-6 items-start">
 
-                <div class="lg:col-span-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-24">
+                <div class="col-span-12 lg:col-span-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-24">
                     <h2 class="text-xl font-bold mb-5 text-gray-800 border-b pb-3">Tạo Yêu Cầu Mới</h2>
                     <form id="pairing-request-form" class="space-y-4">
                         <div>
@@ -112,7 +112,7 @@
                     </form>
                 </div>
 
-                <div class="lg:col-span-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h2 class="text-xl font-bold mb-5 text-gray-800 border-b pb-3">Hàng Chờ Ghép Xe</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -130,7 +130,6 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
@@ -143,13 +142,11 @@
     <script src="config.js"></script>
 
     <script>
-        // Lấy URL từ biến KHO_XE_APPS_SCRIPT_URL trong file config.js
         const API_URL = typeof KHO_XE_APPS_SCRIPT_URL !== 'undefined' 
             ? KHO_XE_APPS_SCRIPT_URL 
             : "URL_DỰ_PHÒNG_NẾU_CONFIG_LỖI";
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Lấy thông tin user từ sessionStorage (đã lưu khi đăng nhập)
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
                 const userData = JSON.parse(userDataString);
@@ -157,25 +154,20 @@
                 document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
                 document.getElementById('tvbh').value = userData.fullName;
             } else {
-                // Nếu chưa đăng nhập, đặt một giá trị mặc định
                 document.getElementById('tvbh').value = "Chưa đăng nhập";
             }
 
-            // Gắn sự kiện cho menu mobile
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
-            // Tải dữ liệu ban đầu
             fetchCarModels();
             fetchWaitingList();
 
-            // Xử lý sự kiện submit form
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
         });
 
-        // Tải danh sách Loại xe từ Sheet DATA
         async function fetchCarModels() {
             const select = document.getElementById('loai_xe');
             try {
@@ -193,7 +185,6 @@
             }
         }
 
-        // Tải danh sách chờ từ Sheet GHÉP XE
         async function fetchWaitingList() {
             const tbody = document.getElementById('waiting-list-body');
             tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Đang tải...</td></tr>';
@@ -209,15 +200,18 @@
             }
         }
 
-        // Hiển thị danh sách chờ ra bảng
         function renderWaitingList(data) {
             const tbody = document.getElementById('waiting-list-body');
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Chưa có yêu cầu nào.</td></tr>';
                 return;
             }
-            // Sắp xếp theo ngày yêu cầu mới nhất (cột đầu tiên)
-            data.sort((a, b) => new Date(b['NGÀY YÊU CẦU'].split('/').reverse().join('-')) - new Date(a['NGÀY YÊU CẦU'].split('/').reverse().join('-')));
+            
+            data.sort((a, b) => {
+                const dateA = new Date(a['NGÀY YÊU CẦU'].split('/').reverse().join('-'));
+                const dateB = new Date(b['NGÀY YÊU CẦU'].split('/').reverse().join('-'));
+                return dateB - dateA;
+            });
             
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-gray-50 border-b">
@@ -233,7 +227,6 @@
             `).join('');
         }
 
-        // Xử lý gửi form
         async function handleFormSubmit(event) {
             event.preventDefault();
             showLoading(true);
@@ -243,13 +236,17 @@
             formData.set('da_coc', formData.get('da_coc').replace(/,/g, ''));
 
             try {
-                const res = await fetch(API_URL, { method: 'POST', body: new URLSearchParams(formData) });
+                // SỬA LỖI KẾT NỐI: Gửi dữ liệu dưới dạng URLSearchParams
+                const res = await fetch(API_URL, { 
+                    method: 'POST', 
+                    body: new URLSearchParams(formData) 
+                });
                 const result = await res.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
 
                 showToast(result.message, 'success');
                 form.reset();
-                // Đặt lại tên user và tải lại danh sách
+                
                 const userDataString = sessionStorage.getItem('loggedInUser');
                 if(userDataString) {
                      document.getElementById('tvbh').value = JSON.parse(userDataString).fullName;
