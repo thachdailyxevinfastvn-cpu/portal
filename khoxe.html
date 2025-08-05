@@ -205,16 +205,30 @@
 
         // --- DATA HANDLING ---
         async function fetchData() {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+            }, 30000); // 30 giây timeout
+
             try {
-                const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                const response = await fetch(KHO_XE_APPS_SCRIPT_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.status} ${response.statusText}`);
+                
                 const data = await response.json();
                 if (data.error) throw new Error(`Lỗi từ Google Script: ${data.message}`);
+                
                 allData = data;
                 initializeApp();
             } catch (error) {
-                console.error('Lỗi khi tải dữ liệu:', error);
-                showError(error.message);
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    showError('Yêu cầu đã hết thời gian chờ (30 giây). Có thể file Google Sheet quá lớn hoặc có lỗi mạng. Vui lòng thử lại.');
+                } else {
+                    console.error('Lỗi khi tải dữ liệu:', error);
+                    showError(error.message);
+                }
             }
         }
         
