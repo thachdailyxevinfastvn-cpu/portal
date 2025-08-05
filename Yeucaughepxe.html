@@ -10,7 +10,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        /* THAY ĐỔI: Giảm padding của input để form gọn hơn */
         .form-input, .form-select {
             width: 100%; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 0.375rem;
             transition: all 0.2s ease-in-out; background-color: white; font-size: 0.875rem;
@@ -117,15 +116,8 @@
                     <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Hàng Chờ Ghép Xe</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="p-3 text-left font-semibold text-gray-600">Ngày YC</th>
-                                    <th class="p-3 text-left font-semibold text-gray-600">TVBH</th>
-                                    <th class="p-3 text-left font-semibold text-gray-600">Tên KH</th>
-                                    <th class="p-3 text-left font-semibold text-gray-600">Yêu Cầu Xe</th>
-                                    <th class="p-3 text-right font-semibold text-gray-600">Đã Cọc (VNĐ)</th>
-                                </tr>
-                            </thead>
+                            <thead id="waiting-list-header" class="bg-gray-50">
+                                </thead>
                             <tbody id="waiting-list-body">
                                 </tbody>
                         </table>
@@ -142,7 +134,6 @@
     
     <script src="config.js"></script>
     <script>
-        // Script không thay đổi, giữ nguyên như phiên bản trước
         const API_URL = typeof KHO_XE_APPS_SCRIPT_URL !== 'undefined' ? KHO_XE_APPS_SCRIPT_URL : null;
         document.addEventListener('DOMContentLoaded', () => {
              if (!API_URL) {
@@ -166,6 +157,7 @@
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
         });
+
         async function fetchCarModels() {
             const select = document.getElementById('loai_xe');
             try {
@@ -180,12 +172,12 @@
                 } else throw new Error(result.message);
             } catch (err) {
                 select.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
-                console.error("fetchCarModels error:", err);
             }
         }
+
         async function fetchWaitingList() {
             const tbody = document.getElementById('waiting-list-body');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Đang tải...</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Đang tải...</td></tr>`;
             try {
                 const res = await fetch(`${API_URL}?action=getWaitingList`);
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
@@ -194,19 +186,36 @@
                     renderWaitingList(result.data);
                 } else throw new Error(result.message);
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-600">Lỗi: ${err.message}</td></tr>`;
-                console.error("fetchWaitingList error:", err);
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Lỗi: ${err.message}</td></tr>`;
             }
         }
+
+        // THAY ĐỔI: Hàm render bảng đã được viết lại hoàn toàn
         function renderWaitingList(data) {
+            const thead = document.getElementById('waiting-list-header');
             const tbody = document.getElementById('waiting-list-body');
+
+            // Cập nhật tiêu đề bảng
+            thead.innerHTML = `
+                <tr>
+                    <th class="p-3 text-left font-semibold text-gray-600">NGÀY YÊU CẦU</th>
+                    <th class="p-3 text-left font-semibold text-gray-600">TVBH</th>
+                    <th class="p-3 text-left font-semibold text-gray-600">TÊN KH</th>
+                    <th class="p-3 text-left font-semibold text-gray-600">YÊU CẦU XE</th>
+                    <th class="p-3 text-right font-semibold text-gray-600">ĐÃ CỌC (VNĐ)</th>
+                    <th class="p-3 text-left font-semibold text-gray-600">NGÀY CỌC</th>
+                </tr>
+            `;
+
             if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Chưa có yêu cầu nào.</td></tr>';
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Chưa có yêu cầu nào.</td></tr>`;
                 return;
             }
+            
+            // Cập nhật nội dung bảng
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-gray-50 border-b">
-                    <td class="p-3 whitespace-nowrap">${row['NGÀY YC'] || 'N/A'}</td>
+                    <td class="p-3 whitespace-nowrap">${row['NGÀY YÊU CẦU'] || ''}</td>
                     <td class="p-3">${row['TVBH'] || ''}</td>
                     <td class="p-3 font-medium">${row['TÊN KH'] || ''}</td>
                     <td class="p-3">
@@ -214,9 +223,11 @@
                         <div class="text-xs text-gray-500">${row['NGOẠI THẤT TV'] || ''} / ${row['NỘI THẤT TV'] || ''}</div>
                     </td>
                     <td class="p-3 text-right">${Number(row['TT 1'] || 0).toLocaleString('vi-VN')}</td>
+                    <td class="p-3 whitespace-nowrap">${row['NGÀY TT 1'] || ''}</td>
                 </tr>
             `).join('');
         }
+
         async function handleFormSubmit(event) {
             event.preventDefault();
             showLoading(true);
@@ -240,14 +251,15 @@
                 await fetchWaitingList(); 
             } catch (err) {
                 showToast(err.message, 'error');
-                console.error("handleFormSubmit error:", err);
             } finally {
                 showLoading(false);
             }
         }
+
         function showLoading(isLoading) {
             document.getElementById('loading-overlay').style.display = isLoading ? 'flex' : 'none';
         }
+
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -255,6 +267,7 @@
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
+
         function formatCurrencyInput(event) {
             let value = event.target.value.replace(/[^0-9]/g, '');
             event.target.value = value ? Number(value).toLocaleString('vi-VN') : '';
