@@ -204,7 +204,7 @@
         });
 
         // --- DATA HANDLING ---
-        async function fetchData() {
+       async function fetchData() {
     try {
         const data = {};
 
@@ -214,7 +214,13 @@
             if (!response.ok) throw new Error(`Lỗi mạng khi lấy sheet ${sheetName}: ${response.statusText}`);
             const sheetData = await response.json();
             if (sheetData.error) throw new Error(`Lỗi Google Script sheet ${sheetName}: ${sheetData.message}`);
-            data[sheetName] = sheetData;
+
+            // Gán đúng cấu trúc cho từng sheet
+            data[sheetName] = {
+                displayName: sheetData.displayName,
+                headers: sheetData.headers,
+                data: sheetData.data
+            };
         }
 
         allData = data;
