@@ -205,18 +205,27 @@
 
         // --- DATA HANDLING ---
         async function fetchData() {
-            try {
-                const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
-                const data = await response.json();
-                if (data.error) throw new Error(`Lỗi từ Google Script: ${data.message}`);
-                allData = data;
-                initializeApp();
-            } catch (error) {
-                console.error('Lỗi khi tải dữ liệu:', error);
-                showError(error.message);
-            }
+    try {
+        const data = {};
+
+        for (const sheetName of sheetOrder) {
+            const url = `${KHO_XE_APPS_SCRIPT_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Lỗi mạng khi lấy sheet ${sheetName}: ${response.statusText}`);
+            const sheetData = await response.json();
+            if (sheetData.error) throw new Error(`Lỗi Google Script sheet ${sheetName}: ${sheetData.message}`);
+            data[sheetName] = sheetData;
         }
+
+        allData = data;
+        initializeApp();
+
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu:', error);
+        showError(error.message);
+    }
+}
+
         
         function showError(message) {
             loadingState.innerHTML = `<div class="text-center text-red-500 p-8 bg-white rounded-lg shadow-md"><i class="fas fa-exclamation-triangle text-4xl"></i><p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p><p class="text-sm text-gray-600">${message}</p></div>`;
