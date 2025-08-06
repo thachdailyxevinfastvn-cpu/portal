@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Quản lý kho xe</title>
+  <style>
+    body { font-family: sans-serif; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #999; padding: 4px 8px; text-align: left; }
+    button { margin-right: 8px; padding: 4px 12px; }
+    #log { background: #f7f7f7; padding: 8px; border: 1px solid #ccc; margin-top: 16px; font-size: 14px; max-height: 200px; overflow-y: auto; }
+  </style>
 </head>
 <body>
   <h1>🚗 Quản lý kho xe</h1>
   <div id="tabs"></div>
   <div id="table-container"></div>
+  <div id="log"></div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbynYKon7UHmfwL_qRvjVu8c5OuzcoqWGkq0n2ticP7BGPDpI5DC5DH_KgLhqbPXuREO/exec";
@@ -15,14 +23,24 @@
     let allData = {};
     let activeSheet = "";
 
+    function logPhase(msg) {
+      const logDiv = document.getElementById("log");
+      const time = new Date().toLocaleTimeString();
+      logDiv.innerHTML += `[${time}] ${msg}<br>`;
+    }
+
     async function fetchData(sheetName) {
       try {
+        logPhase(`📤 Gửi yêu cầu lấy dữ liệu cho sheet: ${sheetName}`);
         const res = await fetch(`${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}`);
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        logPhase(`✅ Đã nhận phản hồi từ server (${res.status})`);
+
+        if (!res.ok) throw new Error(`HTTP status ${res.status}`);
         const json = await res.json();
+        logPhase(`📦 Dữ liệu trả về: ${JSON.stringify(json).substring(0, 100)}...`);
 
         if (json.error) {
-          console.error(`❌ Lỗi dữ liệu từ sheet ${sheetName}:`, json.message);
+          logPhase(`❌ Lỗi từ server: ${json.message}`);
           return;
         }
 
@@ -31,8 +49,10 @@
           activeSheet = sheetName;
           renderTable(sheetName);
         }
+        logPhase(`✅ Đã xử lý xong sheet: ${sheetName}`);
       } catch (err) {
-        console.error(`Lỗi khi tải dữ liệu cho ${sheetName}:`, err.message);
+        logPhase(`❌ Lỗi khi xử lý sheet "${sheetName}": ${err.message}`);
+        console.error(err);
       }
     }
 
@@ -50,19 +70,19 @@
     }
 
     function renderTable(sheetName) {
+      logPhase(`📋 Bắt đầu dựng bảng cho sheet: ${sheetName}`);
       const container = document.getElementById("table-container");
       container.innerHTML = "";
 
       const dataObj = allData[sheetName];
       if (!dataObj || !dataObj.headers || !dataObj.data) {
         container.innerHTML = `<p style="color:red;">❌ Không có dữ liệu hợp lệ cho tab: ${sheetName}</p>`;
+        logPhase(`❌ Sheet "${sheetName}" không có dữ liệu hợp lệ.`);
         return;
       }
 
       const table = document.createElement("table");
-      table.border = "1";
 
-      // Render header
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
       Object.values(dataObj.headers).forEach(header => {
@@ -73,7 +93,6 @@
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
-      // Render body
       const tbody = document.createElement("tbody");
       dataObj.data.forEach(row => {
         const tr = document.createElement("tr");
@@ -87,13 +106,16 @@
 
       table.appendChild(tbody);
       container.appendChild(table);
+      logPhase(`✅ Đã hiển thị bảng dữ liệu: ${sheetName}`);
     }
 
     async function init() {
+      logPhase("🚀 Bắt đầu khởi tạo ứng dụng...");
       renderTabs();
       for (const name of sheetNames) {
-        await fetchData(name); // tuần tự từng sheet
+        await fetchData(name);
       }
+      logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
     }
 
     document.addEventListener("DOMContentLoaded", init);
