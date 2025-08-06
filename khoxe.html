@@ -225,6 +225,8 @@
 
         allData = data;
         initializeApp();
+        console.log('📊 Dữ liệu allData sau khi fetch:', allData);
+
 
     } catch (error) {
         console.error('Lỗi khi tải dữ liệu:', error);
@@ -359,12 +361,15 @@
         }
 
         function renderTable() {
-            if (!activeSheetName || !allData[activeSheetName]) {
-                noResults.classList.remove('hidden');
+            const currentData = allData[activeSheetName];
+
+            if (!currentData || !currentData.headers || !currentData.data) {
+                console.error("Dữ liệu không hợp lệ cho tab:", activeSheetName, currentData);
+                showError("Không thể hiển thị bảng vì dữ liệu không hợp lệ.");
                 return;
             }
 
-            const { headers, data } = allData[activeSheetName];
+            const { headers, data } = currentData;
             const headerKeys = Object.keys(headers);
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLoaiXe = filterLoaiXe.value;
