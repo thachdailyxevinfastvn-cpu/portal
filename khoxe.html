@@ -29,40 +29,56 @@
       logDiv.innerHTML += `[${time}] ${msg}<br>`;
     }
 
-    async function fetchAllSheetsData() {
-      logPhase("🚀 Bắt đầu khởi tạo ứng dụng...");
-      for (const name of sheetNames) {
-        try {
-          logPhase(`📤 Gửi yêu cầu lấy dữ liệu cho sheet: ${name}`);
-          const url = `${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(name)}`;
-          const response = await fetch(url);
-          logPhase(`✅ Đã nhận phản hồi từ server (${response.status})`);
+    function fetchAllSheetsData() {
+  logPhase("🚀 Bắt đầu khởi tạo ứng dụng...");
+  let loadedCount = 0;
 
-          const json = await response.json();
-          logPhase(`📦 Dữ liệu trả về: ${JSON.stringify(json).substring(0, 100)}...`);
+  sheetNames.forEach(sheetName => {
+    logPhase(`📤 Gửi yêu cầu JSONP cho sheet: ${sheetName}`);
 
-          if (json.status === "SUCCESS" && Array.isArray(json.data)) {
-            allData[name] = {
-              headers: json.data.length > 0 ? Object.keys(json.data[0]).reduce((acc, key) => {
-                acc[key] = key;
-                return acc;
-              }, {}) : {},
-              data: json.data
-            };
-            logPhase(`✅ Đã xử lý xong sheet: ${name}`);
-          } else {
-            allData[name] = { headers: {}, data: [] };
-            logPhase(`❌ Sheet "${name}" không có dữ liệu hợp lệ.`);
-          }
-        } catch (error) {
-          allData[name] = { headers: {}, data: [] };
-          logPhase(`❌ Lỗi khi xử lý sheet \"${name}\": ${error.message}`);
-        }
+    const callbackName = `jsonpCallback_${sheetName.replace(/\s+/g, '_')}`;
+    window[callbackName] = function (response) {
+      logPhase(`📦 Đã nhận dữ liệu từ sheet: ${sheetName}`);
+      delete window[callbackName];
+
+      if (response.status === "SUCCESS" && Array.isArray(response.data)) {
+        allData[sheetName] = {
+          headers: response.data.length > 0 ? Object.keys(response.data[0]).reduce((acc, key) => {
+            acc[key] = key;
+            return acc;
+          }, {}) : {},
+          data: response.data
+        };
+        logPhase(`✅ Đã xử lý xong sheet: ${sheetName}`);
+      } else {
+        allData[sheetName] = { headers: {}, data: [] };
+        logPhase(`❌ Sheet "${sheetName}" không có dữ liệu hợp lệ.`);
       }
-      logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
-      activeSheet = sheetNames[0];
-      renderTable(activeSheet);
-    }
+
+      loadedCount++;
+      if (loadedCount === sheetNames.length) {
+        logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
+        activeSheet = sheetNames[0];
+        renderTable(activeSheet);
+      }
+    };
+
+    const script = document.createElement("script");
+    script.src = `${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}&callback=${callbackName}`;
+    script.onerror = () => {
+      logPhase(`❌ Lỗi khi nạp script JSONP từ sheet: ${sheetName}`);
+      allData[sheetName] = { headers: {}, data: [] };
+      loadedCount++;
+      if (loadedCount === sheetNames.length) {
+        logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
+        activeSheet = sheetNames[0];
+        renderTable(activeSheet);
+      }
+    };
+    document.body.appendChild(script);
+  });
+}
+
 
     function renderTabs() {
       const tabsDiv = document.getElementById("tabs");
