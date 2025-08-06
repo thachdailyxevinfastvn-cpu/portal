@@ -1,18 +1,18 @@
 // =================================================================
 // == FILE CẤU HÌNH TRUNG TÂM (CONFIG.JS) ==
 // =================================================================
-// Nơi đây chứa tất cả các đường link và các biến quan trọng.
-// Khi cần thay đổi, bạn chỉ cần chỉnh sửa ở file này.
-// Các trang khác sẽ tự động cập nhật theo.
-// =================================================================
 
+// --- LINK CHO APPS SCRIPT ---
 // URL của Google Apps Script để xử lý dữ liệu người dùng và các tác vụ khác.
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4zP-qroaAqCpLDS0nLKY4WxgaHZX2o6TURZ5FJh2IPRbVL8dQ3nsQ1MTukgIQjt7W/exec';
 
-// URL của Google Apps Script để truy vấn dữ liệu kho xe.
-const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVov7L8x_w2lnZ7yfFkhKEIGqEjmWgFn64hbC35LXlfZPYobz3RKK4o_1MGQArM4odYA/exec';
+// URL Apps Script cũ của Kho xe, có thể các trang khác vẫn cần dùng.
+const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzG-8KfsUe4F1_cYNwSUKCZPOF307aBJDz6IV0F-upsnImn7V7AQnbvIQeq-ssLnInv-A/exec';
+
+
+// --- LINK CHO PHƯƠNG PHÁP LẤY DỮ LIỆU CSV TRỰC TIẾP ---
+// URL này được dùng cho trang khoxe.html phiên bản mới để tránh lỗi.
+const KHO_XE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXy_q11K2YMC3SJ1jEMp_8GMTv5U1SUVRAiG7wDPkhXsBZ89qk3u-Vtw2vcgP-kjmFzEkX_rqGAs2E/pub?output=csv';
 
 
 // Bạn có thể thêm các URL hoặc cấu hình khác ở đây trong tương lai.
-// Ví dụ:
-// const ANOTHER_API_URL = 'https://link-api-khac.com/data';
