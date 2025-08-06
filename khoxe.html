@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Test Kết Nối Google Sheet (HTML)</title>
+    <title>Test Kết Nối Google Sheet (CSV Trực Tiếp)</title>
     <style>
         body { font-family: sans-serif; padding: 20px; }
         table { border-collapse: collapse; width: 100%; }
@@ -15,49 +15,58 @@
 </head>
 <body>
 
-    <h1>Kiểm Tra Kết Nối Dữ Liệu Google Sheet (Từ link csv)</h1>
+    <h1>Kiểm Tra Kết Nối Dữ Liệu Google Sheet (Phương pháp CSV trực tiếp)</h1>
     <div id="status">Đang tải dữ liệu...</div>
     <hr>
     <div id="data-container"></div>
 
     <script>
         // =================================================================
-        // == DÁN LINK pubhtml BẠN ĐÃ TẠO VÀO ĐÂY ==
+        // == SỬ DỤNG LINK CSV BẠN ĐÃ TẠO ==
         // =================================================================
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXy_q11K2YMC3SJ1jEMp_8GMTv5U1SUVRAiG7wDPkhXsBZ89qk3u-Vtw2vcgP-kjmFzEkX_rqGAs2E/pub?output=csv';
 
         const statusDiv = document.getElementById('status');
         const containerDiv = document.getElementById('data-container');
 
-        // Vì link pubhtml không cho phép truy cập trực tiếp bằng fetch (do CORS),
-        // chúng ta cần dùng một "proxy" để vượt qua. Dịch vụ allorigins.win rất hữu ích cho việc này.
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(GOOGLE_SHEET_HTML_URL)}`;
-
-        fetch(proxyUrl)
+        // Gọi fetch trực tiếp đến URL của Google Sheet, không cần proxy
+        fetch(GOOGLE_SHEET_CSV_URL)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Lỗi khi gọi proxy. Status: ' + response.status);
+                    throw new Error('Lỗi mạng hoặc URL không hợp lệ. Status: ' + response.status);
                 }
-                return response.json(); // Lấy nội dung JSON từ proxy
+                return response.text(); // Lấy dữ liệu về dưới dạng văn bản (text)
             })
-            .then(data => {
-                const htmlContent = data.contents; // Lấy nội dung HTML từ response của proxy
+            .then(csvText => {
+                // Khi đã có dữ liệu dạng CSV text
+                statusDiv.textContent = 'THÀNH CÔNG! Đã lấy được dữ liệu trực tiếp từ Google Sheet.';
+                statusDiv.className = 'success';
+
+                // Chuyển đổi văn bản CSV thành bảng HTML
+                const rows = csvText.trim().split('\n');
+                let tableHTML = '<table>';
                 
-                // Tạo một element tạm để chứa HTML và dễ dàng truy vấn
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlContent, 'text/html');
+                // Dòng đầu tiên là tiêu đề
+                const headers = rows.shift().split(',');
+                tableHTML += '<thead><tr>';
+                headers.forEach(header => {
+                    tableHTML += `<th>${header}</th>`;
+                });
+                tableHTML += '</tr></thead>';
+
+                // Các dòng còn lại là dữ liệu
+                tableHTML += '<tbody>';
+                rows.forEach(rowText => {
+                    const cells = rowText.split(',');
+                    tableHTML += '<tr>';
+                    cells.forEach(cell => {
+                        tableHTML += `<td>${cell}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+                tableHTML += '</tbody></table>';
                 
-                // Tìm bảng đầu tiên trong nội dung HTML
-                const tableElement = doc.querySelector('table');
-                
-                if (tableElement) {
-                    statusDiv.textContent = 'THÀNH CÔNG! Đã lấy và phân tích dữ liệu HTML từ Google Sheet.';
-                    statusDiv.className = 'success';
-                    // Hiển thị bảng đã tìm thấy ra trang web
-                    containerDiv.innerHTML = tableElement.outerHTML;
-                } else {
-                    throw new Error('Không tìm thấy thẻ <table> nào trong dữ liệu trả về.');
-                }
+                containerDiv.innerHTML = tableHTML;
             })
             .catch(error => {
                 // Nếu có bất kỳ lỗi nào xảy ra
