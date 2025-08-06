@@ -35,20 +35,10 @@
             height: 48px;
             animation: spin 1s linear infinite;
         }
-        .table-container::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #a8b3c4;
-            border-radius: 4px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #8895a7;
-        }
+        .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #8895a7; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -92,10 +82,12 @@
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Quản Lý Kho Xe</h1>
 
-            <!-- Loading State -->
-            <div id="loading-state" class="flex flex-col items-center justify-center py-20">
-                <div class="loader"></div>
-                <p class="mt-4 text-lg font-medium text-gray-600">Đang tải dữ liệu, sẽ có nhanh thôi !</p>
+            <!-- Loading State or Error State -->
+            <div id="status-container">
+                <div class="flex flex-col items-center justify-center py-20">
+                    <div class="loader"></div>
+                    <p class="mt-4 text-lg font-medium text-gray-600">Đang tải dữ liệu, sẽ có nhanh thôi !</p>
+                </div>
             </div>
 
             <!-- Content Loaded -->
@@ -153,18 +145,11 @@
         </main>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="config.js"></script>
     
     <script>
-        // --- AUTH & UI ELEMENTS ---
-        const userFullNameDisplay = document.getElementById('user-fullname');
-        const userAvatarDisplay = document.getElementById('user-avatar');
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        // --- PAGE ELEMENTS ---
-        const loadingState = document.getElementById('loading-state');
+        // --- UI ELEMENTS ---
+        const statusContainer = document.getElementById('status-container');
         const contentWrapper = document.getElementById('content-wrapper');
         const warehouseTabsContainer = document.getElementById('warehouse-tabs');
         const summarySection = document.getElementById('summary-section');
@@ -181,58 +166,91 @@
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            // User Auth
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
                 window.location.href = 'index.html'; 
                 return;
             }
             const userData = JSON.parse(userDataString);
-            userFullNameDisplay.textContent = userData.fullName;
-            userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            document.getElementById('user-fullname').textContent = userData.fullName;
+            document.getElementById('user-avatar').src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            
+            // Mobile Menu
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
 
-            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-
+            // Check for config
             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
-                showError('Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL.');
+                showError('Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.');
                 return;
             }
-            fetchData();
 
+            // Add event listeners for filters
             [searchInput, filterLoaiXe, filterNgoaiThat].forEach(el => {
                 el.addEventListener('input', () => renderTable());
             });
+            
+            // Start fetching data
+            fetchData();
         });
 
         // --- DATA HANDLING ---
         async function fetchData() {
             try {
+                // This fetch call has NO action parameter, which is correct for this page.
                 const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Lỗi kết nối mạng: ${response.status} ${response.statusText}`);
+                }
+                
                 const data = await response.json();
-                if (data.error) throw new Error(`Lỗi từ Google Script: ${data.message}`);
+
+                // Check for a specific error property from the backend
+                if (data.error) {
+                    throw new Error(`Lỗi từ Google Script: ${data.message}`);
+                }
+
+                // Check if the returned data is a valid object
+                if (typeof data !== 'object' || data === null) {
+                     throw new Error('Dữ liệu trả về không hợp lệ. Vui lòng kiểm tra lại backend.');
+                }
+
                 allData = data;
                 initializeApp();
+
             } catch (error) {
-                console.error('Lỗi khi tải dữ liệu:', error);
+                console.error('Lỗi nghiêm trọng khi tải dữ liệu:', error);
                 showError(error.message);
             }
         }
         
         function showError(message) {
-            loadingState.innerHTML = `<div class="text-center text-red-500 p-8 bg-white rounded-lg shadow-md"><i class="fas fa-exclamation-triangle text-4xl"></i><p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p><p class="text-sm text-gray-600">${message}</p></div>`;
-            loadingState.classList.remove('hidden');
+            statusContainer.innerHTML = `
+                <div class="text-center text-red-500 p-8 bg-white rounded-lg shadow-md">
+                    <i class="fas fa-exclamation-triangle text-4xl"></i>
+                    <p class="mt-4 text-lg font-medium">Đã xảy ra lỗi</p>
+                    <p class="text-sm text-gray-600">${message}</p>
+                </div>`;
+            statusContainer.classList.remove('hidden');
             contentWrapper.classList.add('hidden');
         }
 
         function initializeApp() {
-            loadingState.classList.add('hidden');
+            statusContainer.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
+
             if (Object.keys(allData).length === 0) {
                 showError("Không có dữ liệu nào được trả về từ Google Sheet.");
                 return;
             }
             renderTabs();
-            setActiveTab(sheetOrder[0]);
+            // Set the first tab as active by default
+            if (sheetOrder.length > 0 && allData[sheetOrder[0]]) {
+                setActiveTab(sheetOrder[0]);
+            }
         }
 
         // --- RENDERING ---
@@ -240,7 +258,7 @@
             warehouseTabsContainer.innerHTML = '';
             sheetOrder.forEach(sheetName => {
                 const sheetInfo = allData[sheetName];
-                if (!sheetInfo) return;
+                if (!sheetInfo) return; // Skip if data for a sheet is missing
                 const tab = document.createElement('button');
                 tab.className = 'whitespace-nowrap py-3 px-3 sm:px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700 hover:border-blue-300 transition-colors duration-200';
                 tab.textContent = sheetInfo.displayName;
@@ -281,7 +299,7 @@
             const carModels = [...new Set(data.map(row => row.loai_xe).filter(Boolean))].sort();
             const colors = [...new Set(data.map(row => row.ngoai_that_tv).filter(Boolean))].sort();
 
-            if (carModels.length === 0 || colors.length === 0) {
+            if (carModels.length === 0 || data.length === 0) {
                 return;
             }
 
@@ -346,10 +364,17 @@
         function renderTable() {
             if (!activeSheetName || !allData[activeSheetName]) {
                 noResults.classList.remove('hidden');
+                dataTable.parentElement.classList.add('hidden');
                 return;
             }
 
             const { headers, data } = allData[activeSheetName];
+            
+            if (!headers || typeof headers !== 'object') {
+                dataTable.querySelector('tbody').innerHTML = '<tr><td colspan="99" class="text-center p-8 text-red-500">Lỗi: Cấu trúc tiêu đề không hợp lệ.</td></tr>';
+                return;
+            }
+
             const headerKeys = Object.keys(headers);
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLoaiXe = filterLoaiXe.value;
@@ -371,7 +396,6 @@
                     const cells = headerKeys.map(key => {
                         const value = row[key] || '';
                         let style = '';
-                        // Áp dụng màu cho cả cột ngoại thất và nội thất
                         if (key === 'ngoai_that_tv' || key === 'noi_that_tv') {
                             style = getColorStyle(value);
                         }
@@ -391,12 +415,9 @@
         // --- UTILITY ---
         function getColorStyle(colorName) {
             if (!colorName || typeof colorName !== 'string') return '';
-            
-            // Lấy màu đầu tiên nếu có dấu gạch chéo (ví dụ: "Vàng/trắng" -> "Vàng")
             const firstColorPart = colorName.split('/')[0].trim();
             const lowerColor = firstColorPart.toLowerCase();
-
-            let color = '#374151'; // default gray
+            let color = '#374151';
             let isWhite = false;
             
             if (lowerColor.includes('trắng')) { color = '#FFFFFF'; isWhite = true; }
