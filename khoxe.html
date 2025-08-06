@@ -289,12 +289,15 @@
             loadingState.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
             
-            // SỬA LỖI: Đảm bảo `sheetData` và `sheetData.data` tồn tại trước khi sử dụng
-            const data = sheetData && sheetData.data ? sheetData.data : [];
+            // SỬA LỖI: Kiểm tra kỹ sheetData và các thuộc tính của nó.
+            if (!sheetData || !Array.isArray(sheetData.data) || typeof sheetData.headers !== 'object') {
+                showError("Dữ liệu nhận được không hợp lệ.");
+                return;
+            }
             
-            populateFilters(data);
-            renderSummaryTable(data);
-            renderTable();
+            populateFilters(sheetData.data);
+            renderSummaryTable(sheetData.data);
+            renderTable(sheetData.headers, sheetData.data);
         }
 
         function populateFilters(data) {
@@ -379,14 +382,7 @@
             `;
         }
 
-        function renderTable() {
-            if (!activeSheetName || !allDataCache[activeSheetName]) {
-                dataTable.querySelector('tbody').innerHTML = '';
-                noResults.classList.remove('hidden');
-                return;
-            }
-
-            const { headers, data } = allDataCache[activeSheetName];
+        function renderTable(headers, data) {
             const headerKeys = Object.keys(headers);
             const searchTerm = searchInput.value.toLowerCase();
             const selectedLoaiXe = filterLoaiXe.value;
