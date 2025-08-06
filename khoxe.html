@@ -207,6 +207,9 @@
         });
 
         // --- DATA HANDLING ---
+        /**
+         * [SỬA ĐỔI] Hàm này đã được cập nhật để xử lý đúng định dạng JSON từ Apps Script.
+         */
         async function fetchDataForSheet(sheetName) {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
@@ -219,17 +222,26 @@
                 const response = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
 
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.status} ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`Lỗi kết nối mạng: ${response.status} ${response.statusText}`);
+                }
                 
-                const data = await response.json();
-                if (data.error) throw new Error(`Lỗi từ Google Script: ${data.message}`);
+                const result = await response.json();
+
+                // Kiểm tra thuộc tính 'success' thay vì 'error'
+                if (!result.success) {
+                    throw new Error(`Lỗi từ Google Script: ${result.message || 'Lỗi không xác định.'}`);
+                }
                 
-                return data;
+                // Trả về đối tượng 'data' bên trong, nơi chứa dữ liệu thực tế
+                return result.data;
+
             } catch (error) {
                 clearTimeout(timeoutId);
                 if (error.name === 'AbortError') {
-                    throw new Error('Yêu cầu đã hết thời gian chờ (30 giây).');
+                    throw new Error('Yêu cầu đã hết thời gian chờ (30 giây). Vui lòng thử lại.');
                 }
+                // Ném lỗi ra ngoài để hàm gọi có thể bắt được
                 throw error;
             }
         }
@@ -275,6 +287,7 @@
                 updatePageContent(allDataCache[sheetName]);
             } else {
                 try {
+                    // Dữ liệu trả về từ fetchDataForSheet giờ đã đúng định dạng
                     const sheetData = await fetchDataForSheet(sheetName);
                     allDataCache[sheetName] = sheetData;
                     updatePageContent(sheetData);
@@ -289,8 +302,9 @@
             loadingState.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
             
+            // Logic bên dưới giữ nguyên vì sheetData giờ đã có cấu trúc đúng
             if (!sheetData || !Array.isArray(sheetData.data) || typeof sheetData.headers !== 'object') {
-                showError("Dữ liệu nhận được không hợp lệ.");
+                showError("Dữ liệu nhận được không hợp lệ hoặc rỗng.");
                 return;
             }
             
