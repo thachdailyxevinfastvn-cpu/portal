@@ -2,84 +2,155 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Test Kết Nối Google Sheet (CSV Trực Tiếp)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Xe - VinFast 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; line-height: 1.6; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f7f7f7; font-weight: 600; }
-        #status { font-size: 1.3em; padding: 15px; border-radius: 5px; }
-        .success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; }
-        .error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
-        #debug-output { margin-top: 20px; background-color: #eee; padding: 10px; border: 1px solid #ccc; font-family: monospace; white-space: pre-wrap; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
+        .tab-active { border-color: #1d4ed8; color: #1d4ed8; background-color: white; }
+        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        /* ... Các style khác của bạn ... */
     </style>
 </head>
-<body>
-
-    <h1>Kiểm Tra Kết Nối và dữ liệu (Phương pháp CSV trực tiếp)</h1>
-    <div id="status">Đang chờ tải dữ liệu...</div>
-    <div id="debug-container" style="display: none;">
-        <h2>Dữ liệu thô nhận được từ Google:</h2>
-        <div id="debug-output"></div>
+<body class="antialiased text-gray-800">
+    <div id="loading-state">...</div>
+    <div id="content-wrapper" class="hidden">
+        <nav id="warehouse-tabs"></nav>
+        <div id="summary-section"></div>
+        <div class="filters">
+            <select id="filter-loai-xe"></select>
+            <select id="filter-ngoai-that"></select>
+            <input type="text" id="search-input">
+        </div>
+        <div id="table-container">
+            <table id="data-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div id="no-results" class="hidden">...</div>
     </div>
-    <hr>
-    <div id="data-container"></div>
+
 
     <script>
-        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXy_q11K2YMC3SJ1jEMp_8GMTv5U1SUVRAiG7wDPkhXsBZ89qk3u-Vtw2vcgP-kjmFzEkX_rqGAs2E/pub?output=csv';
+        // --- CẤU HÌNH ---
+        // Dán URL Apps Script mới của bạn vào đây
+        const KHO_XE_JSONP_URL = 'DÁN_URL_APPS_SCRIPT_CỦA_BẠN_VÀO_ĐÂY';
+        const sheetOrder = ["CHƯA VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ", "ĐÃ GIAO XE"];
 
-        const statusDiv = document.getElementById('status');
-        const containerDiv = document.getElementById('data-container');
-        const debugContainer = document.getElementById('debug-container');
-        const debugOutput = document.getElementById('debug-output');
+        // --- BIẾN TOÀN CỤC ---
+        let allData = {}; // Dữ liệu đã được phân tích
+        let activeSheetName = '';
 
-        fetch(GOOGLE_SHEET_CSV_URL)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server phản hồi lỗi. Status: ${response.status}`);
+        // --- DOM ELEMENTS ---
+        const loadingState = document.getElementById('loading-state');
+        const contentWrapper = document.getElementById('content-wrapper');
+        // ... (lấy các element khác bằng ID nếu cần)
+
+        // --- KHỞI TẠO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... (phần kiểm tra user login của bạn) ...
+            
+            if (!KHO_XE_JSONP_URL || KHO_XE_JSONP_URL.includes('DÁN_URL')) {
+                showError('Lỗi cấu hình: Vui lòng dán URL Apps Script vào file khoxe.html.');
+                return;
+            }
+            fetchRawDataViaJsonp();
+        });
+
+        // --- BƯỚC 1: LẤY DỮ LIỆU THÔ BẰNG JSONP ---
+        function fetchRawDataViaJsonp() {
+            console.log("Bắt đầu lấy gói dữ liệu thô bằng JSONP...");
+            loadingState.style.display = 'flex';
+            contentWrapper.style.display = 'none';
+
+            const callbackName = 'processRawData';
+            window[callbackName] = function(response) {
+                console.log("JSONP: Đã nhận phản hồi từ server:", response);
+                if (response && response.success) {
+                    // Gói dữ liệu thô đã về, chuyển sang bước 2
+                    parseRawData(response.rawData);
+                } else {
+                    showError(response.message || "Lỗi không xác định từ server.");
                 }
-                return response.text();
-            })
-            .then(csvText => {
-                statusDiv.textContent = 'THÀNH CÔNG! Đã kết nối và lấy dữ liệu trực tiếp từ Google.';
-                statusDiv.className = 'success';
+                // Dọn dẹp
+                document.body.removeChild(document.getElementById(callbackName));
+                delete window[callbackName];
+            };
 
-                // --- PHẦN GỠ LỖI MỚI ---
-                // Hiển thị dữ liệu thô nhận được để kiểm tra
-                debugContainer.style.display = 'block';
-                debugOutput.textContent = csvText;
-                console.log("Dữ liệu CSV thô nhận được:", csvText);
-                // --- KẾT THÚC PHẦN GỠ LỖI ---
-                
-                if (!csvText || csvText.trim() === '') {
-                    throw new Error('Dữ liệu trả về bị rỗng. Có thể trang tính bạn xuất bản không có nội dung.');
-                }
-                
-                const rows = csvText.trim().split('\n');
-                let tableHTML = '<table>';
-                
-                const headers = rows.shift().split(',');
-                tableHTML += '<thead><tr>';
-                headers.forEach(header => tableHTML += `<th>${header}</th>`);
-                tableHTML += '</tr></thead>';
+            const scriptTag = document.createElement('script');
+            scriptTag.id = callbackName;
+            scriptTag.src = `${KHO_XE_JSONP_URL}?callback=${callbackName}&_=${new Date().getTime()}`; // Thêm cache buster
+            scriptTag.onerror = () => showError("Lỗi tải script. URL sai hoặc có vấn đề về mạng.");
+            document.body.appendChild(scriptTag);
+        }
 
-                tableHTML += '<tbody>';
-                rows.forEach(rowText => {
-                    const cells = rowText.split(',');
-                    tableHTML += '<tr>';
-                    cells.forEach(cell => tableHTML += `<td>${cell}</td>`);
-                    tableHTML += '</tr>';
+        // --- BƯỚC 2: PHÂN TÍCH GÓI DỮ LIỆU THÔ ---
+        function parseRawData(rawDataPackage) {
+            console.log("Bắt đầu phân tích gói dữ liệu thô...");
+            const processedData = {};
+            
+            for (const sheetName in rawDataPackage) {
+                const sheetData = rawDataPackage[sheetName]; // Đây là mảng 2 chiều
+                if (sheetData.length < 1) continue;
+
+                const headersRaw = sheetData.shift(); // Dòng đầu là tiêu đề
+                // Chuyển tiêu đề thành key (lowercase, underscore,...)
+                const headerKeys = headersRaw.map(h => (h || '').toString().toLowerCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, 'd').replace(/[^a-z0-9_]/g, ''));
+                
+                const headersForClient = {};
+                headerKeys.forEach((key, i) => { headersForClient[key] = headersRaw[i]; });
+
+                // Chuyển các dòng dữ liệu thành mảng các object
+                const dataObjects = sheetData.map(row => {
+                    const obj = {};
+                    headerKeys.forEach((key, index) => {
+                        obj[key] = row[index] || '';
+                    });
+                    return obj;
                 });
-                tableHTML += '</tbody></table>';
-                
-                containerDiv.innerHTML = tableHTML;
-            })
-            .catch(error => {
-                console.error('Chi tiết lỗi:', error);
-                statusDiv.textContent = `THẤT BẠI! Không thể xử lý dữ liệu. Chi tiết: ${error.message}`;
-                statusDiv.className = 'error';
-            });
-    </script>
 
+                // Lưu dữ liệu đã xử lý
+                processedData[sheetName] = {
+                    displayName: sheetName.replace(/_/g, ' '), // Tên hiển thị đẹp hơn
+                    headers: headersForClient,
+                    data: dataObjects
+                };
+            }
+            console.log("Phân tích hoàn tất. Dữ liệu đã sẵn sàng:", processedData);
+            
+            allData = processedData;
+            initializeApp();
+        }
+
+        // --- BƯỚC 3: KHỞI TẠO GIAO DIỆN ---
+        function initializeApp() {
+            loadingState.style.display = 'none';
+            contentWrapper.style.display = 'block';
+            if (Object.keys(allData).length === 0) {
+                showError("Không có dữ liệu để hiển thị.");
+                return;
+            }
+            // Gọi các hàm render giao diện của bạn
+            // renderTabs();
+            // setActiveTab(sheetOrder[0]);
+            alert('Thành công! Dữ liệu đã được tải và phân tích. Sẵn sàng để hiển thị.');
+            console.log("Dữ liệu cuối cùng:", allData);
+        }
+
+        function showError(message) {
+            console.error("LỖI:", message);
+            loadingState.innerHTML = `<div style="color: red; text-align: center;"><h2>Đã xảy ra lỗi</h2><p>${message}</p></div>`;
+            loadingState.style.display = 'flex';
+            contentWrapper.style.display = 'none';
+        }
+
+        // Các hàm render giao diện của bạn (renderTabs, setActiveTab, renderTable,...)
+        // Bạn có thể dán chúng vào đây để hoàn thiện trang.
+    </script>
 </body>
 </html>
