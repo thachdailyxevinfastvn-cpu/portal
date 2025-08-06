@@ -19,7 +19,7 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbynYKon7UHmfwL_qRvjVu8c5OuzcoqWGkq0n2ticP7BGPDpI5DC5DH_KgLhqbPXuREO/exec";
-    const sheetNames = ["CHUẨN BỊ VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ", "ĐÃ GIAO XE"];
+    const sheetNames = ["CHUẨN BỊ VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ"];
     let allData = {};
     let activeSheet = "";
 
@@ -29,31 +29,39 @@
       logDiv.innerHTML += `[${time}] ${msg}<br>`;
     }
 
-    async function fetchData(sheetName) {
-      try {
-        logPhase(`📤 Gửi yêu cầu lấy dữ liệu cho sheet: ${sheetName}`);
-        const res = await fetch(`${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}`);
-        logPhase(`✅ Đã nhận phản hồi từ server (${res.status})`);
+    async function fetchAllSheetsData() {
+      logPhase("🚀 Bắt đầu khởi tạo ứng dụng...");
+      for (const name of sheetNames) {
+        try {
+          logPhase(`📤 Gửi yêu cầu lấy dữ liệu cho sheet: ${name}`);
+          const url = `${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(name)}`;
+          const response = await fetch(url);
+          logPhase(`✅ Đã nhận phản hồi từ server (${response.status})`);
 
-        if (!res.ok) throw new Error(`HTTP status ${res.status}`);
-        const json = await res.json();
-        logPhase(`📦 Dữ liệu trả về: ${JSON.stringify(json).substring(0, 100)}...`);
+          const json = await response.json();
+          logPhase(`📦 Dữ liệu trả về: ${JSON.stringify(json).substring(0, 100)}...`);
 
-        if (json.error) {
-          logPhase(`❌ Lỗi từ server: ${json.message}`);
-          return;
+          if (json.status === "SUCCESS" && Array.isArray(json.data)) {
+            allData[name] = {
+              headers: json.data.length > 0 ? Object.keys(json.data[0]).reduce((acc, key) => {
+                acc[key] = key;
+                return acc;
+              }, {}) : {},
+              data: json.data
+            };
+            logPhase(`✅ Đã xử lý xong sheet: ${name}`);
+          } else {
+            allData[name] = { headers: {}, data: [] };
+            logPhase(`❌ Sheet "${name}" không có dữ liệu hợp lệ.`);
+          }
+        } catch (error) {
+          allData[name] = { headers: {}, data: [] };
+          logPhase(`❌ Lỗi khi xử lý sheet \"${name}\": ${error.message}`);
         }
-
-        allData[sheetName] = json;
-        if (!activeSheet) {
-          activeSheet = sheetName;
-          renderTable(sheetName);
-        }
-        logPhase(`✅ Đã xử lý xong sheet: ${sheetName}`);
-      } catch (err) {
-        logPhase(`❌ Lỗi khi xử lý sheet "${sheetName}": ${err.message}`);
-        console.error(err);
       }
+      logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
+      activeSheet = sheetNames[0];
+      renderTable(activeSheet);
     }
 
     function renderTabs() {
@@ -77,7 +85,7 @@
       const dataObj = allData[sheetName];
       if (!dataObj || !dataObj.headers || !dataObj.data) {
         container.innerHTML = `<p style="color:red;">❌ Không có dữ liệu hợp lệ cho tab: ${sheetName}</p>`;
-        logPhase(`❌ Sheet "${sheetName}" không có dữ liệu hợp lệ.`);
+        logPhase(`❌ Sheet \"${sheetName}\" không có dữ liệu hợp lệ.`);
         return;
       }
 
@@ -109,16 +117,10 @@
       logPhase(`✅ Đã hiển thị bảng dữ liệu: ${sheetName}`);
     }
 
-    async function init() {
-      logPhase("🚀 Bắt đầu khởi tạo ứng dụng...");
+    document.addEventListener("DOMContentLoaded", async () => {
       renderTabs();
-      for (const name of sheetNames) {
-        await fetchData(name);
-      }
-      logPhase("🎉 Hoàn tất nạp tất cả dữ liệu.");
-    }
-
-    document.addEventListener("DOMContentLoaded", init);
+      await fetchAllSheetsData();
+    });
   </script>
 </body>
 </html>
