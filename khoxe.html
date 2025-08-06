@@ -3,112 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <title>Quản lý kho xe</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    .tab-button { padding: 10px 20px; border: 1px solid #ccc; cursor: pointer; margin-right: 5px; }
-    .tab-button.active { background-color: #007bff; color: white; }
-    .tab-content { margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-  </style>
 </head>
 <body>
-  <h1>Quản lý kho xe</h1>
+  <h1>🚗 Quản lý kho xe</h1>
   <div id="tabs"></div>
-  <div class="tab-content" id="table-container"></div>
+  <div id="table-container"></div>
 
   <script>
-    const sheetOrder = ["CHUẨN BỊ VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ", "ĐÃ GIAO XE"];
-    const scriptURL = "https://script.google.com/macros/s/AKfycbynYKon7UHmfwL_qRvjVu8c5OuzcoqWGkq0n2ticP7BGPDpI5DC5DH_KgLhqbPXuREO/exec";
-
+    const API_URL = "https://script.google.com/macros/s/AKfycbynYKon7UHmfwL_qRvjVu8c5OuzcoqWGkq0n2ticP7BGPDpI5DC5DH_KgLhqbPXuREO/exec";
+    const sheetNames = ["CHUẨN BỊ VỀ", "KHO XE BÁN", "HÀNG CHỜ GHÉP XE", "GHÉP XE", "XHĐ", "ĐÃ GIAO XE"];
     let allData = {};
-    let activeSheetName = "";
+    let activeSheet = "";
 
-    function fetchData(sheetName) {
-      return new Promise((resolve, reject) => {
-        const callbackName = `cb_${sheetName.replace(/\s/g, "_")}_${Date.now()}`;
-        window[callbackName] = function (data) {
-          delete window[callbackName];
-          resolve(data);
-        };
-        const script = document.createElement("script");
-        script.src = `${scriptURL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}&callback=${callbackName}`;
-        script.onerror = () => reject(new Error("Lỗi khi tải dữ liệu"));
-        document.body.appendChild(script);
-      });
+    async function fetchData(sheetName) {
+      try {
+        const res = await fetch(`${API_URL}?action=getSheetData&sheetName=${encodeURIComponent(sheetName)}`);
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const json = await res.json();
+
+        if (json.error) {
+          console.error(`❌ Lỗi dữ liệu từ sheet ${sheetName}:`, json.message);
+          return;
+        }
+
+        allData[sheetName] = json;
+        if (!activeSheet) {
+          activeSheet = sheetName;
+          renderTable(sheetName);
+        }
+      } catch (err) {
+        console.error(`Lỗi khi tải dữ liệu cho ${sheetName}:`, err.message);
+      }
     }
 
     function renderTabs() {
-      const tabsContainer = document.getElementById("tabs");
-      sheetOrder.forEach(sheetName => {
+      const tabsDiv = document.getElementById("tabs");
+      sheetNames.forEach(name => {
         const btn = document.createElement("button");
-        btn.className = "tab-button";
-        btn.textContent = sheetName;
-        btn.onclick = () => setActiveTab(sheetName);
-        tabsContainer.appendChild(btn);
+        btn.textContent = name;
+        btn.onclick = () => {
+          activeSheet = name;
+          renderTable(name);
+        };
+        tabsDiv.appendChild(btn);
       });
     }
 
-    function setActiveTab(sheetName) {
-      activeSheetName = sheetName;
-      document.querySelectorAll(".tab-button").forEach(btn => {
-        btn.classList.toggle("active", btn.textContent === sheetName);
-      });
-      const tableContainer = document.getElementById("table-container");
-      const sheetData = allData[sheetName];
+    function renderTable(sheetName) {
+      const container = document.getElementById("table-container");
+      container.innerHTML = "";
 
-      if (!sheetData || !sheetData.headers || !sheetData.data) {
-        tableContainer.innerHTML = `<p style="color:red">Dữ liệu không hợp lệ cho tab: ${sheetName}</p>`;
-        console.warn(`Dữ liệu không hợp lệ cho tab: ${sheetName}`, sheetData);
+      const dataObj = allData[sheetName];
+      if (!dataObj || !dataObj.headers || !dataObj.data) {
+        container.innerHTML = `<p style="color:red;">❌ Không có dữ liệu hợp lệ cho tab: ${sheetName}</p>`;
         return;
       }
 
-      const headers = Object.keys(sheetData.headers);
       const table = document.createElement("table");
+      table.border = "1";
+
+      // Render header
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
-
-      headers.forEach(key => {
+      Object.values(dataObj.headers).forEach(header => {
         const th = document.createElement("th");
-        th.textContent = sheetData.headers[key];
+        th.textContent = header;
         headerRow.appendChild(th);
       });
       thead.appendChild(headerRow);
       table.appendChild(thead);
 
+      // Render body
       const tbody = document.createElement("tbody");
-      sheetData.data.forEach(row => {
+      dataObj.data.forEach(row => {
         const tr = document.createElement("tr");
-        headers.forEach(key => {
+        Object.keys(dataObj.headers).forEach(key => {
           const td = document.createElement("td");
           td.textContent = row[key] || "";
           tr.appendChild(td);
         });
         tbody.appendChild(tr);
       });
-      table.appendChild(tbody);
 
-      tableContainer.innerHTML = "";
-      tableContainer.appendChild(table);
+      table.appendChild(tbody);
+      container.appendChild(table);
     }
 
-    async function initializeApp() {
-      try {
-        renderTabs();
-        for (const sheetName of sheetOrder) {
-          const data = await fetchData(sheetName);
-          allData[sheetName] = data;
-        }
-        console.log("\u{1F4CA} Dữ liệu allData sau khi fetch: ", allData);
-        setActiveTab(sheetOrder[0]);
-      } catch (err) {
-        console.error("Lỗi khi tải dữ liệu: ", err);
-        document.getElementById("table-container").innerHTML = `<p style='color:red'>Không thể tải dữ liệu: ${err.message}</p>`;
+    async function init() {
+      renderTabs();
+      for (const name of sheetNames) {
+        await fetchData(name); // tuần tự từng sheet
       }
     }
 
-    document.addEventListener("DOMContentLoaded", initializeApp);
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 </body>
 </html>
