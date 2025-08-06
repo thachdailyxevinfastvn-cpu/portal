@@ -272,12 +272,12 @@
             contentWrapper.classList.add('hidden');
 
             if (allDataCache[sheetName]) {
-                updatePageContent(allDataCache[sheetName].data);
+                updatePageContent(allDataCache[sheetName]);
             } else {
                 try {
                     const sheetData = await fetchDataForSheet(sheetName);
                     allDataCache[sheetName] = sheetData;
-                    updatePageContent(sheetData.data);
+                    updatePageContent(sheetData);
                 } catch (error) {
                     console.error(`Lỗi khi tải dữ liệu cho sheet ${sheetName}:`, error);
                     showError(error.message);
@@ -285,9 +285,13 @@
             }
         }
         
-        function updatePageContent(data) {
+        function updatePageContent(sheetData) {
             loadingState.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
+            
+            // SỬA LỖI: Đảm bảo `sheetData` và `sheetData.data` tồn tại trước khi sử dụng
+            const data = sheetData && sheetData.data ? sheetData.data : [];
+            
             populateFilters(data);
             renderSummaryTable(data);
             renderTable();
