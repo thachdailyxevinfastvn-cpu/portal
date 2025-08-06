@@ -10,7 +10,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4zP-qroaAqCpLDS0nLKY4WxgaHZX2o6TURZ5FJh2IPRbVL8dQ3nsQ1MTukgIQjt7W/exec';
 
 // URL của Google Apps Script để truy vấn dữ liệu kho xe.
-const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWWPhDU1IGHK4G1M-JQzebWbcISLccRLD4UOSFviDppRU2X0oTNcWIywDTqmqXrX1kEw/exec';
+const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVov7L8x_w2lnZ7yfFkhKEIGqEjmWgFn64hbC35LXlfZPYobz3RKK4o_1MGQArM4odYA/exec';
 
 
 // Bạn có thể thêm các URL hoặc cấu hình khác ở đây trong tương lai.
