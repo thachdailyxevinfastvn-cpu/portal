@@ -423,37 +423,38 @@
 
     // --- DATA HANDLING ---
     async function fetchData() {
-        console.log('Bắt đầu quá trình tải dữ liệu...'); // LOG 1
-        try {
-            console.log('Đang gọi đến URL:', KHO_XE_APPS_SCRIPT_URL); // LOG 2
-            const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
-            
-            console.log('Đã nhận phản hồi từ server. Status:', response.status); // LOG 3
+    console.log('Bắt đầu quá trình tải dữ liệu...');
+    try {
+        console.log('Đang gọi đến URL:', KHO_XE_APPS_SCRIPT_URL);
+        const response = await fetch(KHO_XE_APPS_SCRIPT_URL);
+        
+        console.log('Đã nhận phản hồi từ server. Status:', response.status);
 
-            if (!response.ok) {
-                // Ném lỗi với thông tin chi tiết để khối catch có thể bắt được
-                throw new Error(`Lỗi mạng hoặc server. Status: ${response.status} - ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            console.log('Dữ liệu JSON đã được phân tích thành công:', data); // LOG 4
-
-            if (data.error) {
-                // Đây là lỗi do Google Apps Script chủ động trả về
-                console.error('Lỗi trả về từ Google Script:', data.message); // LOG 5
-                throw new Error(`Lỗi từ Google Script: ${data.message}`);
-            }
-            
-            allData = data;
-            console.log('Dữ liệu đã sẵn sàng để khởi tạo ứng dụng.'); // LOG 6
-            initializeApp();
-
-        } catch (error) {
-            console.error('Đã xảy ra lỗi nghiêm trọng trong hàm fetchData:', error); // LOG 7
-            // Hiển thị lỗi ra màn hình cho người dùng
-            showError(`Không thể tải dữ liệu từ Google Sheet. Chi tiết: ${error.message}. Vui lòng kiểm tra lại URL trong config.js và quyền truy cập của Google Sheet.`);
+        if (!response.ok) {
+            throw new Error(`Lỗi mạng hoặc server. Status: ${response.status} - ${response.statusText}`);
         }
+        
+        const data = await response.json();
+        console.log('Dữ liệu JSON đã được phân tích thành công:', data);
+
+        // SỬA LỖI Ở ĐÂY:
+        // Kiểm tra cả `data.error` (cho lỗi tự định nghĩa) và `data.status === 'ERROR'` (cho lỗi từ Google)
+        if (data.error || data.status === 'ERROR') {
+            const errorMessage = data.message || 'Lỗi không xác định từ Google Script.';
+            console.error('Lỗi trả về từ Google Script:', errorMessage);
+            throw new Error(`Lỗi từ Google Script: ${errorMessage}`);
+        }
+        
+        allData = data;
+        console.log('Dữ liệu đã sẵn sàng để khởi tạo ứng dụng.');
+        initializeApp();
+
+    } catch (error) {
+        console.error('Đã xảy ra lỗi nghiêm trọng trong hàm fetchData:', error);
+        // Hiển thị lỗi ra màn hình cho người dùng
+        showError(`Không thể tải dữ liệu. Chi tiết: ${error.message}. Vui lòng kiểm tra lại URL trong config.js và các bước triển khai Apps Script.`);
     }
+}
     
     // ... (toàn bộ code phía dưới) ...
 </script>
