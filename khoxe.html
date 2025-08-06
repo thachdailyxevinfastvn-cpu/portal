@@ -289,7 +289,6 @@
             loadingState.classList.add('hidden');
             contentWrapper.classList.remove('hidden');
             
-            // SỬA LỖI: Kiểm tra kỹ sheetData và các thuộc tính của nó.
             if (!sheetData || !Array.isArray(sheetData.data) || typeof sheetData.headers !== 'object') {
                 showError("Dữ liệu nhận được không hợp lệ.");
                 return;
@@ -297,7 +296,7 @@
             
             populateFilters(sheetData.data);
             renderSummaryTable(sheetData.data);
-            renderTable(); // Sửa lỗi: Gọi renderTable mà không cần tham số
+            renderTable();
         }
 
         function populateFilters(data) {
@@ -391,7 +390,6 @@
 
             const { headers, data } = allDataCache[activeSheetName];
             
-            // SỬA LỖI: Kiểm tra headers có tồn tại không trước khi dùng
             if (!headers || typeof headers !== 'object') {
                 dataTable.querySelector('tbody').innerHTML = '<tr><td colspan="99" class="text-center p-8 text-red-500">Lỗi: Cấu trúc tiêu đề không hợp lệ.</td></tr>';
                 return;
