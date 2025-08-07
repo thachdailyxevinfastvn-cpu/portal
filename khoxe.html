@@ -22,22 +22,41 @@
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
-        <!-- Header & Navigation -->
+        <!-- Header & Navigation (ĐÃ CẬP NHẬT) -->
         <header class="bg-white shadow-md sticky top-0 z-50">
-             <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
                 <div class="hidden md:flex items-center space-x-2">
                     <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                     <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Kho xe</a>
                     <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
+                    <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
+                    <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                    <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
+                    <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
                 </div>
                 <div class="flex items-center">
                     <div id="user-profile" class="flex items-center space-x-3">
                          <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                          <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                     </div>
+                    <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    </button>
+                    <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
                 </div>
             </nav>
+            <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+                <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+                <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Kho xe</a>
+                <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
+                <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+                <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+                <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+                <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+            </div>
         </header>
 
         <!-- Main Content -->
@@ -88,18 +107,25 @@
                 document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
             }
 
-            // THAY ĐỔI: Sử dụng KHO_XE_APPS_SCRIPT_URL từ file config.js
             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
                 showError('Lỗi cấu hình: Vui lòng kiểm tra biến KHO_XE_APPS_SCRIPT_URL trong file config.js.');
                 return;
             }
+            
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                sessionStorage.removeItem('loggedInUser');
+                window.location.href = 'index.html';
+            });
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+
             fetchData();
             [searchInput, filterLoaiXe, filterNgoaiThat].forEach(el => el.addEventListener('input', () => renderTable()));
         });
 
         async function fetchData() {
             try {
-                // THAY ĐỔI QUAN TRỌNG: Thêm ?action=getAllSheetData vào URL
                 const response = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getAllSheetData`);
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const data = await response.json();
