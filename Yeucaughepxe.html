@@ -10,18 +10,9 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        .form-input, .form-select {
-            width: 100%; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 0.375rem;
-            transition: all 0.2s ease-in-out; background-color: white; font-size: 0.875rem;
-        }
-        .form-input:focus, .form-select:focus {
-            outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-        }
-        .btn-primary {
-            background-color: #1d4ed8; color: white; padding: 10px 20px; border-radius: 0.375rem;
-            font-weight: 500; transition: all 0.2s; cursor: pointer; display: inline-flex;
-            align-items: center; justify-content: center;
-        }
+        .form-input, .form-select { width: 100%; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: all 0.2s ease-in-out; background-color: white; font-size: 0.875rem; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
+        .btn-primary { background-color: #1d4ed8; color: white; padding: 10px 20px; border-radius: 0.375rem; font-weight: 500; transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
         .btn-primary:hover { background-color: #2563eb; }
         .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); z-index: 9999; }
         .toast { display: none; position: fixed; bottom: 20px; right: 20px; padding: 16px; border-radius: 8px; color: white; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
@@ -39,105 +30,49 @@
                     <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                     <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
                     <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Yêu cầu ghép xe</a>
-                    <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
-                    <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
-                    <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
-                    <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
                 </div>
                 <div class="flex items-center">
                     <div id="user-profile" class="flex items-center space-x-3">
                          <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                          <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                     </div>
-                    <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
-                        <i class="fas fa-bars w-6 h-6"></i>
-                    </button>
                 </div>
             </nav>
-            <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-                <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
-                <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
-                <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Yêu cầu ghép xe</a>
-                <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
-                <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
-                <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
-                <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
-            </div>
         </header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
             <div class="grid grid-cols-12 gap-6 items-start">
-
                 <div class="col-span-12 lg:col-span-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:sticky top-24">
                     <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Tạo Yêu Cầu Mới</h2>
                     <form id="pairing-request-form" class="space-y-2">
-                         <div>
-                            <label for="tvbh" class="text-xs font-medium text-gray-600">Tư Vấn Bán Hàng (TVBH)</label>
-                            <input type="text" id="tvbh" name="tvbh" class="form-input mt-1">
-                        </div>
-                        <div>
-                            <label for="ten_khach_hang" class="text-xs font-medium text-gray-600">Tên Khách Hàng</label>
-                            <input type="text" id="ten_khach_hang" name="ten_khach_hang" required class="form-input mt-1">
-                        </div>
-                        <div>
-                            <label for="loai_xe" class="text-xs font-medium text-gray-600">Loại Xe</label>
-                            <select id="loai_xe" name="loai_xe" required class="form-select mt-1">
-                                <option value="" disabled selected>Đang tải...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="phien_ban" class="text-xs font-medium text-gray-600">Phiên bản</label>
-                            <input type="text" id="phien_ban" name="phien_ban" required class="form-input mt-1" placeholder="VD: Plus, Eco...">
-                        </div>
-                        <div>
-                            <label for="ngoai_that" class="text-xs font-medium text-gray-600">Màu xe</label>
-                            <input type="text" id="ngoai_that" name="ngoai_that" required class="form-input mt-1" placeholder="VD: Trắng, Đen...">
-                        </div>
-                        <div>
-                            <label for="noi_that" class="text-xs font-medium text-gray-600">Màu nội thất</label>
-                            <input type="text" id="noi_that" name="noi_that" required class="form-input mt-1" placeholder="VD: Black, Beige...">
-                        </div>
-                        <div>
-                            <label for="da_coc" class="text-xs font-medium text-gray-600">Đã cọc (VNĐ)</label>
-                            <input type="text" id="da_coc" name="da_coc" required class="form-input mt-1" placeholder="Chỉ nhập số">
-                        </div>
-                        <div>
-                            <label for="ngay_coc" class="text-xs font-medium text-gray-600">Ngày cọc</label>
-                            <input type="date" id="ngay_coc" name="ngay_coc" required class="form-input mt-1">
-                        </div>
-
-                        <button type="submit" class="btn-primary w-full !mt-4">
-                            <i class="fas fa-paper-plane mr-2"></i>Gửi Yêu Cầu
-                        </button>
+                         <div><label for="tvbh" class="text-xs font-medium text-gray-600">Tư Vấn Bán Hàng (TVBH)</label><input type="text" id="tvbh" name="tvbh" class="form-input mt-1" readonly></div>
+                        <div><label for="ten_khach_hang" class="text-xs font-medium text-gray-600">Tên Khách Hàng</label><input type="text" id="ten_khach_hang" name="ten_khach_hang" required class="form-input mt-1"></div>
+                        <div><label for="loai_xe" class="text-xs font-medium text-gray-600">Loại Xe</label><select id="loai_xe" name="loai_xe" required class="form-select mt-1"><option value="" disabled selected>Đang tải...</option></select></div>
+                        <div><label for="phien_ban" class="text-xs font-medium text-gray-600">Phiên bản</label><input type="text" id="phien_ban" name="phien_ban" required class="form-input mt-1" placeholder="VD: Plus, Eco..."></div>
+                        <div><label for="ngoai_that" class="text-xs font-medium text-gray-600">Màu xe</label><input type="text" id="ngoai_that" name="ngoai_that" required class="form-input mt-1" placeholder="VD: Trắng, Đen..."></div>
+                        <div><label for="noi_that" class="text-xs font-medium text-gray-600">Màu nội thất</label><input type="text" id="noi_that" name="noi_that" required class="form-input mt-1" placeholder="VD: Black, Beige..."></div>
+                        <div><label for="da_coc" class="text-xs font-medium text-gray-600">Đã cọc (VNĐ)</label><input type="text" id="da_coc" name="da_coc" required class="form-input mt-1" placeholder="Chỉ nhập số"></div>
+                        <div><label for="ngay_coc" class="text-xs font-medium text-gray-600">Ngày cọc</label><input type="date" id="ngay_coc" name="ngay_coc" required class="form-input mt-1"></div>
+                        <button type="submit" class="btn-primary w-full !mt-4"><i class="fas fa-paper-plane mr-2"></i>Gửi Yêu Cầu</button>
                     </form>
                 </div>
-
                 <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Hàng Chờ Ghép Xe</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead id="waiting-list-header" class="bg-gray-50">
-                                </thead>
-                            <tbody id="waiting-list-body">
-                                </tbody>
-                        </table>
-                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm"><thead id="waiting-list-header" class="bg-gray-50"></thead><tbody id="waiting-list-body"></tbody></table></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="loading-overlay" class="loading-overlay items-center justify-center">
-        <i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
-    </div>
+    <div id="loading-overlay" class="loading-overlay items-center justify-center"><i class="fas fa-spinner fa-spin text-4xl text-blue-600"></i></div>
     <div id="toast" class="toast"></div>
     
     <script src="config.js"></script>
     <script>
-        const API_URL = typeof KHO_XE_APPS_SCRIPT_URL !== 'undefined' ? KHO_XE_APPS_SCRIPT_URL : null;
         document.addEventListener('DOMContentLoaded', () => {
-             if (!API_URL) {
-                alert("Lỗi: Không tìm thấy URL của API trong file config.js. Vui lòng kiểm tra lại.");
+             // THAY ĐỔI: Sử dụng KHO_XE_APPS_SCRIPT_URL từ file config.js
+             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
+                alert("Lỗi cấu hình: Vui lòng kiểm tra biến KHO_XE_APPS_SCRIPT_URL trong file config.js.");
                 return;
             }
             const userDataString = sessionStorage.getItem('loggedInUser');
@@ -149,11 +84,10 @@
             } else {
                 document.getElementById('tvbh').value = "Chưa đăng nhập";
             }
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            
             fetchCarModels();
             fetchWaitingList();
+            
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
         });
@@ -161,7 +95,8 @@
         async function fetchCarModels() {
             const select = document.getElementById('loai_xe');
             try {
-                const res = await fetch(`${API_URL}?action=getCarModels`);
+                // THAY ĐỔI: Thêm ?action=getCarModels và sử dụng KHO_XE_APPS_SCRIPT_URL
+                const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getCarModels`);
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
                 if (result.status === "SUCCESS") {
@@ -172,6 +107,7 @@
                 } else throw new Error(result.message);
             } catch (err) {
                 select.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
+                console.error("Lỗi fetchCarModels:", err);
             }
         }
 
@@ -179,7 +115,8 @@
             const tbody = document.getElementById('waiting-list-body');
             tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Đang tải...</td></tr>`;
             try {
-                const res = await fetch(`${API_URL}?action=getWaitingList`);
+                // THAY ĐỔI: Thêm ?action=getWaitingList và sử dụng KHO_XE_APPS_SCRIPT_URL
+                const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getWaitingList`);
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
                 if (result.status === 'SUCCESS') {
@@ -187,32 +124,28 @@
                 } else throw new Error(result.message);
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Lỗi: ${err.message}</td></tr>`;
+                 console.error("Lỗi fetchWaitingList:", err);
             }
         }
 
-        // THAY ĐỔI: Hàm render bảng đã được viết lại hoàn toàn
         function renderWaitingList(data) {
             const thead = document.getElementById('waiting-list-header');
             const tbody = document.getElementById('waiting-list-body');
 
-            // Cập nhật tiêu đề bảng
-            thead.innerHTML = `
-                <tr>
-                    <th class="p-3 text-left font-semibold text-gray-600">NGÀY YÊU CẦU</th>
-                    <th class="p-3 text-left font-semibold text-gray-600">TVBH</th>
-                    <th class="p-3 text-left font-semibold text-gray-600">TÊN KH</th>
-                    <th class="p-3 text-left font-semibold text-gray-600">YÊU CẦU XE</th>
-                    <th class="p-3 text-right font-semibold text-gray-600">ĐÃ CỌC (VNĐ)</th>
-                    <th class="p-3 text-left font-semibold text-gray-600">NGÀY CỌC</th>
-                </tr>
-            `;
+            thead.innerHTML = `<tr>
+                <th class="p-3 text-left font-semibold text-gray-600">NGÀY YÊU CẦU</th>
+                <th class="p-3 text-left font-semibold text-gray-600">TVBH</th>
+                <th class="p-3 text-left font-semibold text-gray-600">TÊN KH</th>
+                <th class="p-3 text-left font-semibold text-gray-600">YÊU CẦU XE</th>
+                <th class="p-3 text-right font-semibold text-gray-600">ĐÃ CỌC (VNĐ)</th>
+                <th class="p-3 text-left font-semibold text-gray-600">NGÀY CỌC</th>
+            </tr>`;
 
             if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Chưa có yêu cầu nào.</td></tr>`;
                 return;
             }
             
-            // Cập nhật nội dung bảng
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-gray-50 border-b">
                     <td class="p-3 whitespace-nowrap">${row['NGÀY YÊU CẦU'] || ''}</td>
@@ -233,15 +166,24 @@
             showLoading(true);
             const form = event.target;
             const formData = new FormData(form);
-            formData.set('da_coc', formData.get('da_coc').replace(/,/g, ''));
+            
+            const dataObject = {};
+            formData.forEach((value, key) => {
+                dataObject[key] = value;
+            });
+
             try {
-                const res = await fetch(API_URL, { 
-                    method: 'POST', 
-                    body: new URLSearchParams(formData) 
+                // THAY ĐỔI: Gửi yêu cầu POST với body là JSON đến KHO_XE_APPS_SCRIPT_URL
+                const res = await fetch(KHO_XE_APPS_SCRIPT_URL, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify(dataObject) 
                 });
+                
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
+                
                 showToast(result.message, 'success');
                 form.reset();
                 const userDataString = sessionStorage.getItem('loggedInUser');
@@ -250,16 +192,14 @@
                 }
                 await fetchWaitingList(); 
             } catch (err) {
-                showToast(err.message, 'error');
+                showToast(`Lỗi gửi yêu cầu: ${err.message}`, 'error');
+                console.error("Lỗi handleFormSubmit:", err);
             } finally {
                 showLoading(false);
             }
         }
 
-        function showLoading(isLoading) {
-            document.getElementById('loading-overlay').style.display = isLoading ? 'flex' : 'none';
-        }
-
+        function showLoading(isLoading) { document.getElementById('loading-overlay').style.display = isLoading ? 'flex' : 'none'; }
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -267,7 +207,6 @@
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
-
         function formatCurrencyInput(event) {
             let value = event.target.value.replace(/[^0-9]/g, '');
             event.target.value = value ? Number(value).toLocaleString('vi-VN') : '';
