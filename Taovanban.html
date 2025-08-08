@@ -17,8 +17,6 @@
             animation: spin 1s linear infinite; margin-left: 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* === CSS CHO ANIMATION MỚI === */
         #loader .plane-container {
             display: flex; align-items: center; justify-content: center;
             flex-direction: column; overflow: hidden; padding: 20px 0;
@@ -28,7 +26,6 @@
             animation: fly 2.5s ease-in-out infinite;
         }
         #loader .loading-text { margin-top: 15px; color: #4b5563; font-weight: 500; }
-        
         @keyframes fly {
             0% { transform: translateX(-150px) translateY(40px) rotate(-20deg); opacity: 0; }
             20% { opacity: 1; }
@@ -118,7 +115,6 @@
             const userData = JSON.parse(userDataString);
             document.getElementById('user-fullname').textContent = userData.fullName;
             document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
-
             document.getElementById('logout-btn').addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
@@ -126,7 +122,6 @@
             document.getElementById('mobile-menu-button').addEventListener('click', () => {
                 document.getElementById('mobile-menu').classList.toggle('hidden');
             });
-            
             initializePage();
         });
 
@@ -210,6 +205,7 @@
             } else { submitBtn.disabled = true; }
         }
 
+        // --- HÀM TẠO FORM ĐÃ ĐƯỢC NÂNG CẤP ---
         function createForm(placeholders) {
             if (placeholders.length === 0) {
                 formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
@@ -219,23 +215,28 @@
             
             let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
             placeholders.forEach(p => {
+                // Yêu cầu 1: Ẩn ô <<TODAY>>
                 if (p.name === '<<TODAY>>') return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
-
+                
+                // Yêu cầu 2: Tạo dropdown cho NOI_CAP / NGUOI_DAI_DIEN
                 if (p.name === '<<NOI_CAP>>' || p.name === '<<NGUOI_DAI_DIEN>>') {
                     formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                     <option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option>
                                     <option>BỘ CÔNG AN</option>
                                  </select>`;
-                } 
+                }
+                // Yêu cầu 3: Ô NGAY_KY_HD_TEXT bị vô hiệu hóa
                 else if (p.name === '<<NGAY_KY_HD_TEXT>>') {
                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền theo ngày ký hợp đồng" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
+                // Nhận diện các ô ngày tháng khác
                 else if (p.name.toUpperCase().includes('NGAY')) {
                      formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
                 }
+                // Các ô còn lại
                 else {
                      formHtml += `<input type="text" id="${p.name}" name="${p.name}" required placeholder="${p.label}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
                 }
@@ -245,15 +246,18 @@
             submitBtn.disabled = false;
         }
         
+        // --- HÀM MỚI ĐỂ XỬ LÝ NHẬP LIỆU ĐỘNG ---
         function handleFormInput(event) {
             const target = event.target;
             const fieldName = target.name;
 
+            // Yêu cầu 4: Tự động định dạng số
             if (currencyFields.includes(fieldName)) {
                 let value = target.value.replace(/[^0-9]/g, '');
                 target.value = value ? Number(value).toLocaleString('vi-VN') : '';
             }
 
+            // Yêu cầu 3: Tự động chuyển đổi ngày sang chữ
             if (fieldName === '<<NGAY_KY_HD>>') {
                 const dateTextEl = document.getElementById('<<NGAY_KY_HD_TEXT>>');
                 if(dateTextEl) {
@@ -269,7 +273,12 @@
             let isFormValid = true;
             inputs.forEach(input => {
                 if(input.required && !input.value) isFormValid = false;
-                placeholdersData[input.name] = input.value;
+                // Với các ô tiền tệ, xóa dấu chấm đi trước khi gửi
+                if (currencyFields.includes(input.name)) {
+                   placeholdersData[input.name] = input.value.replace(/\./g, '');
+                } else {
+                   placeholdersData[input.name] = input.value;
+                }
             });
 
             if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
@@ -305,6 +314,7 @@
         function clearResults() { resultContainer.style.display = 'none'; resultLinks.innerHTML = ''; errorContainer.style.display = 'none'; errorContainer.innerHTML = ''; }
         function clearAll() { formContainer.innerHTML = ''; submitBtn.disabled = true; clearResults(); }
         
+        // --- HÀM PHỤ TRỢ MỚI ---
         function convertDateToText(dateString) {
             if (!dateString) return '';
             const [year, month, day] = dateString.split('-');
