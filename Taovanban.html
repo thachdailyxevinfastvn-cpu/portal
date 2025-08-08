@@ -17,8 +17,8 @@
             animation: spin 1s linear infinite; margin-left: 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* CSS CHO ANIMATION MỚI */
+
+        /* === CSS CHO ANIMATION MỚI === */
         #loader .plane-container {
             display: flex; align-items: center; justify-content: center;
             flex-direction: column; overflow: hidden; padding: 20px 0;
@@ -308,6 +308,7 @@
         function convertDateToText(dateString) {
             if (!dateString) return '';
             const [year, month, day] = dateString.split('-');
+            if (!day || !month || !year) return '';
             return `ngày ${day} tháng ${month} năm ${year}`;
         }
 
@@ -323,7 +324,7 @@
 
         function stopLoadingAnimation() {
             loader.style.display = 'none';
-            clearInterval(messageInterval);
+            if (messageInterval) clearInterval(messageInterval);
         }
 
         initializePage();
