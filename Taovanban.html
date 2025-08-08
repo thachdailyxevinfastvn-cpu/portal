@@ -224,7 +224,6 @@
             }
         }
 
-        // ---------- BẮT ĐẦU PHẦN ĐÃ SỬA ----------
         function createForm(placeholders) {
             if (placeholders.length === 0) {
                 formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
@@ -245,8 +244,8 @@
             formContainer.innerHTML = formHtml;
             submitBtn.disabled = false;
         }
-        // ---------- KẾT THÚC PHẦN ĐÃ SỬA ----------
 
+        // ---------- BẮT ĐẦU PHẦN ĐÃ CẬP NHẬT ----------
         async function handleSubmit() {
             clearResults();
             const placeholdersData = {};
@@ -262,9 +261,15 @@
                 return;
             }
 
+            // Lấy thông tin người dùng từ sessionStorage
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
+
+            // Tạo payload chứa cả tên người dùng để gửi lên backend
             const payload = {
                 groupName: groupSelector.value,
-                placeholders: placeholdersData
+                placeholders: placeholdersData,
+                userName: userData.fullName 
             };
             
             const result = await handleApiRequest({ action: 'processFormCreation', payload: JSON.stringify(payload) }, submitBtn);
@@ -280,6 +285,7 @@
                 showError(result.message);
             }
         }
+        // ---------- KẾT THÚC PHẦN ĐÃ CẬP NHẬT ----------
         
         // Helper functions
         function showError(message) {
