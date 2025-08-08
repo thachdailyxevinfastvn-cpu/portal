@@ -9,4 +9,5 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4zP-qroaAqCpL
 // URL Apps Script cũ của Kho xe, có thể các trang khác vẫn cần dùng.
 const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxlKiAYsOF7_3EgWVp6nw7FIRMniFcaUIQEgS8fMeZrHWjjEsbjNVELavfn4SRJ_TJqg/exec';
 
-// Bạn có thể thêm các URL hoặc cấu hình khác ở đây trong tương lai.
+// URL Apps Script cho chức năng TẠO VĂN BẢN
+const TAO_VAN_BAN_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXXF92heosCXuTbnbxkQtI9UHr7pQxNTDOx70pIstxye2keAanT3eRr7gWj2FtlREh/exec';

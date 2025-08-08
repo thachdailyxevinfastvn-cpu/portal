@@ -1,14 +1,61 @@
-<header class="bg-white shadow-md sticky top-0 z-50">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Văn Bản - Portal VF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f4f7fc;
+        }
+        .nav-link-active {
+            background-color: #eef2ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        .button-loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
             <div class="hidden md:flex items-center space-x-2">
-                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Trang chủ</a>
+                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                 <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
                 <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
                 <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
                 <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
                 <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
-                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
+                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Tạo văn bản</a>
             </div>
             <div class="flex items-center">
                 <div id="user-profile" class="flex items-center space-x-3">
@@ -24,12 +71,228 @@
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Trang chủ</a>
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
             <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
             <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
             <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
             <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
             <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
-            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Tạo văn bản</a>
         </div>
     </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+            <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Công Cụ Tạo Văn Bản Tự Động</h1>
+
+            <div class="mb-6">
+                <label for="group-selector" class="block text-sm font-medium text-gray-700 mb-1">1. Chọn Nhóm Văn Bản</label>
+                <select id="group-selector" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Vui lòng chọn --</option>
+                </select>
+            </div>
+        
+            <div id="form-container" class="space-y-4">
+                </div>
+            
+            <div id="loader" class="hidden text-center py-5">
+                <div class="spinner"></div>
+                <p class="text-gray-600">Đang xử lý, vui lòng chờ...</p>
+            </div>
+        
+            <button id="submit-btn" disabled class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center h-12 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                Tạo Văn Bản
+            </button>
+        
+            <div id="result-container" class="hidden mt-6 p-4 border-l-4 border-green-500 bg-green-50">
+                <h3 class="font-bold text-green-800">Thành công! Các văn bản đã được tạo:</h3>
+                <div id="result-links" class="mt-2 space-y-2"></div>
+            </div>
+            
+            <div id="error-container" class="hidden mt-6 p-4 border-l-4 border-red-500 bg-red-50 text-red-700"></div>
+        </div>
+    </main>
+
+    <script>
+        // --- AUTH & COMMON FUNCTIONS (Giống các trang khác) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (!userDataString) {
+                window.location.href = 'index.html';
+                return;
+            }
+            const userData = JSON.parse(userDataString);
+            document.getElementById('user-fullname').textContent = userData.fullName;
+            document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
+
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                sessionStorage.removeItem('loggedInUser');
+                window.location.href = 'index.html';
+            });
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+            
+            // Khởi chạy logic của trang này
+            initializePage();
+        });
+
+        async function handleApiRequest(payload, button) {
+            if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) {
+                showError('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.');
+                return null;
+            }
+            if (button) {
+                button.disabled = true;
+                button.classList.add('button-loading');
+            }
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    if (button) {
+                        button.disabled = false;
+                        button.classList.remove('button-loading');
+                    }
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    if (button) {
+                        button.disabled = false;
+                        button.classList.remove('button-loading');
+                    }
+                    showError('Lỗi mạng hoặc URL API không hợp lệ.');
+                    reject(new Error('JSONP request failed'));
+                };
+                const params = new URLSearchParams({ ...payload, callback: callbackName });
+                script.src = `${TAO_VAN_BAN_APPS_SCRIPT_URL}?${params.toString()}`;
+                document.body.appendChild(script);
+            });
+        }
+
+        // --- PAGE-SPECIFIC LOGIC ---
+        const groupSelector = document.getElementById('group-selector');
+        const formContainer = document.getElementById('form-container');
+        const submitBtn = document.getElementById('submit-btn');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('result-container');
+        const resultLinks = document.getElementById('result-links');
+        const errorContainer = document.getElementById('error-container');
+
+        function initializePage() {
+            fetchGroups();
+            groupSelector.addEventListener('change', handleGroupSelection);
+            submitBtn.addEventListener('click', handleSubmit);
+        }
+
+        async function fetchGroups() {
+            loader.style.display = 'block';
+            const result = await handleApiRequest({ action: 'getGroups' });
+            loader.style.display = 'none';
+
+            if (result && result.status === 'success') {
+                result.data.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group;
+                    option.textContent = group;
+                    groupSelector.appendChild(option);
+                });
+            } else if (result) {
+                showError(result.message);
+            }
+        }
+
+        async function handleGroupSelection() {
+            const selectedGroup = groupSelector.value;
+            clearAll();
+            if (selectedGroup) {
+                loader.style.display = 'block';
+                const result = await handleApiRequest({ action: 'getPlaceholders', group: selectedGroup });
+                loader.style.display = 'none';
+                
+                if (result && result.status === 'success') {
+                    createForm(result.data);
+                } else if (result) {
+                    showError(result.message);
+                }
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        function createForm(placeholders) {
+            if (placeholders.length === 0) {
+                formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
+                submitBtn.disabled = true;
+                return;
+            }
+            
+            let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
+            placeholders.forEach(p => {
+                formHtml += `
+                    <div>
+                        <label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>
+                        <input type="text" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>`;
+            });
+            formContainer.innerHTML = formHtml;
+            submitBtn.disabled = false;
+        }
+
+        async function handleSubmit() {
+            clearResults();
+            const placeholdersData = {};
+            const inputs = formContainer.querySelectorAll('input');
+            let isFormValid = true;
+            inputs.forEach(input => {
+                if(!input.value) isFormValid = false;
+                placeholdersData[input.name] = input.value;
+            });
+
+            if(!isFormValid){
+                showError("Vui lòng điền đầy đủ tất cả các trường.");
+                return;
+            }
+
+            const payload = {
+                groupName: groupSelector.value,
+                placeholders: placeholdersData
+            };
+            
+            const result = await handleApiRequest({ action: 'processFormCreation', payload: JSON.stringify(payload) }, submitBtn);
+
+            if (result && result.status === 'success') {
+                let linksHtml = '';
+                result.links.forEach(link => {
+                    linksHtml += `<a href="${link}" target="_blank" class="block text-blue-600 hover:underline break-all">${link}</a>`;
+                });
+                resultLinks.innerHTML = linksHtml;
+                resultContainer.style.display = 'block';
+            } else if (result) {
+                showError(result.message);
+            }
+        }
+        
+        // Helper functions
+        function showError(message) {
+            errorContainer.textContent = 'Lỗi: ' + (message || 'Đã có lỗi xảy ra.');
+            errorContainer.style.display = 'block';
+        }
+        function clearResults() {
+            resultContainer.style.display = 'none';
+            resultLinks.innerHTML = '';
+            errorContainer.style.display = 'none';
+            errorContainer.innerHTML = '';
+        }
+        function clearAll() {
+            formContainer.innerHTML = '';
+            submitBtn.disabled = true;
+            clearResults();
+        }
+    </script>
+</body>
+</html>
