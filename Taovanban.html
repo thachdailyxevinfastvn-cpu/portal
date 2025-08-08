@@ -224,6 +224,7 @@
             }
         }
 
+        // ---------- BẮT ĐẦU PHẦN ĐÃ SỬA ----------
         function createForm(placeholders) {
             if (placeholders.length === 0) {
                 formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
@@ -236,12 +237,15 @@
                 formHtml += `
                     <div>
                         <label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>
-                        <input type="text" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="${p.name}" name="${p.name}" required 
+                               placeholder="${p.label}" 
+                               class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>`;
             });
             formContainer.innerHTML = formHtml;
             submitBtn.disabled = false;
         }
+        // ---------- KẾT THÚC PHẦN ĐÃ SỬA ----------
 
         async function handleSubmit() {
             clearResults();
