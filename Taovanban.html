@@ -145,13 +145,11 @@
             formContainer.addEventListener('input', handleFormInput);
         }
 
-        // ===== SỬA LỖI LẶP LẠI TÊN NHÓM TẠI ĐÂY =====
         async function fetchGroups() {
             startLoadingAnimation();
             const result = await handleApiRequest({ action: 'getGroups' });
             stopLoadingAnimation();
             if (result && result.status === 'success') {
-                // Xóa các lựa chọn cũ (trừ lựa chọn đầu tiên) để chống lặp lại
                 while (groupSelector.options.length > 1) {
                     groupSelector.remove(1);
                 }
@@ -176,7 +174,6 @@
             } else { submitBtn.disabled = true; }
         }
 
-        // ===== SỬA LỖI ẨN Ô TODAY TẠI ĐÂY =====
         function createForm(placeholders) {
             if (placeholders.length === 0) {
                 formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
@@ -188,21 +185,32 @@
             const dateSourcePlaceholder = placeholders.find(p => p.label.toLowerCase() === dateSourceLabel);
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
             dateSourcePlaceholderName = dateSourcePlaceholder ? dateSourcePlaceholder.name : '';
+            
+            // Lấy ngày hôm nay và định dạng dd/mm/yyyy
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const todayFormatted = `${day}/${month}/${year}`;
 
             let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
             placeholders.forEach(p => {
                 const pLabelLower = p.label.toLowerCase();
-                const pNameUpper = p.name.toUpperCase();
+                const pNameUpper = p.name.toUpperCase().replace(/<|>/g, ''); // Xóa dấu << >> để so sánh
 
-                // Sửa lỗi: Ẩn ô TODAY (bất kể có <<>> hay không) và các ô được định nghĩa trong hiddenLabels
-                if (pNameUpper === 'TODAY' || pNameUpper === '<<TODAY>>' || hiddenLabels.includes(pLabelLower)) {
+                // Sửa lỗi: Ẩn các ô được định nghĩa trong hiddenLabels
+                if (hiddenLabels.includes(pLabelLower)) {
                     return;
                 }
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
-                if (dropdownLabels.some(l => pLabelLower.includes(l))) {
+                // ===== SỬA LỖI HIỂN THỊ Ô TODAY TẠI ĐÂY =====
+                if (pNameUpper === 'TODAY') {
+                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                }
+                else if (dropdownLabels.some(l => pLabelLower.includes(l))) {
                     formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                     <option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option>
                                     <option>BỘ CÔNG AN</option>

@@ -35,9 +35,7 @@ function doGet(e) {
 
 // === CÁC HÀM LOGIC ===
 
-/**
- * Lấy danh sách nhóm văn bản và loại bỏ các tên bị trùng lặp.
- */
+// ===== SỬA LỖI LẶP LẠI TÊN NHÓM TẠI ĐÂY =====
 function getDocumentGroups() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
   if (!sheet) return { status: 'error', message: `Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'` };
@@ -53,9 +51,6 @@ function getDocumentGroups() {
   return { status: 'success', data: uniqueValues };
 }
 
-/**
- * Lấy danh sách placeholder, đọc từ cột A để đảm bảo đủ dữ liệu.
- */
 function getPlaceholdersForGroup(groupName) {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(groupName);
@@ -69,7 +64,7 @@ function getPlaceholdersForGroup(groupName) {
     const lastColumn = sheet.getLastColumn();
     if (lastColumn < 1) return { status: 'success', data: [] };
 
-    // Sửa lỗi: Đọc từ Cột 1 để lấy đầy đủ tất cả các placeholder
+    // Đọc từ Cột 1 để lấy đầy đủ tất cả các placeholder
     const names = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
     const labels = sheet.getRange(2, 1, 1, lastColumn).getValues()[0];
 
@@ -88,15 +83,13 @@ function getPlaceholdersForGroup(groupName) {
   }
 }
 
-/**
- * Hàm chính để xử lý việc tạo văn bản và ghi dữ liệu.
- */
 function processFormCreation(payload) {
   const { groupName, placeholders, userName } = payload;
   try {
     const today = new Date();
     const formattedDate = Utilities.formatDate(today, "GMT+7", "dd/MM/yyyy");
     placeholders['<<TODAY>>'] = formattedDate;
+    placeholders['TODAY'] = formattedDate; // Hỗ trợ cả 2 kiểu placeholder
 
     const templateSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
     if (!templateSheet) throw new Error(`Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'`);
@@ -114,7 +107,7 @@ function processFormCreation(payload) {
       const templateId = extractIdFromUrl(link);
       const templateFile = DriveApp.getFileById(templateId);
       const templateName = templateFile.getName();
-      const customerName = placeholders['<<TEN_KH>>'] || 'KhongCoTen';
+      const customerName = placeholders['<<TEN_KH>>'] || placeholders['TEN_KH'] || 'KhongCoTen';
       const fileCreationDate = Utilities.formatDate(today, "GMT+7", "dd-MM-yyyy"); 
       const newFileName = `${templateName} - ${customerName} - ${fileCreationDate}`;
       const newFile = templateFile.makeCopy(newFileName, targetFolder);
@@ -128,7 +121,6 @@ function processFormCreation(payload) {
       generatedFiles.push({ name: templateName, url: newFile.getUrl() });
     });
     
-    // Tính năng mới: Ghi dữ liệu vào sheet của nhóm văn bản
     writeDataToGroupSheet(groupName, placeholders);
     
     logResult(userName, 'Thành công', generatedFiles);
@@ -139,9 +131,6 @@ function processFormCreation(payload) {
   }
 }
 
-/**
- * HÀM MỚI: Ghi dữ liệu từ form vào sheet tương ứng với nhóm văn bản.
- */
 function writeDataToGroupSheet(groupName, data) {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(groupName);
@@ -149,7 +138,6 @@ function writeDataToGroupSheet(groupName, data) {
       console.log(`Không tìm thấy sheet '${groupName}' để ghi dữ liệu.`);
       return;
     }
-    // Lấy tiêu đề ở Hàng 1 để xác định đúng thứ tự cột
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const newRow = headers.map(header => data[header] || '');
     
