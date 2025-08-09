@@ -124,7 +124,6 @@
         const resultLinks = document.getElementById('result-links');
         const errorContainer = document.getElementById('error-container');
         const loadingText = document.getElementById('loading-text');
-        
         const loadingMessages = ["Đang chuẩn bị giấy mực...", "Xin chữ ký sếp...", "Pha cà phê trong lúc chờ...", "Máy bay giấy đang cất cánh...", "Sắp xong rồi, cố lên!"];
         let messageInterval;
         
@@ -150,6 +149,7 @@
             const result = await handleApiRequest({ action: 'getGroups' });
             stopLoadingAnimation();
             if (result && result.status === 'success') {
+                // Sửa lỗi: Xóa các lựa chọn cũ để chống lặp lại
                 while (groupSelector.options.length > 1) {
                     groupSelector.remove(1);
                 }
@@ -186,7 +186,6 @@
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
             dateSourcePlaceholderName = dateSourcePlaceholder ? dateSourcePlaceholder.name : '';
             
-            // Lấy ngày hôm nay và định dạng dd/mm/yyyy
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -196,17 +195,15 @@
             let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
             placeholders.forEach(p => {
                 const pLabelLower = p.label.toLowerCase();
-                const pNameUpper = p.name.toUpperCase().replace(/<|>/g, ''); // Xóa dấu << >> để so sánh
+                const pNameUpper = p.name.toUpperCase().replace(/<|>/g, '');
 
-                // Sửa lỗi: Ẩn các ô được định nghĩa trong hiddenLabels
-                if (hiddenLabels.includes(pLabelLower)) {
-                    return;
-                }
+                // Sửa lỗi: Ẩn các ô trong hiddenLabels
+                if (hiddenLabels.includes(pLabelLower)) return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
-                // ===== SỬA LỖI HIỂN THỊ Ô TODAY TẠI ĐÂY =====
+                // SỬA LỖI: Hiển thị ô TODAY dưới dạng chỉ đọc
                 if (pNameUpper === 'TODAY') {
                      formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
