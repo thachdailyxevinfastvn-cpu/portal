@@ -151,13 +151,15 @@
         const loadingMessages = ["Đang chuẩn bị giấy mực...", "Xin chữ ký sếp...", "Pha cà phê trong lúc chờ...", "Máy bay giấy đang cất cánh...", "Sắp xong rồi, cố lên!"];
         let messageInterval;
         
-        // --- CÁC ĐỊNH NGHĨA MỚI DỰA TRÊN TIÊU ĐỀ (HÀNG 2) ---
         const dropdownLabels = ['nơi cấp', 'người đại diện công ty'];
         const currencyLabels = ['giá niêm yết', 'giá xuất hóa đơn', 'số tiền trả trước', 'số tiền vay'];
         const dateTextLabel = 'ngày ký hợp đồng bằng chữ';
         const dateSourceLabel = 'ngày ký hợp đồng';
-        let dateTextPlaceholderName = ''; // Biến toàn cục để lưu placeholder name của ô ngày bằng chữ
-        let dateSourcePlaceholderName = ''; // Biến toàn cục để lưu placeholder name của ô ngày nhập
+        const otherDateLabels = ['ngày cấp'];
+        const hiddenLabels = ['giá niêm yết', 'stt'];
+
+        let dateTextPlaceholderName = ''; 
+        let dateSourcePlaceholderName = ''; 
         
         function initializePage() {
             fetchGroups();
@@ -199,7 +201,6 @@
                 return;
             }
             
-            // Tìm và lưu lại tên placeholder của các ô ngày tháng đặc biệt
             const dateTextPlaceholder = placeholders.find(p => p.label.toLowerCase() === dateTextLabel);
             const dateSourcePlaceholder = placeholders.find(p => p.label.toLowerCase() === dateSourceLabel);
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
@@ -209,7 +210,7 @@
             placeholders.forEach(p => {
                 const pLabelLower = p.label.toLowerCase();
 
-                if (p.name === '<<TODAY>>') return;
+                if (p.name === '<<TODAY>>' || hiddenLabels.includes(pLabelLower)) return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
@@ -223,7 +224,7 @@
                 else if (pLabelLower === dateTextLabel) {
                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
-                else if (pLabelLower === dateSourceLabel) {
+                else if (pLabelLower === dateSourceLabel || otherDateLabels.includes(pLabelLower)) {
                      formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
                 }
                 else {
@@ -239,7 +240,6 @@
             const target = event.target;
             const labelEl = target.previousElementSibling;
             if (!labelEl || labelEl.tagName !== 'LABEL') return;
-            
             const labelText = labelEl.textContent.toLowerCase();
 
             if (currencyLabels.some(l => labelText.includes(l))) {
