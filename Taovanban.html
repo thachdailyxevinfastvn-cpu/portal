@@ -108,47 +108,30 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
-            if (!userDataString) {
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!userDataString) { window.location.href = 'index.html'; return; }
             const userData = JSON.parse(userDataString);
             document.getElementById('user-fullname').textContent = userData.fullName;
             document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                sessionStorage.removeItem('loggedInUser');
-                window.location.href = 'index.html';
-            });
-            document.getElementById('mobile-menu-button').addEventListener('click', () => {
-                document.getElementById('mobile-menu').classList.toggle('hidden');
-            });
+            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+            document.getElementById('mobile-menu-button').addEventListener('click', () => { document.getElementById('mobile-menu').classList.toggle('hidden'); });
             initializePage();
         });
 
         async function handleApiRequest(payload, button) {
-            if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) {
-                showError('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.');
-                return null;
-            }
-            if (button) {
-                button.disabled = true;
-                button.classList.add('button-loading');
-            }
+            if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) { showError('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.'); return null; }
+            if (button) { button.disabled = true; button.classList.add('button-loading'); }
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
                 window[callbackName] = (data) => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
+                    delete window[callbackName]; document.body.removeChild(script);
                     if (button) { button.disabled = false; button.classList.remove('button-loading'); }
                     resolve(data);
                 };
                 const script = document.createElement('script');
                 script.onerror = () => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
+                    delete window[callbackName]; document.body.removeChild(script);
                     if (button) { button.disabled = false; button.classList.remove('button-loading'); }
-                    showError('Lỗi mạng hoặc URL API không hợp lệ.');
-                    reject(new Error('JSONP request failed'));
+                    showError('Lỗi mạng hoặc URL API không hợp lệ.'); reject(new Error('JSONP request failed'));
                 };
                 const params = new URLSearchParams({ ...payload, callback: callbackName });
                 script.src = `${TAO_VAN_BAN_APPS_SCRIPT_URL}?${params.toString()}`;
@@ -167,8 +150,15 @@
         
         const loadingMessages = ["Đang chuẩn bị giấy mực...", "Xin chữ ký sếp...", "Pha cà phê trong lúc chờ...", "Máy bay giấy đang cất cánh...", "Sắp xong rồi, cố lên!"];
         let messageInterval;
-        const currencyFields = ['<<GIA_XHD>>', '<<TRA_TRUOC>>', '<<GN>>'];
-
+        
+        // --- CÁC ĐỊNH NGHĨA MỚI DỰA TRÊN TIÊU ĐỀ (HÀNG 2) ---
+        const dropdownLabels = ['nơi cấp', 'người đại diện công ty'];
+        const currencyLabels = ['giá niêm yết', 'giá xuất hóa đơn', 'số tiền trả trước', 'số tiền vay'];
+        const dateTextLabel = 'ngày ký hợp đồng bằng chữ';
+        const dateSourceLabel = 'ngày ký hợp đồng';
+        let dateTextPlaceholderName = ''; // Biến toàn cục để lưu placeholder name của ô ngày bằng chữ
+        let dateSourcePlaceholderName = ''; // Biến toàn cục để lưu placeholder name của ô ngày nhập
+        
         function initializePage() {
             fetchGroups();
             groupSelector.addEventListener('change', handleGroupSelection);
@@ -183,13 +173,10 @@
             if (result && result.status === 'success') {
                 result.data.forEach(group => {
                     const option = document.createElement('option');
-                    option.value = group;
-                    option.textContent = group;
+                    option.value = group; option.textContent = group;
                     groupSelector.appendChild(option);
                 });
-            } else if (result) {
-                showError(result.message);
-            }
+            } else if (result) { showError(result.message); }
         }
 
         async function handleGroupSelection() {
@@ -212,23 +199,31 @@
                 return;
             }
             
+            // Tìm và lưu lại tên placeholder của các ô ngày tháng đặc biệt
+            const dateTextPlaceholder = placeholders.find(p => p.label.toLowerCase() === dateTextLabel);
+            const dateSourcePlaceholder = placeholders.find(p => p.label.toLowerCase() === dateSourceLabel);
+            dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
+            dateSourcePlaceholderName = dateSourcePlaceholder ? dateSourcePlaceholder.name : '';
+
             let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
             placeholders.forEach(p => {
+                const pLabelLower = p.label.toLowerCase();
+
                 if (p.name === '<<TODAY>>') return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
-                if (p.name === '<<NOI_CAP>>' || p.name === '<<NGUOI_DAI_DIEN>>') {
+                if (dropdownLabels.some(l => pLabelLower.includes(l))) {
                     formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                     <option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option>
                                     <option>BỘ CÔNG AN</option>
                                  </select>`;
                 } 
-                else if (p.name === '<<NGAY_KY_HD_TEXT>>') {
-                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền theo ngày ký hợp đồng" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                else if (pLabelLower === dateTextLabel) {
+                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
-                else if (p.name.toUpperCase().includes('NGAY')) {
+                else if (pLabelLower === dateSourceLabel) {
                      formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
                 }
                 else {
@@ -242,15 +237,18 @@
         
         function handleFormInput(event) {
             const target = event.target;
-            const fieldName = target.name;
+            const labelEl = target.previousElementSibling;
+            if (!labelEl || labelEl.tagName !== 'LABEL') return;
+            
+            const labelText = labelEl.textContent.toLowerCase();
 
-            if (currencyFields.includes(fieldName)) {
+            if (currencyLabels.some(l => labelText.includes(l))) {
                 let value = target.value.replace(/[^0-9]/g, '');
                 target.value = value ? Number(value).toLocaleString('vi-VN') : '';
             }
 
-            if (fieldName === '<<NGAY_KY_HD>>') {
-                const dateTextEl = document.getElementById('<<NGAY_KY_HD_TEXT>>');
+            if (target.name === dateSourcePlaceholderName) {
+                const dateTextEl = document.querySelector(`[name="${dateTextPlaceholderName}"]`);
                 if(dateTextEl) {
                    dateTextEl.value = convertDateToText(target.value);
                 }
@@ -263,10 +261,7 @@
             const inputs = formContainer.querySelectorAll('input, select');
             let isFormValid = true;
             inputs.forEach(input => {
-                if(input.required && !input.value) {
-                    isFormValid = false;
-                }
-                // SỬA LỖI: Giữ lại dấu chấm khi gửi đi
+                if(input.required && !input.value) isFormValid = false;
                 placeholdersData[input.name] = input.value;
             });
 
@@ -301,12 +296,18 @@
         
         function showError(message) { errorContainer.textContent = 'Lỗi: ' + (message || 'Đã có lỗi xảy ra.'); errorContainer.style.display = 'block'; }
         function clearResults() { resultContainer.style.display = 'none'; resultLinks.innerHTML = ''; errorContainer.style.display = 'none'; errorContainer.innerHTML = ''; }
-        function clearAll() { formContainer.innerHTML = ''; submitBtn.disabled = true; clearResults(); }
+        function clearAll() {
+            formContainer.innerHTML = '';
+            submitBtn.disabled = true;
+            dateTextPlaceholderName = '';
+            dateSourcePlaceholderName = '';
+            clearResults();
+        }
         
         function convertDateToText(dateString) {
             if (!dateString) return '';
             const [year, month, day] = dateString.split('-');
-            if (!day || !month || !year) return '';
+            if (!day || !month || !year || year.length < 4) return '';
             return `ngày ${day} tháng ${month} năm ${year}`;
         }
 
