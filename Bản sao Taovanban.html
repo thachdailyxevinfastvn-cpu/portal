@@ -129,7 +129,7 @@
         let messageInterval;
         
         const dropdownLabels = ['nơi cấp', 'người đại diện công ty'];
-        const currencyLabels = ['giá xuất hóa đơn', 'số tiền trả trước', 'số tiền vay'];
+        const currencyLabels = ['giá niêm yết', 'giá xuất hóa đơn', 'số tiền trả trước', 'số tiền vay'];
         const dateTextLabel = 'ngày ký hợp đồng bằng chữ';
         const dateSourceLabel = 'ngày ký hợp đồng';
         const otherDateLabels = ['ngày cấp'];
@@ -187,10 +187,7 @@
             placeholders.forEach(p => {
                 const pLabelLower = p.label.toLowerCase();
 
-                // Ẩn ô TODAY và các ô được định nghĩa trong hiddenLabels
-                if (p.name.toUpperCase() === '<<TODAY>>' || hiddenLabels.includes(pLabelLower)) {
-                    return;
-                }
+                if (p.name === '<<TODAY>>' || hiddenLabels.includes(pLabelLower)) return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
