@@ -1,184 +1,124 @@
-// === CẤU HÌNH ===
-const TARGET_FOLDER_ID = '1YP4xBxsMx2YEZrzFojCQJsFPvZ6X8_aB'; 
-const TEMPLATE_SHEET_NAME = 'Template';
-const LOG_SHEET_NAME = 'Log';
+/**
+ * @OnlyCurrentDoc
+ */
 
-// === HÀM CHÍNH (JSONP ENTRYPOINT) ===
-function doGet(e) {
-  const action = e.parameter.action;
-  const callback = e.parameter.callback;
-  let response;
-
-  try {
-    switch(action) {
-      case 'getGroups':
-        response = getDocumentGroups();
-        break;
-      case 'getPlaceholders':
-        response = getPlaceholdersForGroup(e.parameter.group);
-        break;
-      case 'processFormCreation':
-        response = processFormCreation(JSON.parse(e.parameter.payload));
-        break;
-      // HÀM MỚI ĐỂ LẤY LỊCH SỬ
-      case 'getUserHistory':
-        response = getUserHistory(e.parameter.userName);
-        break;
-      default:
-        throw new Error('Hành động không hợp lệ');
-    }
-  } catch (err) {
-    response = { status: 'error', message: err.message };
-  }
-
-  return ContentService.createTextOutput(`${callback}(${JSON.stringify(response)})`)
-    .setMimeType(ContentService.MimeType.JAVASCRIPT);
+/**
+ * Tạo menu tùy chỉnh khi người dùng mở bảng tính.
+ */
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Tùy Chỉnh Automation')
+    .addItem('1. Tạo sheet con từ Template (v4)', 'createSheetsFromTemplate')
+    .addToUi();
 }
 
-// === CÁC HÀM LOGIC ===
-
-function getDocumentGroups() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
-  if (!sheet) return { status: 'error', message: `Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'` };
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return { status: 'success', data: [] };
-  const range = sheet.getRange(2, 2, lastRow - 1, 1);
-  const values = range.getValues().flat().filter(String);
-  const uniqueValues = [...new Set(values)];
-  return { status: 'success', data: uniqueValues };
-}
-
-function getPlaceholdersForGroup(groupName) {
+/**
+ * Tạo các sheet con từ sheet "Template".
+ * Phiên bản này đã sửa lỗi regex để nhận dạng được placeholder chứa dấu "/".
+ */
+function createSheetsFromTemplate() {
+  const ui = SpreadsheetApp.getUi();
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(groupName);
-    if (!sheet) return { status: 'error', message: `Không tìm thấy trang tính cho nhóm: '${groupName}'` };
-    if (sheet.getLastRow() < 2) return { status: 'success', data: [] };
-    const lastColumn = sheet.getLastColumn();
-    if (lastColumn < 1) return { status: 'success', data: [] }; 
-    const names = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
-    const labels = sheet.getRange(2, 1, 1, lastColumn).getValues()[0];
-    const placeholders = [];
-    for (let i = 0; i < names.length; i++) {
-      if (names[i] && labels[i]) {
-        placeholders.push({ name: names[i].toString().trim(), label: labels[i].toString().trim() });
-      }
-    }
-    return { status: 'success', data: placeholders };
-  } catch (e) {
-    return { status: 'error', message: `Không thể lấy placeholder cho nhóm '${groupName}': ${e.message}` };
-  }
-}
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const templateSheet = ss.getSheetByName('Template');
 
-function processFormCreation(payload) {
-  const { groupName, placeholders, userName } = payload;
-  try {
-    const today = new Date();
-    placeholders['<<TODAY>>'] = Utilities.formatDate(today, "GMT+7", "dd/MM/yyyy");
-    for (const key in placeholders) {
-      if (key.toUpperCase().includes('NGAY') && /^\d{4}-\d{2}-\d{2}$/.test(placeholders[key])) {
-        const [year, month, day] = placeholders[key].split('-');
-        placeholders[key] = `${day}/${month}/${year}`;
-      }
+    if (!templateSheet) {
+      throw new Error('Sheet "Template" không tồn tại. Vui lòng tạo sheet này.');
     }
-    const ngayKyHdValue = placeholders['<<NGAY_KY_HD>>'];
-    if (ngayKyHdValue) {
-      placeholders['<<NGAY_KY_HD_TEXT>>'] = convertDateToTextGS(ngayKyHdValue);
-    }
-    const templateSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
-    if (!templateSheet) throw new Error(`Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'`);
-    const targetFolder = DriveApp.getFolderById(TARGET_FOLDER_ID);
+
     const data = templateSheet.getDataRange().getValues();
-    const groupRow = data.find(row => row[1] === groupName);
-    if (!groupRow) throw new Error(`Không tìm thấy nhóm '${groupName}' trong trang Template.`);
-    const templateLinks = groupRow.slice(2).filter(String);
-    if (templateLinks.length === 0) throw new Error(`Nhóm '${groupName}' không có link template nào.`);
-    const generatedFiles = []; 
-    templateLinks.forEach(link => {
-      const templateId = extractIdFromUrl(link);
-      const templateFile = DriveApp.getFileById(templateId);
-      const templateName = templateFile.getName();
-      const customerName = placeholders['<<TEN_KH>>'] || 'KhongCoTen';
-      const fileCreationDate = Utilities.formatDate(today, "GMT+7", "dd-MM-yyyy"); 
-      const newFileName = `${templateName} - ${customerName} - ${fileCreationDate}`;
-      const newFile = templateFile.makeCopy(newFileName, targetFolder);
-      const doc = DocumentApp.openById(newFile.getId());
-      const body = doc.getBody();
-      const allKeys = Object.keys(placeholders);
-      allKeys.sort((a, b) => b.length - a.length);
-      for (const key of allKeys) {
-        body.replaceText(key, placeholders[key] || '');
+
+    // Duyệt qua từng dòng trong sheet "Template", bắt đầu từ dòng 2
+    for (let i = 1; i < data.length; i++) {
+      const rowData = data[i];
+      const newSheetName = (rowData[1] || '').toString().trim(); // Cột B
+
+      if (!newSheetName) {
+        continue; // Bỏ qua dòng trống
       }
-      doc.saveAndClose();
-      newFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
-      generatedFiles.push({ name: templateName, url: newFile.getUrl() });
-    });
-    writeDataToGroupSheet(groupName, placeholders);
-    logResult(userName, 'Thành công', groupName, generatedFiles);
-    return { status: 'success', files: generatedFiles }; 
-  } catch (e) {
-    logResult(userName, `Thất bại: ${e.message}`, groupName, []);
-    return { status: 'error', message: e.message };
-  }
-}
+      
+      const allPlaceholders = new Set();
 
-function writeDataToGroupSheet(groupName, data) {
-  try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(groupName);
-    if (!sheet) return;
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    const newRow = headers.map(header => data[header] || '');
-    sheet.appendRow(newRow);
-  } catch(e) { console.error(`Lỗi khi ghi dữ liệu vào sheet '${groupName}': ${e.message}`); }
-}
+      // Quét các cột từ C (index 2) trở đi trong dòng hiện tại
+      for (let c = 2; c < rowData.length; c++) {
+        const cellValue = (rowData[c] || '').toString().trim();
+        
+        if (cellValue.includes('docs.google.com/document')) {
+          const docId = extractFileId(cellValue);
+          if (docId) {
+            try {
+              const doc = DocumentApp.openById(docId);
+              const placeholdersInDoc = extractPlaceholders(doc);
+              
+              if (placeholdersInDoc.length > 0) {
+                 placeholdersInDoc.forEach(ph => allPlaceholders.add(ph));
+              }
+            } catch (e) {
+              Logger.log(`LỖI: Không thể mở hoặc xử lý file Doc ID: ${docId}. ${e.message}`);
+            }
+          }
+        }
+      }
 
-function logResult(userName, status, groupName, filesArray) {
-  try {
-    const logSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LOG_SHEET_NAME);
-    if (logSheet) {
-      const timestamp = new Date();
-      const links = filesArray.map(file => file.url);
-      const rowData = [timestamp, userName, status, groupName, ...links];
-      logSheet.appendRow(rowData);
+      // Sau khi đã quét hết các link trong dòng, tiến hành tạo sheet
+      const existingSheet = ss.getSheetByName(newSheetName);
+      if (existingSheet) {
+        ss.deleteSheet(existingSheet);
+      }
+      const newSheet = ss.insertSheet(newSheetName);
+
+      const finalHeaders = ['stt', ...Array.from(allPlaceholders)];
+      const subtitles = finalHeaders.map(h => (h === 'stt' ? 'Số thứ tự' : `Nhập ${h}`));
+
+      if (finalHeaders.length > 1) {
+        newSheet.getRange(1, 1, 1, finalHeaders.length).setValues([finalHeaders]);
+        newSheet.getRange(2, 1, 1, subtitles.length).setValues([subtitles]);
+      } else {
+        const defaultHeaders = ['stt', 'TEN_KH', 'NGAYKY_HDMB', 'SO_TIEN'];
+        newSheet.getRange(1, 1, 1, defaultHeaders.length).setValues([defaultHeaders]);
+      }
+
+      newSheet.setFrozenRows(2);
+      newSheet.getRange("A:A").setNumberFormat('@');
     }
-  } catch (e) { console.error(`Không thể ghi log: ${e.message}`); }
-}
 
-function getUserHistory(userName) {
-  try {
-    const logSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LOG_SHEET_NAME);
-    if (!logSheet) return { status: 'success', data: [] };
-    const allData = logSheet.getDataRange().getValues();
-    if (allData.length < 2) return { status: 'success', data: [] };
-    const headers = allData.shift(); 
-    const tvbhIndex = headers.findIndex(h => h === 'TVBH');
-    const groupNameIndex = headers.findIndex(h => h === 'Nhóm văn bản');
-    const fileStartIndex = headers.findIndex(h => h === 'File 1');
-    if (tvbhIndex === -1) return { status: 'success', data: [] };
-    const userHistory = allData
-      .filter(row => row[tvbhIndex] === userName) 
-      .map(row => {
-        const timestamp = new Date(row[0]).toLocaleString('vi-VN');
-        const groupName = row[groupNameIndex] || 'Không rõ';
-        const links = fileStartIndex > -1 ? row.slice(fileStartIndex).filter(String) : [];
-        return { timestamp, groupName, links };
-      })
-      .reverse(); 
-    return { status: 'success', data: userHistory };
-  } catch (e) {
-    return { status: 'error', message: `Lỗi khi lấy lịch sử: ${e.message}` };
+    ui.alert('✅ Hoàn tất! Đã cập nhật các sheet với logic mới nhất.');
+  } catch (err) {
+    Logger.log(`LỖI NGHIÊM TRỌNG: ${err.message}`);
+    ui.alert(`❌ Đã xảy ra lỗi nghiêm trọng: ${err.message}`);
   }
 }
 
-function extractIdFromUrl(url) {
-  const match = url.match(/[-\w]{25,}/);
-  if (match) return match[0];
-  throw new Error(`URL không hợp lệ: ${url}`);
+/**
+ * Trích xuất ID file từ URL Google Docs.
+ * @param {string} url
+ * @return {string|null}
+ */
+function extractFileId(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9\-_]+)/);
+  return match ? match[1] : null;
 }
 
-function convertDateToTextGS(dateString_ddMMyyyy) {
-  if (!dateString_ddMMyyyy) return '';
-  const parts = dateString_ddMMyyyy.split('/');
-  if (parts.length !== 3) return dateString_ddMMyyyy;
-  const [day, month, year] = parts;
-  return `ngày ${day} tháng ${month} năm ${year}`;
+/**
+ * Trích xuất tất cả các placeholder <<...>> từ một file Google Doc.
+ * @param {GoogleAppsScript.Document.Document} doc
+ * @return {string[]} Mảng các placeholder.
+ */
+function extractPlaceholders(doc) {
+  const headerText = doc.getHeader() ? doc.getHeader().getText() : '';
+  const footerText = doc.getFooter() ? doc.getFooter().getText() : '';
+  const bodyText = doc.getBody().getText();
+  const fullText = `${headerText} ${bodyText} ${footerText}`;
+
+  const placeholders = new Set();
+  
+  // *** ĐÂY LÀ DÒNG ĐÃ ĐƯỢC SỬA ***
+  // Đã thêm ký tự "/" vào trong bộ ký tự cho phép [A-Za-z0-9_/]
+  const regex = /<<\s*([A-Za-z0-9_/]+)\s*>>/g;
+  
+  let match;
+  while ((match = regex.exec(fullText)) !== null) {
+    placeholders.add(match[1]);
+  }
+  return Array.from(placeholders);
 }

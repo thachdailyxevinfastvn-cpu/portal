@@ -297,56 +297,65 @@
         }
 
         // Cập nhật: Sử dụng fetch POST thay vì JSONP để ghi dữ liệu
-        async function handleSubmit() {
-            clearResults();
-            const placeholdersData = {};
-            const inputs = formContainer.querySelectorAll('input, select');
-            let isFormValid = true;
-            inputs.forEach(input => {
-                if(input.required && !input.value) isFormValid = false;
-                placeholdersData[input.name] = input.value;
-            });
+     // ===== THAY THẾ TOÀN BỘ HÀM CŨ BẰNG HÀM MỚI NÀY =====
+async function handleSubmit() {
+    clearResults();
+    const placeholdersData = {};
+    const inputs = formContainer.querySelectorAll('input, select');
+    let isFormValid = true;
+    inputs.forEach(input => {
+        if(input.required && !input.value) isFormValid = false;
+        placeholdersData[input.name] = input.value;
+    });
 
-            if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
+    if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
 
-            const userDataString = sessionStorage.getItem('loggedInUser');
-            const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
+    const userDataString = sessionStorage.getItem('loggedInUser');
+    const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
 
-            const payload = {
-                groupName: groupSelector.value,
-                placeholders: placeholdersData,
-                userName: userData.fullName 
-            };
+    const payload = {
+        groupName: groupSelector.value,
+        placeholders: placeholdersData,
+        userName: userData.fullName 
+    };
+    
+    startLoadingAnimation();
+    submitBtn.disabled = true;
+    submitBtn.classList.add('button-loading');
+
+    try {
+        // SỬA LỖI: Sử dụng fetch POST với mode 'no-cors' để gửi dữ liệu an toàn đến Apps Script
+        await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Rất quan trọng để tránh lỗi CORS
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        // Với mode 'no-cors', chúng ta không nhận được phản hồi trực tiếp.
+        // Thay vào đó, chúng ta sẽ chờ một chút và giả định yêu cầu thành công,
+        // sau đó tải lại lịch sử để xác nhận.
+        setTimeout(() => {
+            stopLoadingAnimation();
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('button-loading');
             
-            startLoadingAnimation();
-            submitBtn.disabled = true;
-            submitBtn.classList.add('button-loading');
+            // Tải lại lịch sử để xem kết quả văn bản vừa tạo
+            fetchHistory(); 
+            
+            // Hiển thị thông báo thành công chung
+            resultContainer.style.display = 'block';
+            resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi thành công! Kết quả sẽ xuất hiện trong lịch sử bên dưới.</p>';
+        }, 4000); // Chờ 4 giây để server có thời gian xử lý file
 
-            try {
-                // Sửa lỗi: Sử dụng biến chung TAO_VAN_BAN_APPS_SCRIPT_URL
-                const res = await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
-                });
+    } catch (err) {
+         stopLoadingAnimation();
+         submitBtn.disabled = false;
+         submitBtn.classList.remove('button-loading');
+         showError(`Gửi yêu cầu thất bại: ${err.message}`);
+    }
+}
 
-                if (!res.ok) throw new Error(`Lỗi server: ${res.status}`);
-                const result = await res.json();
-                if (result.status === 'success') {
-                    showSuccess(result.files);
-                    fetchHistory();
-                } else {
-                    throw new Error(result.message);
-                }
-            } catch (err) {
-                 showError(`Gửi yêu cầu thất bại: ${err.message}`);
-            } finally {
-                stopLoadingAnimation();
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('button-loading');
-            }
-        }
-        
         function showSuccess(files) {
             let linksHtml = '';
             files.forEach(file => {
