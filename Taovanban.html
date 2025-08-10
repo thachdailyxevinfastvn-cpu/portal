@@ -39,7 +39,7 @@
                      <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                 </div>
                 <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 S.A. 001-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 </button>
                 <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -101,7 +101,6 @@
             initializePage();
         });
 
-        // Hàm này (JSONP) chỉ dùng để LẤY dữ liệu (GET)
         async function handleApiRequest_GET(payload) {
             if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) { showError('Lỗi cấu hình: Vui lòng kiểm tra TAO_VAN_BAN_APPS_SCRIPT_URL trong config.js.'); return null; }
             return new Promise((resolve, reject) => {
@@ -144,6 +143,7 @@
 
         let dateTextPlaceholderName = '', dateSourcePlaceholderName = '';
         let pricePlaceholderName = '', loanPlaceholderName = '', downPaymentPlaceholderName = '';
+        let customerNameKey = '';
         
         function initializePage() {
             fetchGroups();
@@ -175,7 +175,6 @@
                 const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: selectedGroup });
                 stopLoadingAnimation();
                 if (result && result.status === 'success') {
-                    // CẬP NHẬT: Nhận về cấu trúc dữ liệu mới từ backend
                     customerNameKey = result.data.customerNameKey; 
                     createForm(result.data.placeholders);
                 } else if (result) { showError(result.message); }
@@ -330,8 +329,7 @@
             submitBtn.classList.add('button-loading');
 
             try {
-                // Sửa lỗi: Sử dụng fetch POST và URL đúng từ config
-                const res = await fetch(TAO_VAN_BAN_POST_URL, {
+                const res = await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(payload),
@@ -399,4 +397,3 @@
     </script>
 </body>
 </html>
-}
