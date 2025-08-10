@@ -8,38 +8,48 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.css" type="text/css" rel="stylesheet" />
-    <script src="config.js"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
-        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        
-        /* CSS cho hiệu ứng loader */
-        @keyframes bounce-loader { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
-        .bounce-dot { width: 1rem; height: 1rem; background-color: #3b82f6; border-radius: 9999px; display: inline-block; animation: bounce-loader 1.4s infinite ease-in-out both; }
-        .bounce-dot:nth-child(1) { animation-delay: -0.32s; }
-        .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 
-        /* === THAY ĐỔI 1: CSS CHO NÚT LỌC VÀ NÚT ĐÓNG ẢNH === */
-        .filter-btn-active {
-            background-color: #1d4ed8; /* blue-800 */
-            color: white;
+    <script src="config.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f5f5f5;
+        }
+        .nav-link-active {
+            background-color: #eef2ff;
+            color: #1d4ed8;
             font-weight: 600;
         }
-        /* Tùy chỉnh cho nút đóng (X) của trình xem ảnh to và rõ hơn */
-        .featherlight .featherlight-close-icon {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            font-size: 2rem; /* Làm cho dấu '×' to hơn */
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border-radius: 50%;
-            top: 15px;
-            right: 15px;
+        /* Style cho loader */
+        @keyframes bounce-loader {
+          0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); }
         }
-        .featherlight .featherlight-close-icon:hover {
-            background: rgba(239, 68, 68, 0.8); /* Màu đỏ khi di chuột qua */
+        .bounce-dot {
+          width: 1rem; height: 1rem; background-color: #3b82f6;
+          border-radius: 9999px; display: inline-block;
+          animation: bounce-loader 1.4s infinite ease-in-out both;
+        }
+        .bounce-dot:nth-child(1) { animation-delay: -0.32s; }
+        .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        /* THÊM MỚI: CSS cho các nút lọc */
+        .filter-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .filter-active {
+            background-color: #3b82f6 !important; /* blue-500 */
+            color: white !important;
+            opacity: 1 !important;
+            font-weight: 600;
+        }
+        .filter-btn:not(.filter-active) {
+            opacity: 0.7;
+        }
+        .hidden-row {
+            display: none;
         }
     </style>
 </head>
@@ -62,8 +72,12 @@
                      <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                      <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                 </div>
-                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
-                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </button>
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
@@ -82,23 +96,26 @@
             <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">Thông Tin Ngân Hàng</h1>
             <p class="text-gray-600 mb-6">Tổng hợp chính sách và điều kiện từ các đối tác ngân hàng.</p>
             
-            <div id="filter-container" class="mb-4 flex flex-wrap gap-2">
-                <button data-filter="all" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border filter-btn-active">Tất cả</button>
-                <button data-filter="cong-ty" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border">Hỗ trợ Công ty</button>
-                <button data-filter="bien-vang" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border">Biển vàng</button>
+            <div id="filter-container" class="mb-6 flex flex-wrap gap-3 items-center">
+                <span class="font-semibold text-gray-700">Lọc nhanh:</span>
+                <button data-filter="all" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full filter-active">Tất cả</button>
+                <button data-filter-column="2" data-filter-value="có" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full">Hỗ trợ Công ty</button>
+                <button data-filter-column="3" data-filter-value="có" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full">Biển vàng</button>
             </div>
-            
+
             <div id="data-container" class="bg-white shadow-lg rounded-lg overflow-x-auto">
                 <div id="loader" class="text-center p-8">
-                    <div class="flex justify-center items-center space-x-2"><div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div></div>
+                    <div class="flex justify-center items-center space-x-2">
+                        <div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div>
+                    </div>
                     <p class="mt-4 text-gray-600 font-semibold">Đang tải dữ liệu ngân hàng...</p>
                 </div>
             </div>
         </section>
     </main>
 
-    <script src="//code.jquery.com/jquery-latest.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
     
     <script>
         const userFullNameDisplay = document.getElementById('user-fullname');
@@ -111,9 +128,10 @@
         const filterContainer = document.getElementById('filter-container');
 
         async function handleApiRequest(payload, scriptUrl) {
+            // ... (Hàm này giữ nguyên, không thay đổi)
             if (typeof scriptUrl === 'undefined' || !scriptUrl) {
                 console.error('Lỗi: URL của Apps Script không được cung cấp.');
-                dataContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình: Vui lòng kiểm tra file config.js.</p>`;
+                dataContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình.</p>`;
                 return null;
             }
             return new Promise((resolve, reject) => {
@@ -127,75 +145,44 @@
             });
         }
         
-        /**
-         * Hàm thiết lập sự kiện cho các nút lọc.
-         */
-        function setupFilters() {
-            const buttons = filterContainer.querySelectorAll('.filter-btn');
-            const tableRows = dataContainer.querySelectorAll('tbody tr');
-
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    // Bỏ class active khỏi tất cả các nút, sau đó thêm vào nút được nhấn
-                    buttons.forEach(btn => btn.classList.remove('filter-btn-active'));
-                    button.classList.add('filter-btn-active');
-                    
-                    const filter = button.dataset.filter;
-
-                    tableRows.forEach(row => {
-                        // Lấy text từ các cột tương ứng
-                        const congTyCell = row.cells[2].textContent.trim().toLowerCase();
-                        const bienVangCell = row.cells[3].textContent.trim().toLowerCase();
-
-                        let showRow = false;
-                        if (filter === 'all') {
-                            showRow = true;
-                        } else if (filter === 'cong-ty' && congTyCell === 'có') {
-                            showRow = true;
-                        } else if (filter === 'bien-vang' && bienVangCell === 'có') {
-                            showRow = true;
-                        }
-
-                        row.style.display = showRow ? '' : 'none';
-                    });
-                });
-            });
-        }
-
         function displayBankTable(bankData) {
             if (!bankData || bankData.length === 0) {
-                dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu ngân hàng nào.</p>`;
+                dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu.</p>`;
                 return;
             }
             const table = document.createElement('table');
             table.className = 'min-w-full divide-y divide-gray-200';
-            
-            // === THAY ĐỔI 3: THÊM DÒNG HƯỚNG DẪN ===
             table.innerHTML = `
                 <thead class="bg-gray-100">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                            Tên Ngân Hàng
-                            <span class="block text-xs font-normal text-gray-500 normal-case">Bấm vào tên để xem chính sách</span>
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ghi Chú</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tên Ngân Hàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ghi Chú</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200"></tbody>
             `;
-            
             const tbody = table.querySelector('tbody');
             bankData.forEach(bank => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
+                tr.className = 'transition-all duration-300';
+                
+                // THAY ĐỔI: Chuyển sang data-fancybox và thêm subtitle
                 const imagePath = `images/${bank.link}`;
-                const nameCell = `<a href="${imagePath}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">${bank.tenNganHang || 'N/A'}</a>`;
+                const nameCell = `
+                    <div>
+                        <a href="${imagePath}" data-fancybox="gallery" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
+                            ${bank.tenNganHang || 'N/A'}
+                        </a>
+                        <p class="text-xs text-gray-500 mt-1 italic">Bấm vào tên để xem chính sách</p>
+                    </div>
+                `;
+                
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${nameCell}</td>
+                    <td class="px-6 py-4">${nameCell}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCaNhan || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCongTy || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.bienVang || ''}</td>
@@ -207,11 +194,15 @@
             
             dataContainer.innerHTML = '';
             dataContainer.appendChild(table);
-            
-            // Sau khi bảng được tạo, thiết lập các bộ lọc
-            setupFilters();
+
+            // THÊM MỚI: Khởi tạo Fancybox
+            // Fancybox sẽ tự thêm hiệu ứng loading, nút đóng to và các nút zoom
+            Fancybox.bind("[data-fancybox]", {
+                // Các tùy chọn tùy chỉnh nếu cần
+            });
         }
 
+        // --- Các hàm xử lý chung ---
         window.addEventListener('load', async () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) { window.location.href = 'index.html'; return; }
@@ -223,16 +214,46 @@
                 if (result && result.success) {
                     displayBankTable(result.data);
                 } else {
-                    loader.innerHTML = `<p class="text-red-500 text-center p-8">Lỗi khi tải dữ liệu: ${result ? result.error : 'Không nhận được phản hồi.'}</p>`;
+                    loader.innerHTML = `<p class="text-red-500 text-center p-8">Lỗi: ${result ? result.error : 'Không phản hồi.'}</p>`;
                 }
             } catch (error) {
-                console.error('Lỗi nghiêm trọng khi fetch dữ liệu:', error);
+                console.error('Lỗi fetch dữ liệu:', error);
                 loader.innerHTML = `<p class="text-red-500 text-center p-8">Không thể kết nối đến máy chủ.</p>`;
             }
         });
-        
         logoutBtn.addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
         mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+
+        // THÊM MỚI: Logic xử lý các nút lọc
+        filterContainer.addEventListener('click', (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+
+            // Cập nhật giao diện nút
+            filterContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('filter-active'));
+            button.classList.add('filter-active');
+
+            const filter = button.dataset.filter;
+            const tableRows = document.querySelectorAll('#data-container tbody tr');
+
+            if (filter === 'all') {
+                tableRows.forEach(row => row.classList.remove('hidden-row'));
+                return;
+            }
+
+            const filterColumn = parseInt(button.dataset.filterColumn, 10);
+            const filterValue = button.dataset.filterValue.toLowerCase();
+
+            tableRows.forEach(row => {
+                const cell = row.cells[filterColumn];
+                const cellValue = cell ? cell.textContent.trim().toLowerCase() : '';
+                if (cellValue.includes(filterValue)) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+        });
 
     </script>
 </body>
