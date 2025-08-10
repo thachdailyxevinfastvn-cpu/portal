@@ -166,18 +166,23 @@
             } else if (result) { showError(result.message); }
         }
 
-        async function handleGroupSelection() {
-            const selectedGroup = groupSelector.value;
-            clearAll();
-            if (selectedGroup) {
-                startLoadingAnimation();
-                const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: selectedGroup });
-                stopLoadingAnimation();
-                if (result && result.status === 'success') {
-                    createForm(result.data);
-                } else if (result) { showError(result.message); }
-            } else { submitBtn.disabled = true; }
-        }
+       // Biến toàn cục để lưu key của tên khách hàng
+let customerNameKey = '';
+
+async function handleGroupSelection() {
+    const selectedGroup = groupSelector.value;
+    clearAll();
+    if (selectedGroup) {
+        startLoadingAnimation();
+        const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: selectedGroup });
+        stopLoadingAnimation();
+        if (result && result.status === 'success') {
+            // Lưu lại key tên khách hàng để dùng khi submit
+            customerNameKey = result.data.customerNameKey; 
+            createForm(result.data.placeholders);
+        } else if (result) { showError(result.message); }
+    } else { submitBtn.disabled = true; }
+}
         
         async function fetchHistory() {
             const historyContainer = document.getElementById('history-container');
@@ -313,53 +318,54 @@
         }
 
         async function handleSubmit() {
-            clearResults();
-            const placeholdersData = {};
-            const inputs = formContainer.querySelectorAll('input, select');
-            let isFormValid = true;
-            inputs.forEach(input => {
-                if(input.required && !input.value) isFormValid = false;
-                placeholdersData[input.name] = input.value;
-            });
+    clearResults();
+    const placeholdersData = {};
+    const inputs = formContainer.querySelectorAll('input, select');
+    let isFormValid = true;
+    inputs.forEach(input => {
+        if(input.required && !input.value) isFormValid = false;
+        placeholdersData[input.name] = input.value;
+    });
 
-            if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
+    if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
 
-            const userDataString = sessionStorage.getItem('loggedInUser');
-            const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
+    const userDataString = sessionStorage.getItem('loggedInUser');
+    const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
 
-            const payload = {
-                groupName: groupSelector.value,
-                placeholders: placeholdersData,
-                userName: userData.fullName 
-            };
-            
-            startLoadingAnimation();
-            submitBtn.disabled = true;
-            submitBtn.classList.add('button-loading');
+    const payload = {
+        groupName: groupSelector.value,
+        placeholders: placeholdersData,
+        userName: userData.fullName,
+        customerNameKey: customerNameKey // Gửi key tên khách hàng lên backend
+    };
+    
+    startLoadingAnimation();
+    submitBtn.disabled = true;
+    submitBtn.classList.add('button-loading');
 
-            try {
-                const res = await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload),
-                });
-                
-                setTimeout(() => {
-                    stopLoadingAnimation();
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('button-loading');
-                    fetchHistory(); 
-                    resultContainer.style.display = 'block';
-                    resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi! Kết quả sẽ xuất hiện trong lịch sử bên dưới.</p>';
-                }, 4000);
+    try {
+        const res = await fetch(TAO_VAN_BAN_POST_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-            } catch (err) {
-                 stopLoadingAnimation();
-                 submitBtn.disabled = false;
-                 submitBtn.classList.remove('button-loading');
-                 showError(`Gửi yêu cầu thất bại: ${err.message}`);
-            }
+        if (!res.ok) throw new Error(`Lỗi server: ${res.status}`);
+        const result = await res.json();
+        if (result.status === 'success') {
+            showSuccess(result.files);
+            fetchHistory();
+        } else {
+            throw new Error(result.message);
         }
+    } catch (err) {
+         showError(`Gửi yêu cầu thất bại: ${err.message}`);
+    } finally {
+        stopLoadingAnimation();
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('button-loading');
+    }
+}
         
         function showSuccess(files) {
             let linksHtml = '';
