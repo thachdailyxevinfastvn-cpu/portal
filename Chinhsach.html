@@ -114,9 +114,9 @@
 
         // --- Hàm gọi API (JSONP) để lấy dữ liệu từ Google Sheet ---
         async function handleApiRequest(payload) {
-            // Kiểm tra xem biến URL đã được định nghĩa trong config.js chưa
-            if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL) {
-                console.error('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.');
+            // **SỬA LỖI**: Kiểm tra và sử dụng biến URL dành riêng cho trang chính sách
+            if (typeof POLICY_PAGE_SCRIPT_URL === 'undefined' || !POLICY_PAGE_SCRIPT_URL) {
+                console.error('Lỗi: Không tìm thấy biến POLICY_PAGE_SCRIPT_URL trong file config.js.');
                 policyContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình: Vui lòng kiểm tra file config.js.</p>`;
                 return null;
             }
@@ -135,7 +135,8 @@
                     reject(new Error('JSONP request failed'));
                 };
                 const params = new URLSearchParams({ ...payload, callback: callbackName });
-                script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+                // **SỬA LỖI**: Sử dụng biến URL đúng
+                script.src = `${POLICY_PAGE_SCRIPT_URL}?${params.toString()}`;
                 document.body.appendChild(script);
             });
         }
