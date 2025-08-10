@@ -58,6 +58,30 @@
             flex-shrink: 0; /* Ngăn icon bị co lại */
             margin-left: 1rem;
         }
+
+        /* Hiệu ứng cho loader mới */
+        @keyframes bounce-loader {
+          0%, 80%, 100% {
+            transform: scale(0);
+          }
+          40% {
+            transform: scale(1.0);
+          }
+        }
+        .bounce-dot {
+          width: 1rem; /* 16px */
+          height: 1rem; /* 16px */
+          background-color: #3b82f6; /* blue-500 */
+          border-radius: 9999px; /* rounded-full */
+          display: inline-block;
+          animation: bounce-loader 1.4s infinite ease-in-out both;
+        }
+        .bounce-dot:nth-child(1) {
+          animation-delay: -0.32s;
+        }
+        .bounce-dot:nth-child(2) {
+          animation-delay: -0.16s;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -106,8 +130,12 @@
             
             <div id="policy-container" class="space-y-4">
                 <div id="loader" class="text-center p-8">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                    <p class="mt-4 text-gray-500">Đang tải chính sách từ Google Sheet...</p>
+                    <div class="flex justify-center items-center space-x-2">
+                        <div class="bounce-dot"></div>
+                        <div class="bounce-dot"></div>
+                        <div class="bounce-dot"></div>
+                    </div>
+                    <p class="mt-4 text-gray-600 font-semibold">Đang tải chính sách nè ! Chờ xíu chờ xíu</p>
                 </div>
             </div>
         </section>
@@ -164,7 +192,6 @@
                 policyElement.rel = 'noopener noreferrer';
                 policyElement.className = 'policy-item flex items-center justify-between';
                 
-                // Cập nhật cấu trúc HTML để hiển thị cả Nguồn và Ngày cập nhật
                 const sourceHTML = policy.source ? `<span>Nguồn: <strong>${policy.source}</strong></span>` : '';
                 const updatedHTML = policy.updated ? `<span>Cập nhật: ${policy.updated}</span>` : '';
 
