@@ -8,49 +8,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
-
     <script src="config.js"></script>
-
     <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f5f5f5;
-        }
-        .nav-link-active {
-            background-color: #eef2ff;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        /* Style cho loader */
-        @keyframes bounce-loader {
-          0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); }
-        }
-        .bounce-dot {
-          width: 1rem; height: 1rem; background-color: #3b82f6;
-          border-radius: 9999px; display: inline-block;
-          animation: bounce-loader 1.4s infinite ease-in-out both;
-        }
-        .bounce-dot:nth-child(1) { animation-delay: -0.32s; }
-        .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        /* THÊM MỚI: CSS cho các nút lọc */
-        .filter-btn {
-            transition: all 0.2s ease-in-out;
-        }
-        .filter-active {
-            background-color: #3b82f6 !important; /* blue-500 */
-            color: white !important;
-            opacity: 1 !important;
-            font-weight: 600;
-        }
-        .filter-btn:not(.filter-active) {
-            opacity: 0.7;
-        }
-        .hidden-row {
-            display: none;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
+        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
+        @keyframes bounce-loader { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        .bounce-dot { width: 1rem; height: 1rem; background-color: #3b82f6; border-radius: 9999px; display: inline-block; animation: bounce-loader 1.4s infinite ease-in-out both; }
+        .bounce-dot:nth-child(1) { animation-delay: -0.32s; } .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
+        .filter-btn { transition: all 0.2s ease-in-out; }
+        .filter-active { background-color: #3b82f6 !important; color: white !important; opacity: 1 !important; font-weight: 600; }
+        .filter-btn:not(.filter-active) { opacity: 0.7; }
+        .hidden-row { display: none; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -68,27 +37,12 @@
                 <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
             </div>
             <div class="flex items-center">
-                <div id="user-profile" class="flex items-center space-x-3">
-                     <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
-                     <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
-                </div>
-                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                </button>
-                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+                <div id="user-profile" class="flex items-center space-x-3"><span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span><img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500"></div>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
             </div>
         </nav>
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
-            <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
-            <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
-            <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
-            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Ngân hàng</a>
-            <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
-            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
-        </div>
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t"><a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a><a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a><a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a><a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a><a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Ngân hàng</a><a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a><a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a></div>
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 py-8">
@@ -101,13 +55,12 @@
                 <button data-filter="all" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full filter-active">Tất cả</button>
                 <button data-filter-column="2" data-filter-value="có" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full">Hỗ trợ Công ty</button>
                 <button data-filter-column="3" data-filter-value="có" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full">Biển vàng</button>
+                <button data-filter-column="4" data-filter-value="có" class="filter-btn px-4 py-2 text-sm bg-gray-200 rounded-full">Hoa hồng</button>
             </div>
 
             <div id="data-container" class="bg-white shadow-lg rounded-lg overflow-x-auto">
                 <div id="loader" class="text-center p-8">
-                    <div class="flex justify-center items-center space-x-2">
-                        <div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div>
-                    </div>
+                    <div class="flex justify-center items-center space-x-2"><div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div></div>
                     <p class="mt-4 text-gray-600 font-semibold">Đang tải dữ liệu ngân hàng...</p>
                 </div>
             </div>
@@ -118,6 +71,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
     
     <script>
+        // Các biến và hàm handleApiRequest, window.addEventListener('load') không đổi...
         const userFullNameDisplay = document.getElementById('user-fullname');
         const userAvatarDisplay = document.getElementById('user-avatar');
         const logoutBtn = document.getElementById('logout-btn');
@@ -127,31 +81,14 @@
         const loader = document.getElementById('loader');
         const filterContainer = document.getElementById('filter-container');
 
-        async function handleApiRequest(payload, scriptUrl) {
-            // ... (Hàm này giữ nguyên, không thay đổi)
-            if (typeof scriptUrl === 'undefined' || !scriptUrl) {
-                console.error('Lỗi: URL của Apps Script không được cung cấp.');
-                dataContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình.</p>`;
-                return null;
-            }
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                window[callbackName] = (data) => { delete window[callbackName]; document.body.removeChild(script); resolve(data); };
-                const script = document.createElement('script');
-                script.onerror = () => { delete window[callbackName]; document.body.removeChild(script); reject(new Error('JSONP request failed')); };
-                const params = new URLSearchParams({ ...payload, callback: callbackName });
-                script.src = `${scriptUrl}?${params.toString()}`;
-                document.body.appendChild(script);
-            });
-        }
+        async function handleApiRequest(payload, scriptUrl) { if (typeof scriptUrl === 'undefined' || !scriptUrl) { console.error('Lỗi: URL của Apps Script không được cung cấp.'); dataContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình.</p>`; return null; } return new Promise((resolve, reject) => { const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random()); window[callbackName] = (data) => { delete window[callbackName]; document.body.removeChild(script); resolve(data); }; const script = document.createElement('script'); script.onerror = () => { delete window[callbackName]; document.body.removeChild(script); reject(new Error('JSONP request failed')); }; const params = new URLSearchParams({ ...payload, callback: callbackName }); script.src = `${scriptUrl}?${params.toString()}`; document.body.appendChild(script); }); }
         
         function displayBankTable(bankData) {
-            if (!bankData || bankData.length === 0) {
-                dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu.</p>`;
-                return;
-            }
+            if (!bankData || bankData.length === 0) { dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu.</p>`; return; }
             const table = document.createElement('table');
             table.className = 'min-w-full divide-y divide-gray-200';
+            
+            // THAY ĐỔI: Thêm cột "Hoa hồng" vào header của bảng
             table.innerHTML = `
                 <thead class="bg-gray-100">
                     <tr>
@@ -159,6 +96,7 @@
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hoa hồng</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ghi Chú</th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
                     </tr>
@@ -170,91 +108,32 @@
                 const tr = document.createElement('tr');
                 tr.className = 'transition-all duration-300';
                 
-                // THAY ĐỔI: Chuyển sang data-fancybox và thêm subtitle
                 const imagePath = `images/${bank.link}`;
-                const nameCell = `
-                    <div>
-                        <a href="${imagePath}" data-fancybox="gallery" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
-                            ${bank.tenNganHang || 'N/A'}
-                        </a>
-                        <p class="text-xs text-gray-500 mt-1 italic">Bấm vào tên để xem chính sách</p>
-                    </div>
-                `;
+                const nameCell = `<div><a href="${imagePath}" data-fancybox="gallery" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">${bank.tenNganHang || 'N/A'}</a><p class="text-xs text-gray-500 mt-1 italic">Bấm vào tên để xem chính sách</p></div>`;
                 
+                // THAY ĐỔI: Thêm cột "Hoa hồng" và điều chỉnh độ rộng cột "Ghi chú"
                 tr.innerHTML = `
                     <td class="px-6 py-4">${nameCell}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCaNhan || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCongTy || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.bienVang || ''}</td>
-                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${bank.ghiChu || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoaHong || ''}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700 min-w-[250px]">${bank.ghiChu || ''}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bank.ngayCapNhat || ''}</td>
                 `;
                 tbody.appendChild(tr);
             });
             
-            dataContainer.innerHTML = '';
-            dataContainer.appendChild(table);
-
-            // THÊM MỚI: Khởi tạo Fancybox
-            // Fancybox sẽ tự thêm hiệu ứng loading, nút đóng to và các nút zoom
-            Fancybox.bind("[data-fancybox]", {
-                // Các tùy chọn tùy chỉnh nếu cần
-            });
+            dataContainer.innerHTML = ''; dataContainer.appendChild(table);
+            Fancybox.bind("[data-fancybox]", {});
         }
 
-        // --- Các hàm xử lý chung ---
-        window.addEventListener('load', async () => {
-            const userDataString = sessionStorage.getItem('loggedInUser');
-            if (!userDataString) { window.location.href = 'index.html'; return; }
-            const userData = JSON.parse(userDataString);
-            userFullNameDisplay.textContent = userData.fullName;
-            userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
-            try {
-                const result = await handleApiRequest({ action: 'getBankData' }, NGAN_HANG_APPS_SCRIPT_URL);
-                if (result && result.success) {
-                    displayBankTable(result.data);
-                } else {
-                    loader.innerHTML = `<p class="text-red-500 text-center p-8">Lỗi: ${result ? result.error : 'Không phản hồi.'}</p>`;
-                }
-            } catch (error) {
-                console.error('Lỗi fetch dữ liệu:', error);
-                loader.innerHTML = `<p class="text-red-500 text-center p-8">Không thể kết nối đến máy chủ.</p>`;
-            }
-        });
+        window.addEventListener('load', async () => { const userDataString = sessionStorage.getItem('loggedInUser'); if (!userDataString) { window.location.href = 'index.html'; return; } const userData = JSON.parse(userDataString); userFullNameDisplay.textContent = userData.fullName; userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)'; try { const result = await handleApiRequest({ action: 'getBankData' }, NGAN_HANG_APPS_SCRIPT_URL); if (result && result.success) { displayBankTable(result.data); } else { loader.innerHTML = `<p class="text-red-500 text-center p-8">Lỗi: ${result ? result.error : 'Không phản hồi.'}</p>`; } } catch (error) { console.error('Lỗi fetch dữ liệu:', error); loader.innerHTML = `<p class="text-red-500 text-center p-8">Không thể kết nối đến máy chủ.</p>`; } });
         logoutBtn.addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
         mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
 
-        // THÊM MỚI: Logic xử lý các nút lọc
-        filterContainer.addEventListener('click', (event) => {
-            const button = event.target.closest('button');
-            if (!button) return;
-
-            // Cập nhật giao diện nút
-            filterContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('filter-active'));
-            button.classList.add('filter-active');
-
-            const filter = button.dataset.filter;
-            const tableRows = document.querySelectorAll('#data-container tbody tr');
-
-            if (filter === 'all') {
-                tableRows.forEach(row => row.classList.remove('hidden-row'));
-                return;
-            }
-
-            const filterColumn = parseInt(button.dataset.filterColumn, 10);
-            const filterValue = button.dataset.filterValue.toLowerCase();
-
-            tableRows.forEach(row => {
-                const cell = row.cells[filterColumn];
-                const cellValue = cell ? cell.textContent.trim().toLowerCase() : '';
-                if (cellValue.includes(filterValue)) {
-                    row.classList.remove('hidden-row');
-                } else {
-                    row.classList.add('hidden-row');
-                }
-            });
-        });
-
+        // Logic xử lý các nút lọc không cần thay đổi, nó sẽ tự nhận nút mới
+        filterContainer.addEventListener('click', (event) => { const button = event.target.closest('button'); if (!button) return; filterContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('filter-active')); button.classList.add('filter-active'); const filter = button.dataset.filter; const tableRows = document.querySelectorAll('#data-container tbody tr'); if (filter === 'all') { tableRows.forEach(row => row.classList.remove('hidden-row')); return; } const filterColumn = parseInt(button.dataset.filterColumn, 10); const filterValue = button.dataset.filterValue.toLowerCase(); tableRows.forEach(row => { const cell = row.cells[filterColumn]; const cellValue = cell ? cell.textContent.trim().toLowerCase() : ''; if (cellValue.includes(filterValue)) { row.classList.remove('hidden-row'); } else { row.classList.add('hidden-row'); } }); });
     </script>
 </body>
 </html>
