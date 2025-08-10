@@ -80,6 +80,13 @@
             </div>
             <div id="error-container" class="hidden mt-6 p-4 border-l-4 border-red-500 bg-red-50 text-red-700"></div>
         </div>
+
+        <div id="history-section" class="max-w-3xl mx-auto mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Lịch sử tạo văn bản của bạn</h2>
+            <div id="history-container" class="bg-white p-6 rounded-xl shadow-lg space-y-4">
+                 <p class="text-center text-gray-500">Đang tải lịch sử...</p>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -94,20 +101,17 @@
             initializePage();
         });
 
-        async function handleApiRequest(payload, button) {
-            if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) { showError('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.'); return null; }
-            if (button) { button.disabled = true; button.classList.add('button-loading'); }
+        async function handleApiRequest_GET(payload) {
+            if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) { showError('Lỗi cấu hình: Vui lòng kiểm tra TAO_VAN_BAN_APPS_SCRIPT_URL trong config.js.'); return null; }
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
                 window[callbackName] = (data) => {
                     delete window[callbackName]; document.body.removeChild(script);
-                    if (button) { button.disabled = false; button.classList.remove('button-loading'); }
                     resolve(data);
                 };
                 const script = document.createElement('script');
                 script.onerror = () => {
                     delete window[callbackName]; document.body.removeChild(script);
-                    if (button) { button.disabled = false; button.classList.remove('button-loading'); }
                     showError('Lỗi mạng hoặc URL API không hợp lệ.'); reject(new Error('JSONP request failed'));
                 };
                 const params = new URLSearchParams({ ...payload, callback: callbackName });
@@ -133,12 +137,16 @@
         const dateSourceLabel = 'ngày ký hợp đồng';
         const otherDateLabels = ['ngày cấp'];
         const hiddenLabels = ['giá niêm yết', 'stt'];
+        const priceLabel = 'giá xuất hóa đơn';
+        const loanLabel = 'số tiền vay';
+        const downPaymentLabel = 'số tiền trả trước';
 
-        let dateTextPlaceholderName = ''; 
-        let dateSourcePlaceholderName = ''; 
+        let dateTextPlaceholderName = '', dateSourcePlaceholderName = '';
+        let pricePlaceholderName = '', loanPlaceholderName = '', downPaymentPlaceholderName = '';
         
         function initializePage() {
             fetchGroups();
+            fetchHistory();
             groupSelector.addEventListener('change', handleGroupSelection);
             submitBtn.addEventListener('click', handleSubmit);
             formContainer.addEventListener('input', handleFormInput);
@@ -146,13 +154,10 @@
 
         async function fetchGroups() {
             startLoadingAnimation();
-            const result = await handleApiRequest({ action: 'getGroups' });
+            const result = await handleApiRequest_GET({ action: 'getGroups' });
             stopLoadingAnimation();
             if (result && result.status === 'success') {
-                // Sửa lỗi: Xóa các lựa chọn cũ để chống lặp lại
-                while (groupSelector.options.length > 1) {
-                    groupSelector.remove(1);
-                }
+                while (groupSelector.options.length > 1) { groupSelector.remove(1); }
                 result.data.forEach(group => {
                     const option = document.createElement('option');
                     option.value = group; option.textContent = group;
@@ -166,12 +171,38 @@
             clearAll();
             if (selectedGroup) {
                 startLoadingAnimation();
-                const result = await handleApiRequest({ action: 'getPlaceholders', group: selectedGroup });
+                const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: selectedGroup });
                 stopLoadingAnimation();
                 if (result && result.status === 'success') {
                     createForm(result.data);
                 } else if (result) { showError(result.message); }
             } else { submitBtn.disabled = true; }
+        }
+        
+        async function fetchHistory() {
+            const historyContainer = document.getElementById('history-container');
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (!userDataString) return;
+            const userName = JSON.parse(userDataString).fullName;
+            const result = await handleApiRequest_GET({ action: 'getUserHistory', userName: userName });
+            if (result && result.status === 'success') {
+                renderHistory(result.data);
+            } else {
+                historyContainer.innerHTML = `<p class="text-center text-red-500">Không thể tải lịch sử.</p>`;
+            }
+        }
+
+        function renderHistory(historyData) {
+            const historyContainer = document.getElementById('history-container');
+            if (!historyData || historyData.length === 0) {
+                historyContainer.innerHTML = `<p class="text-center text-gray-500">Bạn chưa tạo văn bản nào.</p>`;
+                return;
+            }
+            let historyHtml = '';
+            historyData.forEach(item => {
+                historyHtml += `<div class="border-b pb-4 last:border-b-0 last:pb-0"><p class="text-sm text-gray-500">${item.timestamp}</p><p class="font-semibold text-gray-800">${item.groupName}</p><div class="flex flex-wrap gap-2 mt-2">${item.links.map((link, index) => `<a href="${link}" target="_blank" class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-md hover:bg-blue-200">File ${index + 1}</a>`).join('')}</div></div>`;
+            });
+            historyContainer.innerHTML = historyHtml;
         }
 
         function createForm(placeholders) {
@@ -186,6 +217,13 @@
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
             dateSourcePlaceholderName = dateSourcePlaceholder ? dateSourcePlaceholder.name : '';
             
+            const pricePlaceholder = placeholders.find(p => p.label.toLowerCase() === priceLabel);
+            const loanPlaceholder = placeholders.find(p => p.label.toLowerCase() === loanLabel);
+            const downPaymentPlaceholder = placeholders.find(p => p.label.toLowerCase() === downPaymentLabel);
+            pricePlaceholderName = pricePlaceholder ? pricePlaceholder.name : '';
+            loanPlaceholderName = loanPlaceholder ? loanPlaceholder.name : '';
+            downPaymentPlaceholderName = downPaymentPlaceholder ? downPaymentPlaceholder.name : '';
+            
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -197,24 +235,19 @@
                 const pLabelLower = p.label.toLowerCase();
                 const pNameUpper = p.name.toUpperCase().replace(/<|>/g, '');
 
-                // Sửa lỗi: Ẩn các ô trong hiddenLabels
                 if (hiddenLabels.includes(pLabelLower)) return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
-                // SỬA LỖI: Hiển thị ô TODAY dưới dạng chỉ đọc
                 if (pNameUpper === 'TODAY') {
                      formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
                 else if (dropdownLabels.some(l => pLabelLower.includes(l))) {
-                    formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                    <option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option>
-                                    <option>BỘ CÔNG AN</option>
-                                 </select>`;
+                    formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"><option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option><option>BỘ CÔNG AN</option></select>`;
                 } 
-                else if (pLabelLower === dateTextLabel) {
-                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                else if (pLabelLower === dateTextLabel || pLabelLower === downPaymentLabel) {
+                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
                 else if (pLabelLower === dateSourceLabel || otherDateLabels.includes(pLabelLower)) {
                      formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
@@ -230,13 +263,9 @@
         
         function handleFormInput(event) {
             const target = event.target;
-            const labelEl = target.previousElementSibling;
-            if (!labelEl || labelEl.tagName !== 'LABEL') return;
-            const labelText = labelEl.textContent.toLowerCase();
-
-            if (currencyLabels.some(l => labelText.includes(l))) {
-                let value = target.value.replace(/[^0-9]/g, '');
-                target.value = value ? Number(value).toLocaleString('vi-VN') : '';
+            
+            if (target.name === pricePlaceholderName || target.name === loanPlaceholderName) {
+                calculateDownPayment();
             }
 
             if (target.name === dateSourcePlaceholderName) {
@@ -245,8 +274,35 @@
                    dateTextEl.value = convertDateToText(target.value);
                 }
             }
+            
+            const labelEl = target.previousElementSibling;
+            if (!labelEl || labelEl.tagName !== 'LABEL') return;
+            const labelText = labelEl.textContent.toLowerCase();
+
+            if (currencyLabels.some(l => labelText.includes(l))) {
+                let value = target.value.replace(/[^0-9]/g, '');
+                target.value = value ? Number(value).toLocaleString('vi-VN') : '';
+            }
         }
         
+        // ===== HÀM TÍNH TOÁN ĐÃ ĐƯỢC SỬA LỖI =====
+        function calculateDownPayment() {
+            const priceEl = document.querySelector(`[name="${pricePlaceholderName}"]`);
+            const loanEl = document.querySelector(`[name="${loanPlaceholderName}"]`);
+            const downPaymentEl = document.querySelector(`[name="${downPaymentPlaceholderName}"]`);
+            if (!priceEl || !loanEl || !downPaymentEl) return;
+
+            // Lấy giá trị và chuyển thành số, coi giá trị rỗng là 0
+            const price = parseFloat(priceEl.value.replace(/\./g, '')) || 0;
+            const loan = parseFloat(loanEl.value.replace(/\./g, '')) || 0;
+            
+            // Thực hiện phép tính
+            const downPayment = price - loan;
+            
+            // Cập nhật giá trị vào ô trả trước, đảm bảo không âm
+            downPaymentEl.value = downPayment >= 0 ? downPayment.toLocaleString('vi-VN') : '0';
+        }
+
         async function handleSubmit() {
             clearResults();
             const placeholdersData = {};
@@ -269,12 +325,31 @@
             };
             
             startLoadingAnimation();
-            const result = await handleApiRequest({ action: 'processFormCreation', payload: JSON.stringify(payload) }, submitBtn);
-            stopLoadingAnimation();
+            submitBtn.disabled = true;
+            submitBtn.classList.add('button-loading');
 
-            if (result && result.status === 'success') {
-                showSuccess(result.files);
-            } else if (result) { showError(result.message); }
+            try {
+                const res = await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload),
+                });
+                
+                setTimeout(() => {
+                    stopLoadingAnimation();
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('button-loading');
+                    fetchHistory(); 
+                    resultContainer.style.display = 'block';
+                    resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi! Kết quả sẽ xuất hiện trong lịch sử bên dưới.</p>';
+                }, 4000);
+
+            } catch (err) {
+                 stopLoadingAnimation();
+                 submitBtn.disabled = false;
+                 submitBtn.classList.remove('button-loading');
+                 showError(`Gửi yêu cầu thất bại: ${err.message}`);
+            }
         }
         
         function showSuccess(files) {
@@ -291,8 +366,8 @@
         function clearAll() {
             formContainer.innerHTML = '';
             submitBtn.disabled = true;
-            dateTextPlaceholderName = '';
-            dateSourcePlaceholderName = '';
+            dateTextPlaceholderName = ''; dateSourcePlaceholderName = '';
+            pricePlaceholderName = ''; loanPlaceholderName = ''; downPaymentPlaceholderName = '';
             clearResults();
         }
         
