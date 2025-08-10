@@ -14,3 +14,7 @@ const KHO_XE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzxlKiAY
 
 // URL Apps Script cho chức năng TẠO VĂN BẢN
 const TAO_VAN_BAN_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz0cTmDkjU9Tn5jC49HNHbZjIBYWwZJtvHlDFNEcbEAA3Oqfa-YuQ8Dh_eL_3YXbj9p/exec';
+
+// URL Apps Script cho chức năng NGÂN HÀNG
+// >>> LƯU Ý: Đã đổi tên biến để không bị trùng lặp <<<
+const NGAN_HANG_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHclMvZJmt_2UOOhqf_CT_YCnQRscCrmFZF6rDnjil5P4S-3zzV1sIz6nPrL1-km-s/exec';

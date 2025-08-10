@@ -1,12 +1,45 @@
-<header class="bg-white shadow-md sticky top-0 z-50">
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chính sách Ngân hàng - Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="config.js"></script>
+    
+    <link href="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.css" type="text/css" rel="stylesheet" />
+
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f5f5f5;
+        }
+        .nav-link-active {
+            background-color: #eef2ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
             <div class="hidden md:flex items-center space-x-2">
-                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Trang chủ</a>
+                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                 <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
                 <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
                 <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
-                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Ngân hàng</a>
                 <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
                 <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
             </div>
@@ -24,12 +57,179 @@
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
-            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Trang chủ</a>
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
             <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
             <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
             <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
-            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">Ngân hàng</a>
             <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
             <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
         </div>
     </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Chính sách Ngân hàng</h1>
+            <button id="refresh-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4" /></svg>
+                Làm mới
+            </button>
+        </div>
+
+        <div id="table-container" class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div id="loader" class="text-center p-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                <p class="mt-4 text-gray-500">Đang tải dữ liệu ngân hàng...</p>
+            </div>
+            </div>
+    </main>
+    
+    <script src="//code.jquery.com/jquery-latest.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
+    
+    <script>
+        // --- DOM Elements ---
+        const userFullNameDisplay = document.getElementById('user-fullname');
+        const userAvatarDisplay = document.getElementById('user-avatar');
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const tableContainer = document.getElementById('table-container');
+        const loader = document.getElementById('loader');
+        const refreshBtn = document.getElementById('refresh-btn');
+
+        // --- Hàm gọi API (JSONP) ---
+        async function handleApiRequest(payload) {
+            const SCRIPT_URL_TO_USE = window.NGAN_HANG_APPS_SCRIPT_URL;
+
+            if (typeof SCRIPT_URL_TO_USE === 'undefined' || !SCRIPT_URL_TO_USE) {
+                console.error('Lỗi: Không tìm thấy biến NGAN_HANG_APPS_SCRIPT_URL trong file config.js.');
+                return { success: false, message: 'Lỗi cấu hình URL. Vui lòng kiểm tra file config.js.' };
+            }
+
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP request failed'));
+                };
+                const params = new URLSearchParams({ ...payload, callback: callbackName });
+                script.src = `${SCRIPT_URL_TO_USE}?${params.toString()}`;
+                document.body.appendChild(script);
+            });
+        }
+
+        // --- Hàm lấy và hiển thị dữ liệu ngân hàng ---
+        async function fetchAndDisplayBankPolicies() {
+            loader.style.display = 'block';
+            tableContainer.innerHTML = '';
+            tableContainer.appendChild(loader);
+
+            try {
+                const result = await handleApiRequest({ action: 'getBankPolicies' });
+
+                if (result && result.success) {
+                    displayTable(result.data);
+                } else {
+                    handleError(result.message || 'Không thể tải dữ liệu.');
+                }
+            } catch (error) {
+                handleError('Lỗi kết nối. Vui lòng thử lại.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+        
+        function handleError(message) {
+             tableContainer.innerHTML = `<div class="text-center p-8 text-red-500 font-semibold">${message}</div>`;
+        }
+
+        // --- Hàm tạo bảng hiển thị ---
+        function displayTable(policies) {
+            if (policies.length === 0) {
+                tableContainer.innerHTML = '<p class="text-center p-8 text-gray-500">Không có dữ liệu để hiển thị.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'min-w-full divide-y divide-gray-200';
+
+            // SỬA LỖI 1: Thêm cặp dấu backtick (`) để bao bọc chuỗi HTML
+            const thead = `
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tên Ngân Hàng</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ghi Chú</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
+                    </tr>
+                </thead>
+            `;
+
+            const tbody = document.createElement('tbody');
+            tbody.className = 'bg-white divide-y divide-gray-200';
+
+            policies.forEach(policy => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+
+                // SỬA LỖI 2: Xóa dấu chấm phẩy (;) thừa ở cuối chuỗi
+                tr.innerHTML = \`
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="\${policy.link}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
+                            \${policy.tenNganHang || 'N/A'}
+                        </a>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.hoTroCaNhan || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.hoTroCongTy || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.bienVang || ''}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">\${policy.ghiChu || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">\${policy.ngayCapNhat || ''}</td>
+                \`;
+                tbody.appendChild(tr);
+            });
+            
+            table.innerHTML = thead;
+            table.appendChild(tbody);
+            tableContainer.innerHTML = '';
+            tableContainer.appendChild(table);
+        }
+
+        // --- Xử lý khi tải trang ---
+        window.addEventListener('load', () => {
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (!userDataString) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const userData = JSON.parse(userDataString);
+            userFullNameDisplay.textContent = userData.fullName;
+            userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            
+            fetchAndDisplayBankPolicies();
+        });
+        
+        // --- Xử lý sự kiện ---
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        });
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        refreshBtn.addEventListener('click', fetchAndDisplayBankPolicies);
+    </script>
+</body>
+</html>
