@@ -3,20 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chính sách Ngân hàng - Portal</title>
+    <title>Thông tin Ngân hàng - Portal VF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
     <link href="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.css" type="text/css" rel="stylesheet" />
+    <script src="config.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
-        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f5f5f5;
+        }
+        .nav-link-active {
+            background-color: #eef2ff;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+        /* Style cho loader */
+        @keyframes bounce-loader {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1.0); }
+        }
+        .bounce-dot {
+          width: 1rem; height: 1rem; background-color: #3b82f6;
+          border-radius: 9999px; display: inline-block;
+          animation: bounce-loader 1.4s infinite ease-in-out both;
+        }
+        .bounce-dot:nth-child(1) { animation-delay: -0.32s; }
+        .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -58,22 +73,23 @@
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Chính sách Ngân hàng</h1>
-            <button id="refresh-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4l-4 4M4 20l4-4" /></svg>
-                Làm mới
-            </button>
-        </div>
-
-        <div id="table-container" class="bg-white shadow-lg rounded-lg overflow-hidden">
-            <div id="loader" class="text-center p-8">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                <p class="mt-4 text-gray-500">Đang tải dữ liệu ngân hàng...</p>
-            </div>
-        </div>
+        <section>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">Thông Tin Ngân Hàng</h1>
+            <p class="text-gray-600 mb-8">Tổng hợp chính sách và điều kiện từ các đối tác ngân hàng.</p>
+            
+            <div id="data-container" class="bg-white shadow-lg rounded-lg overflow-x-auto">
+                <div id="loader" class="text-center p-8">
+                    <div class="flex justify-center items-center space-x-2">
+                        <div class="bounce-dot"></div>
+                        <div class="bounce-dot"></div>
+                        <div class="bounce-dot"></div>
+                    </div>
+                    <p class="mt-4 text-gray-600 font-semibold">Đang tải dữ liệu ngân hàng...</p>
+                </div>
+                </div>
+        </section>
     </main>
-    
+
     <script src="//code.jquery.com/jquery-latest.js"></script>
     <script src="//cdn.jsdelivr.net/npm/featherlight@1.7.14/release/featherlight.min.js" type="text/javascript" charset="utf-8"></script>
     
@@ -83,15 +99,17 @@
         const logoutBtn = document.getElementById('logout-btn');
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        const tableContainer = document.getElementById('table-container');
+        const dataContainer = document.getElementById('data-container');
         const loader = document.getElementById('loader');
-        const refreshBtn = document.getElementById('refresh-btn');
 
-        async function handleApiRequest(payload) {
-            const SCRIPT_URL_TO_USE = window.NGAN_HANG_APPS_SCRIPT_URL;
-            if (typeof SCRIPT_URL_TO_USE === 'undefined' || !SCRIPT_URL_TO_USE) {
-                console.error('Lỗi: Không tìm thấy biến NGAN_HANG_APPS_SCRIPT_URL trong file config.js.');
-                return { success: false, message: 'Lỗi cấu hình URL. Vui lòng kiểm tra file config.js.' };
+        /**
+         * Hàm gọi API chung, sử dụng URL được chỉ định.
+         */
+        async function handleApiRequest(payload, scriptUrl) {
+            if (typeof scriptUrl === 'undefined' || !scriptUrl) {
+                console.error('Lỗi: URL của Apps Script không được cung cấp.');
+                dataContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình: Vui lòng kiểm tra file config.js.</p>`;
+                return null;
             }
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
@@ -107,41 +125,23 @@
                     reject(new Error('JSONP request failed'));
                 };
                 const params = new URLSearchParams({ ...payload, callback: callbackName });
-                script.src = `${SCRIPT_URL_TO_USE}?${params.toString()}`;
+                script.src = `${scriptUrl}?${params.toString()}`;
                 document.body.appendChild(script);
             });
         }
-
-        async function fetchAndDisplayBankPolicies() {
-            loader.style.display = 'block';
-            tableContainer.innerHTML = '';
-            tableContainer.appendChild(loader);
-            try {
-                const result = await handleApiRequest({ action: 'getBankPolicies' });
-                if (result && result.success) {
-                    displayTable(result.data);
-                } else {
-                    handleError(result.message || 'Không thể tải dữ liệu.');
-                }
-            } catch (error) {
-                handleError('Lỗi kết nối. Vui lòng thử lại.');
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
         
-        function handleError(message) {
-             tableContainer.innerHTML = `<div class="text-center p-8 text-red-500 font-semibold">${message}</div>`;
-        }
-
-        function displayTable(policies) {
-            if (policies.length === 0) {
-                tableContainer.innerHTML = '<p class="text-center p-8 text-gray-500">Không có dữ liệu để hiển thị.</p>';
+        /**
+         * Hàm tạo và hiển thị bảng dữ liệu ngân hàng.
+         */
+        function displayBankTable(bankData) {
+            if (!bankData || bankData.length === 0) {
+                dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu ngân hàng nào.</p>`;
                 return;
             }
+
             const table = document.createElement('table');
             table.className = 'min-w-full divide-y divide-gray-200';
-            const thead = \`
+            table.innerHTML = `
                 <thead class="bg-gray-100">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tên Ngân Hàng</th>
@@ -152,33 +152,42 @@
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
                     </tr>
                 </thead>
-            \`;
-            const tbody = document.createElement('tbody');
-            tbody.className = 'bg-white divide-y divide-gray-200';
-            policies.forEach(policy => {
+                <tbody class="bg-white divide-y divide-gray-200">
+                </tbody>
+            `;
+            
+            const tbody = table.querySelector('tbody');
+
+            bankData.forEach(bank => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
-                tr.innerHTML = \`
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <a href="\${policy.link}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
-                            \${policy.tenNganHang || 'N/A'}
-                        </a>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.hoTroCaNhan || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.hoTroCongTy || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">\${policy.bienVang || ''}</td>
-                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">\${policy.ghiChu || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">\${policy.ngayCapNhat || ''}</td>
-                \`;
+                
+                // Cột Tên Ngân Hàng có link để mở ảnh
+                const nameCell = `
+                    <a href="${bank.link}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
+                        ${bank.tenNganHang || 'N/A'}
+                    </a>
+                `;
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${nameCell}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCaNhan || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCongTy || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.bienVang || ''}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-700">${bank.ghiChu || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bank.ngayCapNhat || ''}</td>
+                `;
                 tbody.appendChild(tr);
             });
-            table.innerHTML = thead;
-            table.appendChild(tbody);
-            tableContainer.innerHTML = '';
-            tableContainer.appendChild(table);
+            
+            dataContainer.innerHTML = ''; // Xóa loader
+            dataContainer.appendChild(table);
         }
 
-        window.addEventListener('load', () => {
+        /**
+         * Hàm chạy chính khi tải trang.
+         */
+        window.addEventListener('load', async () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
                 window.location.href = 'index.html';
@@ -187,9 +196,22 @@
             const userData = JSON.parse(userDataString);
             userFullNameDisplay.textContent = userData.fullName;
             userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
-            fetchAndDisplayBankPolicies();
+
+            try {
+                // Gọi API với action và URL của trang Ngân Hàng
+                const result = await handleApiRequest({ action: 'getBankData' }, NGAN_HANG_APPS_SCRIPT_URL);
+                if (result && result.success) {
+                    displayBankTable(result.data);
+                } else {
+                    loader.innerHTML = `<p class="text-red-500 text-center p-8">Lỗi khi tải dữ liệu: ${result ? result.error : 'Không nhận được phản hồi.'}</p>`;
+                }
+            } catch (error) {
+                console.error('Lỗi nghiêm trọng khi fetch dữ liệu:', error);
+                loader.innerHTML = `<p class="text-red-500 text-center p-8">Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại đường dẫn API và cài đặt Google Sheet.</p>`;
+            }
         });
         
+        // --- Các sự kiện cho nút đăng xuất và menu mobile ---
         logoutBtn.addEventListener('click', () => {
             sessionStorage.removeItem('loggedInUser');
             window.location.href = 'index.html';
@@ -199,7 +221,6 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        refreshBtn.addEventListener('click', fetchAndDisplayBankPolicies);
     </script>
 </body>
 </html>
