@@ -90,17 +90,17 @@
             
             // THAY ĐỔI: Thêm cột "Hoa hồng" vào header của bảng
             table.innerHTML = `
-             <thead class="bg-gray-100">
-    <tr>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tên Ngân Hàng</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hoa hồng</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider max-w-[200px]">Ghi Chú</th>
-        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ngày Cập Nhật</th>
-    </tr>
-</thead>
+            <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider min-w-[250px]">Tên Ngân Hàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Hỗ trợ Cá nhân</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Hỗ trợ Công ty</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Biển Vàng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Hoa hồng</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Ghi Chú</th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap">Ngày Cập Nhật</th>
+                    </tr>
+                </thead>
                 <tbody class="bg-white divide-y divide-gray-200"></tbody>
             `;
             const tbody = table.querySelector('tbody');
