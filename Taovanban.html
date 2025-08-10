@@ -101,7 +101,6 @@
             initializePage();
         });
 
-        // Hàm handleApiRequest (GET) đổi tên thành handleApiRequest_GET cho rõ ràng
         async function handleApiRequest_GET(payload) {
             if (typeof TAO_VAN_BAN_APPS_SCRIPT_URL === 'undefined' || !TAO_VAN_BAN_APPS_SCRIPT_URL) { showError('Lỗi cấu hình: Vui lòng kiểm tra TAO_VAN_BAN_APPS_SCRIPT_URL trong config.js.'); return null; }
             return new Promise((resolve, reject) => {
@@ -326,24 +325,24 @@
                 // Sửa lỗi: Sử dụng fetch POST và URL đúng từ config
                 const res = await fetch(TAO_VAN_BAN_POST_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'application/json' }
                 });
+                
+                setTimeout(() => {
+                    stopLoadingAnimation();
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('button-loading');
+                    fetchHistory(); 
+                    resultContainer.style.display = 'block';
+                    resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi! Kết quả sẽ xuất hiện trong lịch sử bên dưới.</p>';
+                }, 4000);
 
-                if (!res.ok) throw new Error(`Lỗi server: ${res.status}`);
-                const result = await res.json();
-                if (result.status === 'success') {
-                    showSuccess(result.files);
-                    fetchHistory();
-                } else {
-                    throw new Error(result.message);
-                }
             } catch (err) {
+                 stopLoadingAnimation();
+                 submitBtn.disabled = false;
+                 submitBtn.classList.remove('button-loading');
                  showError(`Gửi yêu cầu thất bại: ${err.message}`);
-            } finally {
-                stopLoadingAnimation();
-                submitBtn.disabled = false;
-                submitBtn.classList.remove('button-loading');
             }
         }
         
