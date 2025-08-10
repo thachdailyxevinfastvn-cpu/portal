@@ -13,12 +13,34 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        @keyframes bounce-loader {
-          0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); }
-        }
+        
+        /* CSS cho hiệu ứng loader */
+        @keyframes bounce-loader { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
         .bounce-dot { width: 1rem; height: 1rem; background-color: #3b82f6; border-radius: 9999px; display: inline-block; animation: bounce-loader 1.4s infinite ease-in-out both; }
         .bounce-dot:nth-child(1) { animation-delay: -0.32s; }
         .bounce-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        /* === THAY ĐỔI 1: CSS CHO NÚT LỌC VÀ NÚT ĐÓNG ẢNH === */
+        .filter-btn-active {
+            background-color: #1d4ed8; /* blue-800 */
+            color: white;
+            font-weight: 600;
+        }
+        /* Tùy chỉnh cho nút đóng (X) của trình xem ảnh to và rõ hơn */
+        .featherlight .featherlight-close-icon {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            font-size: 2rem; /* Làm cho dấu '×' to hơn */
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 50%;
+            top: 15px;
+            right: 15px;
+        }
+        .featherlight .featherlight-close-icon:hover {
+            background: rgba(239, 68, 68, 0.8); /* Màu đỏ khi di chuột qua */
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -40,12 +62,8 @@
                      <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                      <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                 </div>
-                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                </button>
-                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
             </div>
         </nav>
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
@@ -62,12 +80,17 @@
     <main class="container mx-auto px-4 sm:px-6 py-8">
         <section>
             <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">Thông Tin Ngân Hàng</h1>
-            <p class="text-gray-600 mb-8">Tổng hợp chính sách và điều kiện từ các đối tác ngân hàng.</p>
+            <p class="text-gray-600 mb-6">Tổng hợp chính sách và điều kiện từ các đối tác ngân hàng.</p>
+            
+            <div id="filter-container" class="mb-4 flex flex-wrap gap-2">
+                <button data-filter="all" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border filter-btn-active">Tất cả</button>
+                <button data-filter="cong-ty" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border">Hỗ trợ Công ty</button>
+                <button data-filter="bien-vang" class="filter-btn px-4 py-2 text-sm rounded-lg shadow-sm bg-white border">Biển vàng</button>
+            </div>
+            
             <div id="data-container" class="bg-white shadow-lg rounded-lg overflow-x-auto">
                 <div id="loader" class="text-center p-8">
-                    <div class="flex justify-center items-center space-x-2">
-                        <div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div>
-                    </div>
+                    <div class="flex justify-center items-center space-x-2"><div class="bounce-dot"></div><div class="bounce-dot"></div><div class="bounce-dot"></div></div>
                     <p class="mt-4 text-gray-600 font-semibold">Đang tải dữ liệu ngân hàng...</p>
                 </div>
             </div>
@@ -85,6 +108,7 @@
         const mobileMenu = document.getElementById('mobile-menu');
         const dataContainer = document.getElementById('data-container');
         const loader = document.getElementById('loader');
+        const filterContainer = document.getElementById('filter-container');
 
         async function handleApiRequest(payload, scriptUrl) {
             if (typeof scriptUrl === 'undefined' || !scriptUrl) {
@@ -103,18 +127,57 @@
             });
         }
         
+        /**
+         * Hàm thiết lập sự kiện cho các nút lọc.
+         */
+        function setupFilters() {
+            const buttons = filterContainer.querySelectorAll('.filter-btn');
+            const tableRows = dataContainer.querySelectorAll('tbody tr');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Bỏ class active khỏi tất cả các nút, sau đó thêm vào nút được nhấn
+                    buttons.forEach(btn => btn.classList.remove('filter-btn-active'));
+                    button.classList.add('filter-btn-active');
+                    
+                    const filter = button.dataset.filter;
+
+                    tableRows.forEach(row => {
+                        // Lấy text từ các cột tương ứng
+                        const congTyCell = row.cells[2].textContent.trim().toLowerCase();
+                        const bienVangCell = row.cells[3].textContent.trim().toLowerCase();
+
+                        let showRow = false;
+                        if (filter === 'all') {
+                            showRow = true;
+                        } else if (filter === 'cong-ty' && congTyCell === 'có') {
+                            showRow = true;
+                        } else if (filter === 'bien-vang' && bienVangCell === 'có') {
+                            showRow = true;
+                        }
+
+                        row.style.display = showRow ? '' : 'none';
+                    });
+                });
+            });
+        }
+
         function displayBankTable(bankData) {
             if (!bankData || bankData.length === 0) {
                 dataContainer.innerHTML = `<p class="text-gray-500 text-center p-8">Không có dữ liệu ngân hàng nào.</p>`;
                 return;
             }
-
             const table = document.createElement('table');
             table.className = 'min-w-full divide-y divide-gray-200';
+            
+            // === THAY ĐỔI 3: THÊM DÒNG HƯỚNG DẪN ===
             table.innerHTML = `
                 <thead class="bg-gray-100">
                     <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tên Ngân Hàng</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Tên Ngân Hàng
+                            <span class="block text-xs font-normal text-gray-500 normal-case">Bấm vào tên để xem chính sách</span>
+                        </th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Cá nhân</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Hỗ trợ Công ty</th>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Biển Vàng</th>
@@ -126,22 +189,11 @@
             `;
             
             const tbody = table.querySelector('tbody');
-
             bankData.forEach(bank => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50';
-                
-                // === THAY ĐỔI QUAN TRỌNG Ở ĐÂY ===
-                // Tự động xây dựng đường dẫn ảnh dựa trên tên file từ sheet
-                // Đường dẫn sẽ là "images/TEN_FILE_ANH.jpg"
-                const imagePath = `images/${bank.link}`; // bank.link bây giờ chứa tên file, ví dụ: "VP Bank.jpg"
-                
-                const nameCell = `
-                    <a href="${imagePath}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">
-                        ${bank.tenNganHang || 'N/A'}
-                    </a>
-                `;
-                
+                const imagePath = `images/${bank.link}`;
+                const nameCell = `<a href="${imagePath}" data-featherlight="image" class="text-blue-600 hover:text-blue-800 hover:underline font-semibold cursor-pointer">${bank.tenNganHang || 'N/A'}</a>`;
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">${nameCell}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${bank.hoTroCaNhan || ''}</td>
@@ -155,18 +207,17 @@
             
             dataContainer.innerHTML = '';
             dataContainer.appendChild(table);
+            
+            // Sau khi bảng được tạo, thiết lập các bộ lọc
+            setupFilters();
         }
 
         window.addEventListener('load', async () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
-            if (!userDataString) {
-                window.location.href = 'index.html';
-                return;
-            }
+            if (!userDataString) { window.location.href = 'index.html'; return; }
             const userData = JSON.parse(userDataString);
             userFullNameDisplay.textContent = userData.fullName;
             userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
-
             try {
                 const result = await handleApiRequest({ action: 'getBankData' }, NGAN_HANG_APPS_SCRIPT_URL);
                 if (result && result.success) {
@@ -180,14 +231,8 @@
             }
         });
         
-        logoutBtn.addEventListener('click', () => {
-            sessionStorage.removeItem('loggedInUser');
-            window.location.href = 'index.html';
-        });
-
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
+        logoutBtn.addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+        mobileMenuButton.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
 
     </script>
 </body>
