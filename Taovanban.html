@@ -80,6 +80,13 @@
             </div>
             <div id="error-container" class="hidden mt-6 p-4 border-l-4 border-red-500 bg-red-50 text-red-700"></div>
         </div>
+
+        <div id="history-section" class="max-w-3xl mx-auto mt-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Lịch sử tạo văn bản của bạn</h2>
+            <div id="history-container" class="bg-white p-6 rounded-xl shadow-lg space-y-4">
+                 <p class="text-center text-gray-500">Đang tải lịch sử...</p>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -133,12 +140,16 @@
         const dateSourceLabel = 'ngày ký hợp đồng';
         const otherDateLabels = ['ngày cấp'];
         const hiddenLabels = ['giá niêm yết', 'stt'];
+        const priceLabel = 'giá xuất hóa đơn';
+        const loanLabel = 'số tiền vay';
+        const downPaymentLabel = 'số tiền trả trước';
 
-        let dateTextPlaceholderName = ''; 
-        let dateSourcePlaceholderName = ''; 
+        let dateTextPlaceholderName = '', dateSourcePlaceholderName = '';
+        let pricePlaceholderName = '', loanPlaceholderName = '', downPaymentPlaceholderName = '';
         
         function initializePage() {
             fetchGroups();
+            fetchHistory();
             groupSelector.addEventListener('change', handleGroupSelection);
             submitBtn.addEventListener('click', handleSubmit);
             formContainer.addEventListener('input', handleFormInput);
@@ -149,7 +160,6 @@
             const result = await handleApiRequest({ action: 'getGroups' });
             stopLoadingAnimation();
             if (result && result.status === 'success') {
-                // Sửa lỗi: Xóa các lựa chọn cũ để chống lặp lại
                 while (groupSelector.options.length > 1) {
                     groupSelector.remove(1);
                 }
@@ -173,6 +183,32 @@
                 } else if (result) { showError(result.message); }
             } else { submitBtn.disabled = true; }
         }
+        
+        async function fetchHistory() {
+            const historyContainer = document.getElementById('history-container');
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (!userDataString) return;
+            const userName = JSON.parse(userDataString).fullName;
+            const result = await handleApiRequest({ action: 'getUserHistory', userName: userName });
+            if (result && result.status === 'success') {
+                renderHistory(result.data);
+            } else {
+                historyContainer.innerHTML = `<p class="text-center text-red-500">Không thể tải lịch sử.</p>`;
+            }
+        }
+
+        function renderHistory(historyData) {
+            const historyContainer = document.getElementById('history-container');
+            if (!historyData || historyData.length === 0) {
+                historyContainer.innerHTML = `<p class="text-center text-gray-500">Bạn chưa tạo văn bản nào.</p>`;
+                return;
+            }
+            let historyHtml = '';
+            historyData.forEach(item => {
+                historyHtml += `<div class="border-b pb-4 last:border-b-0 last:pb-0"><p class="text-sm text-gray-500">${item.timestamp}</p><p class="font-semibold text-gray-800">${item.groupName}</p><div class="flex flex-wrap gap-2 mt-2">${item.links.map((link, index) => `<a href="${link}" target="_blank" class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-md hover:bg-blue-200">File ${index + 1}</a>`).join('')}</div></div>`;
+            });
+            historyContainer.innerHTML = historyHtml;
+        }
 
         function createForm(placeholders) {
             if (placeholders.length === 0) {
@@ -186,6 +222,13 @@
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
             dateSourcePlaceholderName = dateSourcePlaceholder ? dateSourcePlaceholder.name : '';
             
+            const pricePlaceholder = placeholders.find(p => p.label.toLowerCase() === priceLabel);
+            const loanPlaceholder = placeholders.find(p => p.label.toLowerCase() === loanLabel);
+            const downPaymentPlaceholder = placeholders.find(p => p.label.toLowerCase() === downPaymentLabel);
+            pricePlaceholderName = pricePlaceholder ? pricePlaceholder.name : '';
+            loanPlaceholderName = loanPlaceholder ? loanPlaceholder.name : '';
+            downPaymentPlaceholderName = downPaymentPlaceholder ? downPaymentPlaceholder.name : '';
+            
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -197,24 +240,19 @@
                 const pLabelLower = p.label.toLowerCase();
                 const pNameUpper = p.name.toUpperCase().replace(/<|>/g, '');
 
-                // Sửa lỗi: Ẩn các ô trong hiddenLabels
                 if (hiddenLabels.includes(pLabelLower)) return;
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
-                // SỬA LỖI: Hiển thị ô TODAY dưới dạng chỉ đọc
                 if (pNameUpper === 'TODAY') {
                      formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
                 else if (dropdownLabels.some(l => pLabelLower.includes(l))) {
-                    formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                    <option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option>
-                                    <option>BỘ CÔNG AN</option>
-                                 </select>`;
+                    formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"><option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option><option>BỘ CÔNG AN</option></select>`;
                 } 
-                else if (pLabelLower === dateTextLabel) {
-                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động điền" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                else if (pLabelLower === dateTextLabel || pLabelLower === downPaymentLabel) {
+                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
                 }
                 else if (pLabelLower === dateSourceLabel || otherDateLabels.includes(pLabelLower)) {
                      formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
@@ -239,6 +277,10 @@
                 target.value = value ? Number(value).toLocaleString('vi-VN') : '';
             }
 
+            if (target.name === pricePlaceholderName || target.name === loanPlaceholderName) {
+                calculateDownPayment();
+            }
+
             if (target.name === dateSourcePlaceholderName) {
                 const dateTextEl = document.querySelector(`[name="${dateTextPlaceholderName}"]`);
                 if(dateTextEl) {
@@ -247,6 +289,17 @@
             }
         }
         
+        function calculateDownPayment() {
+            const priceEl = document.querySelector(`[name="${pricePlaceholderName}"]`);
+            const loanEl = document.querySelector(`[name="${loanPlaceholderName}"]`);
+            const downPaymentEl = document.querySelector(`[name="${downPaymentPlaceholderName}"]`);
+            if (!priceEl || !loanEl || !downPaymentEl) return;
+            const price = parseFloat(priceEl.value.replace(/\./g, '')) || 0;
+            const loan = parseFloat(loanEl.value.replace(/\./g, '')) || 0;
+            const downPayment = price - loan;
+            downPaymentEl.value = downPayment >= 0 ? downPayment.toLocaleString('vi-VN') : '0';
+        }
+
         async function handleSubmit() {
             clearResults();
             const placeholdersData = {};
@@ -274,6 +327,7 @@
 
             if (result && result.status === 'success') {
                 showSuccess(result.files);
+                fetchHistory(); // Tải lại lịch sử sau khi tạo thành công
             } else if (result) { showError(result.message); }
         }
         
@@ -291,8 +345,8 @@
         function clearAll() {
             formContainer.innerHTML = '';
             submitBtn.disabled = true;
-            dateTextPlaceholderName = '';
-            dateSourcePlaceholderName = '';
+            dateTextPlaceholderName = ''; dateSourcePlaceholderName = '';
+            pricePlaceholderName = ''; loanPlaceholderName = ''; downPaymentPlaceholderName = '';
             clearResults();
         }
         

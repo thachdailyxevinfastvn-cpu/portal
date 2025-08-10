@@ -35,7 +35,6 @@ function doGet(e) {
 
 // === CÁC HÀM LOGIC ===
 
-// ===== SỬA LỖI LẶP LẠI TÊN NHÓM TẠI ĐÂY =====
 function getDocumentGroups() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
   if (!sheet) return { status: 'error', message: `Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'` };
@@ -46,7 +45,7 @@ function getDocumentGroups() {
   const range = sheet.getRange(2, 2, lastRow - 1, 1);
   const values = range.getValues().flat().filter(String);
   
-  // Sửa lỗi: Chỉ trả về các giá trị duy nhất, không lặp lại
+  // SỬA LỖI: Chỉ trả về các giá trị duy nhất, không lặp lại
   const uniqueValues = [...new Set(values)];
   return { status: 'success', data: uniqueValues };
 }
@@ -62,9 +61,8 @@ function getPlaceholdersForGroup(groupName) {
     }
 
     const lastColumn = sheet.getLastColumn();
-    if (lastColumn < 1) return { status: 'success', data: [] };
+    if (lastColumn < 1) return { status: 'success', data: [] }; 
 
-    // Đọc từ Cột 1 để lấy đầy đủ tất cả các placeholder
     const names = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
     const labels = sheet.getRange(2, 1, 1, lastColumn).getValues()[0];
 
@@ -79,26 +77,39 @@ function getPlaceholdersForGroup(groupName) {
     }
     return { status: 'success', data: placeholders };
   } catch (e) {
-    return { status: 'error', message: `Không thể lấy placeholder cho nhóm '${groupName}': ${e.message}` };
+    return { status: 'error', message: `Không tìm thấy trang tính cho nhóm '${groupName}': ${e.message}` };
   }
 }
 
+/**
+ * Hàm chính để xử lý việc tạo văn bản.
+ * SỬA LỖI CUỐI CÙNG: Thay thế placeholder theo thứ tự ưu tiên để khắc phục lỗi _TEXT.
+ */
 function processFormCreation(payload) {
   const { groupName, placeholders, userName } = payload;
   try {
     const today = new Date();
-    const formattedDate = Utilities.formatDate(today, "GMT+7", "dd/MM/yyyy");
-    placeholders['<<TODAY>>'] = formattedDate;
-    placeholders['TODAY'] = formattedDate; // Hỗ trợ cả 2 kiểu placeholder
+    
+    placeholders['<<TODAY>>'] = Utilities.formatDate(today, "GMT+7", "dd/MM/yyyy");
 
+    for (const key in placeholders) {
+      if (key.toUpperCase().includes('NGAY') && /^\d{4}-\d{2}-\d{2}$/.test(placeholders[key])) {
+        const [year, month, day] = placeholders[key].split('-');
+        placeholders[key] = `${day}/${month}/${year}`;
+      }
+    }
+
+    const ngayKyHdValue = placeholders['<<NGAY_KY_HD>>'];
+    if (ngayKyHdValue) {
+      placeholders['<<NGAY_KY_HD_TEXT>>'] = convertDateToTextGS(ngayKyHdValue);
+    }
+    
     const templateSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TEMPLATE_SHEET_NAME);
     if (!templateSheet) throw new Error(`Không tìm thấy trang tính '${TEMPLATE_SHEET_NAME}'`);
-
     const targetFolder = DriveApp.getFolderById(TARGET_FOLDER_ID);
     const data = templateSheet.getDataRange().getValues();
     const groupRow = data.find(row => row[1] === groupName);
     if (!groupRow) throw new Error(`Không tìm thấy nhóm '${groupName}' trong trang Template.`);
-
     const templateLinks = groupRow.slice(2).filter(String);
     if (templateLinks.length === 0) throw new Error(`Nhóm '${groupName}' không có link template nào.`);
     
@@ -107,22 +118,34 @@ function processFormCreation(payload) {
       const templateId = extractIdFromUrl(link);
       const templateFile = DriveApp.getFileById(templateId);
       const templateName = templateFile.getName();
-      const customerName = placeholders['<<TEN_KH>>'] || placeholders['TEN_KH'] || 'KhongCoTen';
+      const customerName = placeholders['<<TEN_KH>>'] || 'KhongCoTen';
       const fileCreationDate = Utilities.formatDate(today, "GMT+7", "dd-MM-yyyy"); 
       const newFileName = `${templateName} - ${customerName} - ${fileCreationDate}`;
       const newFile = templateFile.makeCopy(newFileName, targetFolder);
       const doc = DocumentApp.openById(newFile.getId());
       const body = doc.getBody();
-      for (const key in placeholders) {
-        body.replaceText(key, placeholders[key] || '');
+      
+      // ===== BẮT ĐẦU PHẦN SỬA LỖI CUỐI CÙNG =====
+      // Lấy ra tất cả các key (placeholder) từ dữ liệu
+      const allKeys = Object.keys(placeholders);
+      
+      // Sắp xếp các key theo độ dài từ DÀI NHẤT đến NGẮN NHẤT
+      allKeys.sort((a, b) => b.length - a.length);
+      
+      // Lặp qua mảng key đã được sắp xếp và thực hiện thay thế
+      // Việc này đảm bảo <<NGAY_KY_HD_TEXT>> luôn được thay thế trước <<NGAY_KY_HD>>
+      for (const key of allKeys) {
+        const value = placeholders[key] || '';
+        body.replaceText(key, value);
       }
+      // ===== KẾT THÚC PHẦN SỬA LỖI CUỐI CÙNG =====
+
       doc.saveAndClose();
       newFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
       generatedFiles.push({ name: templateName, url: newFile.getUrl() });
     });
     
     writeDataToGroupSheet(groupName, placeholders);
-    
     logResult(userName, 'Thành công', generatedFiles);
     return { status: 'success', files: generatedFiles }; 
   } catch (e) {
@@ -131,20 +154,17 @@ function processFormCreation(payload) {
   }
 }
 
+
+
+
 function writeDataToGroupSheet(groupName, data) {
   try {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(groupName);
-    if (!sheet) {
-      console.log(`Không tìm thấy sheet '${groupName}' để ghi dữ liệu.`);
-      return;
-    }
+    if (!sheet) return;
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
     const newRow = headers.map(header => data[header] || '');
-    
     sheet.appendRow(newRow);
-  } catch(e) {
-    console.error(`Lỗi khi ghi dữ liệu vào sheet '${groupName}': ${e.message}`);
-  }
+  } catch(e) { console.error(`Lỗi khi ghi dữ liệu vào sheet '${groupName}': ${e.message}`); }
 }
 
 function logResult(userName, status, filesArray) {
@@ -163,4 +183,12 @@ function extractIdFromUrl(url) {
   const match = url.match(/[-\w]{25,}/);
   if (match) return match[0];
   throw new Error(`URL không hợp lệ: ${url}`);
+}
+
+function convertDateToTextGS(dateString_ddMMyyyy) {
+  if (!dateString_ddMMyyyy) return '';
+  const parts = dateString_ddMMyyyy.split('/');
+  if (parts.length !== 3) return dateString_ddMMyyyy; // Trả lại giá trị cũ nếu không đúng định dạng
+  const [day, month, year] = parts;
+  return `ngày ${day} tháng ${month} năm ${year}`;
 }
