@@ -36,18 +36,33 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             border-color: #3b82f6;
         }
+        .policy-item .policy-details {
+            flex-grow: 1;
+        }
         .policy-item .policy-title {
             color: #1f2937;
             font-weight: 600;
         }
+        .policy-item .policy-meta {
+            font-size: 0.8rem;
+            color: #6b7280; /* gray-500 */
+            margin-top: 0.25rem;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .policy-item .policy-meta span {
+            margin-right: 1rem;
+        }
         .policy-item .policy-icon {
             color: #3b82f6;
+            flex-shrink: 0; /* Ngăn icon bị co lại */
+            margin-left: 1rem;
         }
     </style>
 </head>
 <body class="bg-gray-50">
 
-    <!-- Header và Menu được copy từ trang homepage.html để đảm bảo đồng bộ -->
+    <!-- Header và Menu -->
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
             <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
@@ -55,7 +70,6 @@
                 <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                 <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
                 <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
-                <!-- Đánh dấu trang Chính sách là active -->
                 <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Chính sách</a>
                 <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
                 <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
@@ -74,7 +88,6 @@
                 </button>
             </div>
         </nav>
-        <!-- Menu cho mobile -->
         <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
             <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
             <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
@@ -88,22 +101,19 @@
 
     <main class="container mx-auto px-6 py-8">
         <section>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-8">Tổng Hợp Chính Sách</h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-2">Tổng Hợp Chính Sách</h1>
+            <p class="text-gray-600 mb-8">Cập nhật chính sách chính thức từ VinFast và các nguồn khác.</p>
             
-            <!-- Container chính để chứa danh sách chính sách -->
             <div id="policy-container" class="space-y-4">
-                <!-- Loader hiển thị trong khi chờ tải dữ liệu -->
                 <div id="loader" class="text-center p-8">
                     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
                     <p class="mt-4 text-gray-500">Đang tải chính sách từ Google Sheet...</p>
                 </div>
-                <!-- Dữ liệu từ Google Sheet sẽ được chèn vào đây -->
             </div>
         </section>
     </main>
 
     <script>
-        // --- DOM Elements ---
         const userFullNameDisplay = document.getElementById('user-fullname');
         const userAvatarDisplay = document.getElementById('user-avatar');
         const logoutBtn = document.getElementById('logout-btn');
@@ -112,15 +122,12 @@
         const policyContainer = document.getElementById('policy-container');
         const loader = document.getElementById('loader');
 
-        // --- Hàm gọi API (JSONP) để lấy dữ liệu từ Google Sheet ---
         async function handleApiRequest(payload) {
-            // **SỬA LỖI**: Kiểm tra và sử dụng biến URL dành riêng cho trang chính sách
             if (typeof POLICY_PAGE_SCRIPT_URL === 'undefined' || !POLICY_PAGE_SCRIPT_URL) {
                 console.error('Lỗi: Không tìm thấy biến POLICY_PAGE_SCRIPT_URL trong file config.js.');
                 policyContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi cấu hình: Vui lòng kiểm tra file config.js.</p>`;
                 return null;
             }
-            // Sử dụng JSONP để vượt qua giới hạn CORS
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
                 window[callbackName] = (data) => {
@@ -135,15 +142,12 @@
                     reject(new Error('JSONP request failed'));
                 };
                 const params = new URLSearchParams({ ...payload, callback: callbackName });
-                // **SỬA LỖI**: Sử dụng biến URL đúng
                 script.src = `${POLICY_PAGE_SCRIPT_URL}?${params.toString()}`;
                 document.body.appendChild(script);
             });
         }
 
-        // --- Hàm hiển thị dữ liệu chính sách lên trang web ---
         function displayPolicies(policies) {
-            // Xóa loader
             loader.remove();
             
             if (!policies || policies.length === 0) {
@@ -151,19 +155,27 @@
                 return;
             }
 
-            // Lặp qua từng chính sách và tạo HTML tương ứng
             policies.forEach(policy => {
-                // Bỏ qua các hàng trống trong Google Sheet
                 if (!policy.name || !policy.link) return;
 
                 const policyElement = document.createElement('a');
                 policyElement.href = policy.link;
-                policyElement.target = '_blank'; // Mở link trong tab mới
+                policyElement.target = '_blank';
                 policyElement.rel = 'noopener noreferrer';
                 policyElement.className = 'policy-item flex items-center justify-between';
                 
+                // Cập nhật cấu trúc HTML để hiển thị cả Nguồn và Ngày cập nhật
+                const sourceHTML = policy.source ? `<span>Nguồn: <strong>${policy.source}</strong></span>` : '';
+                const updatedHTML = policy.updated ? `<span>Cập nhật: ${policy.updated}</span>` : '';
+
                 policyElement.innerHTML = `
-                    <span class="policy-title text-lg">${policy.name}</span>
+                    <div class="policy-details">
+                        <p class="policy-title text-lg">${policy.name}</p>
+                        <div class="policy-meta">
+                           ${sourceHTML}
+                           ${updatedHTML}
+                        </div>
+                    </div>
                     <span class="policy-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -174,19 +186,16 @@
             });
         }
 
-        // --- Hàm chính chạy khi tải trang ---
         window.addEventListener('load', async () => {
-            // 1. Kiểm tra và hiển thị thông tin người dùng (giống trang chủ)
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
-                window.location.href = 'index.html'; // Nếu chưa đăng nhập, quay về trang login
+                window.location.href = 'index.html';
                 return;
             }
             const userData = JSON.parse(userDataString);
             userFullNameDisplay.textContent = userData.fullName;
             userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
 
-            // 2. Gọi API để lấy dữ liệu chính sách
             try {
                 const result = await handleApiRequest({ action: 'getPolicies' });
                 if (result && result.success) {
@@ -200,13 +209,11 @@
             }
         });
         
-        // --- Xử lý đăng xuất ---
         logoutBtn.addEventListener('click', () => {
             sessionStorage.removeItem('loggedInUser');
             window.location.href = 'index.html';
         });
 
-        // --- Xử lý menu mobile ---
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
