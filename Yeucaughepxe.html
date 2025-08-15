@@ -12,6 +12,7 @@
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
         .form-input, .form-select { width: 100%; padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 0.375rem; transition: all 0.2s ease-in-out; background-color: white; font-size: 0.875rem; }
         .form-input:focus, .form-select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); }
+        .form-input[readonly] { background-color: #f3f4f6; cursor: not-allowed; }
         .btn-primary { background-color: #1d4ed8; color: white; padding: 10px 20px; border-radius: 0.375rem; font-weight: 500; transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
         .btn-primary:hover { background-color: #2563eb; }
         .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255, 255, 255, 0.75); z-index: 9999; }
@@ -24,7 +25,6 @@
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
-        <!-- Header & Navigation (ĐÃ CẬP NHẬT) -->
         <header class="bg-white shadow-md sticky top-0 z-50">
             <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
@@ -65,16 +65,29 @@
             <div class="grid grid-cols-12 gap-6 items-start">
                 <div class="col-span-12 lg:col-span-4 bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:sticky top-24">
                     <h2 class="text-lg font-semibold mb-4 text-gray-800 border-b pb-2">Tạo Yêu Cầu Mới</h2>
-                    <form id="pairing-request-form" class="space-y-2">
-                         <div><label for="tvbh" class="text-xs font-medium text-gray-600">Tư Vấn Bán Hàng (TVBH)</label><input type="text" id="tvbh" name="tvbh" class="form-input mt-1" readonly></div>
+                    <form id="pairing-request-form" class="space-y-3">
+                        <div><label for="tvbh" class="text-xs font-medium text-gray-600">Tư Vấn Bán Hàng (TVBH)</label><input type="text" id="tvbh" name="tvbh" class="form-input mt-1" readonly></div>
                         <div><label for="ten_khach_hang" class="text-xs font-medium text-gray-600">Tên Khách Hàng</label><input type="text" id="ten_khach_hang" name="ten_khach_hang" required class="form-input mt-1"></div>
+                        
                         <div><label for="loai_xe" class="text-xs font-medium text-gray-600">Loại Xe</label><select id="loai_xe" name="loai_xe" required class="form-select mt-1"><option value="" disabled selected>Đang tải...</option></select></div>
-                        <div><label for="phien_ban" class="text-xs font-medium text-gray-600">Phiên bản</label><input type="text" id="phien_ban" name="phien_ban" required class="form-input mt-1" placeholder="VD: Plus, Eco..."></div>
-                        <div><label for="ngoai_that" class="text-xs font-medium text-gray-600">Màu xe</label><input type="text" id="ngoai_that" name="ngoai_that" required class="form-input mt-1" placeholder="VD: Trắng, Đen..."></div>
-                        <div><label for="noi_that" class="text-xs font-medium text-gray-600">Màu nội thất</label><input type="text" id="noi_that" name="noi_that" required class="form-input mt-1" placeholder="VD: Black, Beige..."></div>
+                        <div><label for="ma_san_pham" class="text-xs font-medium text-gray-600">Mã sản phẩm</label><input type="text" id="ma_san_pham" name="ma_san_pham" class="form-input mt-1" readonly></div>
+                        <div><label for="phien_ban" class="text-xs font-medium text-gray-600">Phiên bản</label><select id="phien_ban" name="phien_ban" required class="form-select mt-1"><option value="" disabled selected>-- Chọn Loại xe trước --</option></select></div>
+                        <div><label for="ma_phien_ban" class="text-xs font-medium text-gray-600">Mã phiên bản</label><input type="text" id="ma_phien_ban" name="ma_phien_ban" class="form-input mt-1" readonly></div>
+                        <div><label for="ngoai_that" class="text-xs font-medium text-gray-600">Màu ngoại thất</label><select id="ngoai_that" name="ngoai_that" required class="form-select mt-1"><option value="" disabled selected>Đang tải...</option></select></div>
+                        <div><label for="ext" class="text-xs font-medium text-gray-600">EXT</label><input type="text" id="ext" name="ext" class="form-input mt-1" readonly></div>
+                        <div><label for="noi_that" class="text-xs font-medium text-gray-600">Màu nội thất</label>
+                            <select id="noi_that" name="noi_that" required class="form-select mt-1">
+                                <option value="" disabled selected>-- Chọn màu nội thất --</option>
+                                <option value="Màu Đen">Màu Đen</option>
+                                <option value="Màu Mocha Nâu">Màu Mocha Nâu</option>
+                                <option value="Màu Be">Màu Be</option>
+                            </select>
+                        </div>
+                        <div><label for="ghi_chu" class="text-xs font-medium text-gray-600">Ghi chú</label><input type="text" id="ghi_chu" name="ghi_chu" class="form-input mt-1" readonly></div>
                         <div><label for="da_coc" class="text-xs font-medium text-gray-600">Đã cọc (VNĐ)</label><input type="text" id="da_coc" name="da_coc" required class="form-input mt-1" placeholder="Chỉ nhập số"></div>
                         <div><label for="ngay_coc" class="text-xs font-medium text-gray-600">Ngày cọc</label><input type="date" id="ngay_coc" name="ngay_coc" required class="form-input mt-1"></div>
-                        <button type="submit" class="btn-primary w-full !mt-4"><i class="fas fa-paper-plane mr-2"></i>Gửi Yêu Cầu</button>
+                        
+                        <button type="submit" class="btn-primary w-full !mt-5"><i class="fas fa-paper-plane mr-2"></i>Gửi Yêu Cầu</button>
                     </form>
                 </div>
                 <div class="col-span-12 lg:col-span-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -90,11 +103,28 @@
     
     <script src="config.js"></script>
     <script>
+        // Biến toàn cục để lưu trữ dữ liệu từ server, tránh gọi lại nhiều lần
+        let GHEPXE_DATA = [];
+        let MAUXE_DATA = [];
+
         document.addEventListener('DOMContentLoaded', () => {
-             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
+            // Kiểm tra config URL
+            if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
                 alert("Lỗi cấu hình: Vui lòng kiểm tra biến KHO_XE_APPS_SCRIPT_URL trong file config.js.");
                 return;
             }
+
+            // Thiết lập thông tin người dùng
+            setupUserInfo();
+
+            // Gắn các sự kiện cho các element
+            addEventListeners();
+            
+            // Tải dữ liệu cần thiết cho form và bảng
+            fetchAllInitialData();
+        });
+
+        function setupUserInfo() {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
                 const userData = JSON.parse(userDataString);
@@ -104,37 +134,84 @@
             } else {
                 document.getElementById('tvbh').value = "Chưa đăng nhập";
             }
-            
+        }
+        
+        function addEventListeners() {
             document.getElementById('logout-btn').addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
             });
+
             document.getElementById('mobile-menu-button').addEventListener('click', () => {
                 document.getElementById('mobile-menu').classList.toggle('hidden');
             });
 
-            fetchCarModels();
-            fetchWaitingList();
-            
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
-        });
 
-        async function fetchCarModels() {
-            const select = document.getElementById('loai_xe');
+            // === Sự kiện cho các dropdown phụ thuộc ===
+            document.getElementById('loai_xe').addEventListener('change', handleLoaiXeChange);
+            document.getElementById('phien_ban').addEventListener('change', handlePhienBanChange);
+            document.getElementById('ngoai_that').addEventListener('change', handleNgoaiThatChange);
+        }
+
+        async function fetchAllInitialData() {
+            showLoading(true);
             try {
-                const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getCarModels`);
+                // Chạy song song các promise để tăng tốc độ tải
+                await Promise.all([
+                    fetchGhepxeData(),
+                    fetchMauXeData(),
+                    fetchWaitingList() 
+                ]);
+            } catch (error) {
+                showToast(`Lỗi nghiêm trọng khi tải dữ liệu ban đầu: ${error.message}`, 'error');
+                console.error("Lỗi fetchAllInitialData:", error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function fetchGhepxeData() {
+            const selectLoaiXe = document.getElementById('loai_xe');
+            try {
+                const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getGhepxeData`);
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
+
                 if (result.status === "SUCCESS") {
-                    select.innerHTML = '<option value="" disabled selected>-- Chọn loại xe --</option>';
-                    result.data.forEach(model => {
-                        select.innerHTML += `<option value="${model}">${model}</option>`;
+                    GHEPXE_DATA = result.data;
+                    const uniqueLoaiXe = [...new Set(GHEPXE_DATA.map(item => item['LOẠI XE']))];
+                    
+                    selectLoaiXe.innerHTML = '<option value="" disabled selected>-- Chọn loại xe --</option>';
+                    uniqueLoaiXe.forEach(model => {
+                        selectLoaiXe.innerHTML += `<option value="${model}">${model}</option>`;
                     });
                 } else throw new Error(result.message);
             } catch (err) {
-                select.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
-                console.error("Lỗi fetchCarModels:", err);
+                selectLoaiXe.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
+                console.error("Lỗi fetchGhepxeData:", err);
+                throw err; // Ném lỗi ra để Promise.all bắt được
+            }
+        }
+
+        async function fetchMauXeData() {
+            const selectNgoaiThat = document.getElementById('ngoai_that');
+            try {
+                const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getMauXeData`);
+                if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
+                const result = await res.json();
+                if (result.status === "SUCCESS") {
+                    MAUXE_DATA = result.data;
+                    selectNgoaiThat.innerHTML = '<option value="" disabled selected>-- Chọn màu ngoại thất --</option>';
+                    MAUXE_DATA.forEach(item => {
+                        selectNgoaiThat.innerHTML += `<option value="${item['NGOẠI THẤT TV']}">${item['NGOẠI THẤT TV']}</option>`;
+                    });
+                } else throw new Error(result.message);
+            } catch (err) {
+                selectNgoaiThat.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
+                console.error("Lỗi fetchMauXeData:", err);
+                throw err;
             }
         }
 
@@ -151,13 +228,71 @@
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-red-600">Lỗi: ${err.message}</td></tr>`;
                  console.error("Lỗi fetchWaitingList:", err);
+                 throw err;
+            }
+        }
+
+        function handleLoaiXeChange(event) {
+            const selectedLoaiXe = event.target.value;
+            const selectPhienBan = document.getElementById('phien_ban');
+
+            // Reset các trường phụ thuộc
+            document.getElementById('ma_san_pham').value = '';
+            document.getElementById('ghi_chu').value = '';
+            document.getElementById('ma_phien_ban').value = '';
+            selectPhienBan.innerHTML = '<option value="" disabled selected>-- Chọn phiên bản --</option>';
+
+            if (!selectedLoaiXe) return;
+            
+            // Lọc các phiên bản tương ứng với loại xe đã chọn
+            const phienBanFiltered = GHEPXE_DATA.filter(item => item['LOẠI XE'] === selectedLoaiXe);
+            
+            // Điền Mã sản phẩm và Ghi chú (lấy từ dòng đầu tiên tìm được)
+            if (phienBanFiltered.length > 0) {
+                document.getElementById('ma_san_pham').value = phienBanFiltered[0]['MÃ SP'] || '';
+                document.getElementById('ghi_chu').value = phienBanFiltered[0]['NOTE'] || '';
+            }
+            
+            // Điền dropdown phiên bản
+            const uniquePhienBan = [...new Set(phienBanFiltered.map(item => item['PB TV']))];
+            uniquePhienBan.forEach(pb => {
+                selectPhienBan.innerHTML += `<option value="${pb}">${pb}</option>`;
+            });
+        }
+
+        function handlePhienBanChange(event) {
+            const selectedPhienBan = event.target.value;
+            const selectedLoaiXe = document.getElementById('loai_xe').value;
+
+            // Reset mã phiên bản
+            document.getElementById('ma_phien_ban').value = '';
+
+            if (!selectedPhienBan || !selectedLoaiXe) return;
+            
+            // Tìm chính xác dòng dữ liệu để lấy MÃ PB
+            const dataRow = GHEPXE_DATA.find(item => item['LOẠI XE'] === selectedLoaiXe && item['PB TV'] === selectedPhienBan);
+            if (dataRow) {
+                document.getElementById('ma_phien_ban').value = dataRow['MÃ PB'] || '';
+            }
+        }
+
+        function handleNgoaiThatChange(event) {
+            const selectedNgoaiThat = event.target.value;
+            
+            // Reset EXT
+            document.getElementById('ext').value = '';
+
+            if (!selectedNgoaiThat) return;
+
+            const dataRow = MAUXE_DATA.find(item => item['NGOẠI THẤT TV'] === selectedNgoaiThat);
+            if (dataRow) {
+                document.getElementById('ext').value = dataRow['EXT'] || '';
             }
         }
 
         function renderWaitingList(data) {
             const thead = document.getElementById('waiting-list-header');
             const tbody = document.getElementById('waiting-list-body');
-
             thead.innerHTML = `<tr>
                 <th class="p-3 text-left font-semibold text-gray-600">NGÀY YÊU CẦU</th>
                 <th class="p-3 text-left font-semibold text-gray-600">TVBH</th>
@@ -166,12 +301,10 @@
                 <th class="p-3 text-right font-semibold text-gray-600">ĐÃ CỌC (VNĐ)</th>
                 <th class="p-3 text-left font-semibold text-gray-600">NGÀY CỌC</th>
             </tr>`;
-
             if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Chưa có yêu cầu nào.</td></tr>`;
                 return;
             }
-            
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-gray-50 border-b">
                     <td class="p-3 whitespace-nowrap">${row['NGÀY YÊU CẦU'] || ''}</td>
@@ -192,11 +325,8 @@
             showLoading(true);
             const form = event.target;
             const formData = new FormData(form);
-            
             const dataObject = {};
-            formData.forEach((value, key) => {
-                dataObject[key] = value;
-            });
+            formData.forEach((value, key) => { dataObject[key] = value; });
 
             try {
                 const res = await fetch(KHO_XE_APPS_SCRIPT_URL, { 
@@ -204,17 +334,13 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                     body: JSON.stringify(dataObject) 
                 });
-                
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
                 
                 showToast(result.message, 'success');
                 form.reset();
-                const userDataString = sessionStorage.getItem('loggedInUser');
-                if(userDataString) {
-                     document.getElementById('tvbh').value = JSON.parse(userDataString).fullName;
-                }
+                setupUserInfo(); // Đặt lại tên TVBH sau khi reset
                 await fetchWaitingList(); 
             } catch (err) {
                 showToast(`Lỗi gửi yêu cầu: ${err.message}`, 'error');
