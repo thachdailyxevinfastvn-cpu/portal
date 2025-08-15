@@ -73,6 +73,7 @@
                         <div><label for="ma_san_pham" class="text-xs font-medium text-gray-600">Mã sản phẩm</label><input type="text" id="ma_san_pham" name="ma_san_pham" class="form-input mt-1" readonly></div>
                         <div><label for="phien_ban" class="text-xs font-medium text-gray-600">Phiên bản</label><select id="phien_ban" name="phien_ban" required class="form-select mt-1"><option value="" disabled selected>-- Chọn Loại xe trước --</option></select></div>
                         <div><label for="ma_phien_ban" class="text-xs font-medium text-gray-600">Mã phiên bản</label><input type="text" id="ma_phien_ban" name="ma_phien_ban" class="form-input mt-1" readonly></div>
+                        <div><label for="ghi_chu" class="text-xs font-medium text-gray-600">Ghi chú</label><input type="text" id="ghi_chu" name="ghi_chu" class="form-input mt-1" readonly></div>
                         <div><label for="ngoai_that" class="text-xs font-medium text-gray-600">Màu ngoại thất</label><select id="ngoai_that" name="ngoai_that" required class="form-select mt-1"><option value="" disabled selected>Đang tải...</option></select></div>
                         <div><label for="ext" class="text-xs font-medium text-gray-600">EXT</label><input type="text" id="ext" name="ext" class="form-input mt-1" readonly></div>
                         <div><label for="noi_that" class="text-xs font-medium text-gray-600">Màu nội thất</label>
@@ -83,7 +84,6 @@
                                 <option value="Màu Be">Màu Be</option>
                             </select>
                         </div>
-                        <div><label for="ghi_chu" class="text-xs font-medium text-gray-600">Ghi chú</label><input type="text" id="ghi_chu" name="ghi_chu" class="form-input mt-1" readonly></div>
                         <div><label for="da_coc" class="text-xs font-medium text-gray-600">Đã cọc (VNĐ)</label><input type="text" id="da_coc" name="da_coc" required class="form-input mt-1" placeholder="Chỉ nhập số"></div>
                         <div><label for="ngay_coc" class="text-xs font-medium text-gray-600">Ngày cọc</label><input type="date" id="ngay_coc" name="ngay_coc" required class="form-input mt-1"></div>
                         
@@ -108,23 +108,18 @@
         let MAUXE_DATA = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Kiểm tra config URL
+            // ... (Phần này giữ nguyên)
             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
                 alert("Lỗi cấu hình: Vui lòng kiểm tra biến KHO_XE_APPS_SCRIPT_URL trong file config.js.");
                 return;
             }
-
-            // Thiết lập thông tin người dùng
             setupUserInfo();
-
-            // Gắn các sự kiện cho các element
             addEventListeners();
-            
-            // Tải dữ liệu cần thiết cho form và bảng
             fetchAllInitialData();
         });
 
         function setupUserInfo() {
+            // ... (Phần này giữ nguyên)
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
                 const userData = JSON.parse(userDataString);
@@ -137,28 +132,25 @@
         }
         
         function addEventListeners() {
+            // ... (Phần này giữ nguyên)
             document.getElementById('logout-btn').addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
             });
-
             document.getElementById('mobile-menu-button').addEventListener('click', () => {
                 document.getElementById('mobile-menu').classList.toggle('hidden');
             });
-
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
-
-            // === Sự kiện cho các dropdown phụ thuộc ===
             document.getElementById('loai_xe').addEventListener('change', handleLoaiXeChange);
             document.getElementById('phien_ban').addEventListener('change', handlePhienBanChange);
             document.getElementById('ngoai_that').addEventListener('change', handleNgoaiThatChange);
         }
 
         async function fetchAllInitialData() {
+            // ... (Phần này giữ nguyên)
             showLoading(true);
             try {
-                // Chạy song song các promise để tăng tốc độ tải
                 await Promise.all([
                     fetchGhepxeData(),
                     fetchMauXeData(),
@@ -173,16 +165,15 @@
         }
         
         async function fetchGhepxeData() {
+            // ... (Phần này giữ nguyên)
             const selectLoaiXe = document.getElementById('loai_xe');
             try {
                 const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getGhepxeData`);
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
-
                 if (result.status === "SUCCESS") {
                     GHEPXE_DATA = result.data;
                     const uniqueLoaiXe = [...new Set(GHEPXE_DATA.map(item => item['LOẠI XE']))];
-                    
                     selectLoaiXe.innerHTML = '<option value="" disabled selected>-- Chọn loại xe --</option>';
                     uniqueLoaiXe.forEach(model => {
                         selectLoaiXe.innerHTML += `<option value="${model}">${model}</option>`;
@@ -191,11 +182,12 @@
             } catch (err) {
                 selectLoaiXe.innerHTML = '<option value="" disabled selected>Lỗi tải dữ liệu</option>';
                 console.error("Lỗi fetchGhepxeData:", err);
-                throw err; // Ném lỗi ra để Promise.all bắt được
+                throw err;
             }
         }
 
         async function fetchMauXeData() {
+            // ... (Phần này giữ nguyên)
             const selectNgoaiThat = document.getElementById('ngoai_that');
             try {
                 const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getMauXeData`);
@@ -216,6 +208,7 @@
         }
 
         async function fetchWaitingList() {
+            // ... (Phần này giữ nguyên)
             const tbody = document.getElementById('waiting-list-body');
             tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Đang tải...</td></tr>`;
             try {
@@ -232,65 +225,68 @@
             }
         }
 
+        // === CÁC HÀM XỬ LÝ SỰ KIỆN ĐÃ ĐƯỢC CẬP NHẬT ===
+
         function handleLoaiXeChange(event) {
             const selectedLoaiXe = event.target.value;
             const selectPhienBan = document.getElementById('phien_ban');
 
-            // Reset các trường phụ thuộc
+            // Reset tất cả các trường phụ thuộc
             document.getElementById('ma_san_pham').value = '';
-            document.getElementById('ghi_chu').value = '';
             document.getElementById('ma_phien_ban').value = '';
+            document.getElementById('ghi_chu').value = '';
             selectPhienBan.innerHTML = '<option value="" disabled selected>-- Chọn phiên bản --</option>';
 
             if (!selectedLoaiXe) return;
             
-            // Lọc các phiên bản tương ứng với loại xe đã chọn
-            const phienBanFiltered = GHEPXE_DATA.filter(item => item['LOẠI XE'] === selectedLoaiXe);
-            
-            // Điền Mã sản phẩm và Ghi chú (lấy từ dòng đầu tiên tìm được)
-            if (phienBanFiltered.length > 0) {
-                document.getElementById('ma_san_pham').value = phienBanFiltered[0]['MÃ SP'] || '';
-                document.getElementById('ghi_chu').value = phienBanFiltered[0]['NOTE'] || '';
+            // Lấy Mã sản phẩm (thường là giống nhau cho cùng 1 loại xe)
+            const firstMatch = GHEPXE_DATA.find(item => item['LOẠI XE'] === selectedLoaiXe);
+            if (firstMatch) {
+                document.getElementById('ma_san_pham').value = firstMatch['MÃ SP'] || '';
             }
-            
-            // Điền dropdown phiên bản
-            const uniquePhienBan = [...new Set(phienBanFiltered.map(item => item['PB TV']))];
-            uniquePhienBan.forEach(pb => {
-                selectPhienBan.innerHTML += `<option value="${pb}">${pb}</option>`;
+
+            // Lọc và thêm TẤT CẢ phiên bản (không lấy duy nhất) vào dropdown
+            // Mỗi option sẽ có value là index của dòng đó trong mảng GHEPXE_DATA gốc
+            GHEPXE_DATA.forEach((item, index) => {
+                if (item['LOẠI XE'] === selectedLoaiXe) {
+                    selectPhienBan.innerHTML += `<option value="${index}">${item['PB TV']}</option>`;
+                }
             });
         }
 
         function handlePhienBanChange(event) {
-            const selectedPhienBan = event.target.value;
-            const selectedLoaiXe = document.getElementById('loai_xe').value;
+            const selectedIndex = event.target.value;
 
-            // Reset mã phiên bản
+            // Reset các trường phụ thuộc vào phiên bản
             document.getElementById('ma_phien_ban').value = '';
+            document.getElementById('ghi_chu').value = '';
 
-            if (!selectedPhienBan || !selectedLoaiXe) return;
+            if (!selectedIndex) return;
             
-            // Tìm chính xác dòng dữ liệu để lấy MÃ PB
-            const dataRow = GHEPXE_DATA.find(item => item['LOẠI XE'] === selectedLoaiXe && item['PB TV'] === selectedPhienBan);
+            // Lấy dữ liệu của dòng được chọn trực tiếp từ mảng gốc bằng index
+            const dataRow = GHEPXE_DATA[parseInt(selectedIndex)];
+            
             if (dataRow) {
                 document.getElementById('ma_phien_ban').value = dataRow['MÃ PB'] || '';
+                document.getElementById('ghi_chu').value = dataRow['NOTE'] || '';
             }
         }
 
         function handleNgoaiThatChange(event) {
+            // ... (Phần này giữ nguyên)
             const selectedNgoaiThat = event.target.value;
-            
-            // Reset EXT
             document.getElementById('ext').value = '';
-
             if (!selectedNgoaiThat) return;
-
             const dataRow = MAUXE_DATA.find(item => item['NGOẠI THẤT TV'] === selectedNgoaiThat);
             if (dataRow) {
                 document.getElementById('ext').value = dataRow['EXT'] || '';
             }
         }
 
+        // === CÁC HÀM CÒN LẠI GIỮ NGUYÊN ===
+
         function renderWaitingList(data) {
+            // ... (Phần này giữ nguyên)
             const thead = document.getElementById('waiting-list-header');
             const tbody = document.getElementById('waiting-list-body');
             thead.innerHTML = `<tr>
@@ -321,13 +317,21 @@
         }
 
         async function handleFormSubmit(event) {
+            // ... (Phần này giữ nguyên)
             event.preventDefault();
             showLoading(true);
             const form = event.target;
             const formData = new FormData(form);
             const dataObject = {};
-            formData.forEach((value, key) => { dataObject[key] = value; });
-
+            formData.forEach((value, key) => { 
+                // Xử lý name 'phien_ban' để chỉ lấy text hiển thị, không lấy index
+                if (key === 'phien_ban') {
+                    const select = form.querySelector('[name="phien_ban"]');
+                    dataObject[key] = select.options[select.selectedIndex].text;
+                } else {
+                    dataObject[key] = value;
+                }
+            });
             try {
                 const res = await fetch(KHO_XE_APPS_SCRIPT_URL, { 
                     method: 'POST',
@@ -337,10 +341,9 @@
                 if (!res.ok) throw new Error(`Lỗi mạng: ${res.statusText}`);
                 const result = await res.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
-                
                 showToast(result.message, 'success');
                 form.reset();
-                setupUserInfo(); // Đặt lại tên TVBH sau khi reset
+                setupUserInfo();
                 await fetchWaitingList(); 
             } catch (err) {
                 showToast(`Lỗi gửi yêu cầu: ${err.message}`, 'error');
