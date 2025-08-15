@@ -81,9 +81,11 @@
                                 <option value="" disabled selected>-- Chọn màu nội thất --</option>
                                 <option value="Màu Đen">Màu Đen</option>
                                 <option value="Màu Mocha Nâu">Màu Mocha Nâu</option>
+                                <option value="Màu Nâu">Màu Nâu</option>
                                 <option value="Màu Be">Màu Be</option>
                             </select>
                         </div>
+                        <div><label for="int" class="text-xs font-medium text-gray-600">INT</label><input type="text" id="int" name="int" class="form-input mt-1" readonly></div>
                         <div><label for="da_coc" class="text-xs font-medium text-gray-600">Đã cọc (VNĐ)</label><input type="text" id="da_coc" name="da_coc" required class="form-input mt-1" placeholder="Chỉ nhập số"></div>
                         <div><label for="ngay_coc" class="text-xs font-medium text-gray-600">Ngày cọc</label><input type="date" id="ngay_coc" name="ngay_coc" required class="form-input mt-1"></div>
                         
@@ -103,12 +105,11 @@
     
     <script src="config.js"></script>
     <script>
-        // Biến toàn cục để lưu trữ dữ liệu từ server, tránh gọi lại nhiều lần
+        // Biến toàn cục để lưu trữ dữ liệu từ server
         let GHEPXE_DATA = [];
         let MAUXE_DATA = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... (Phần này giữ nguyên)
             if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
                 alert("Lỗi cấu hình: Vui lòng kiểm tra biến KHO_XE_APPS_SCRIPT_URL trong file config.js.");
                 return;
@@ -119,7 +120,6 @@
         });
 
         function setupUserInfo() {
-            // ... (Phần này giữ nguyên)
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
                 const userData = JSON.parse(userDataString);
@@ -132,7 +132,6 @@
         }
         
         function addEventListeners() {
-            // ... (Phần này giữ nguyên)
             document.getElementById('logout-btn').addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
@@ -142,13 +141,16 @@
             });
             document.getElementById('pairing-request-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('da_coc').addEventListener('input', formatCurrencyInput);
+            
+            // === Gắn sự kiện cho các dropdown ===
             document.getElementById('loai_xe').addEventListener('change', handleLoaiXeChange);
             document.getElementById('phien_ban').addEventListener('change', handlePhienBanChange);
             document.getElementById('ngoai_that').addEventListener('change', handleNgoaiThatChange);
+            document.getElementById('noi_that').addEventListener('change', handleNoiThatChange); // Listener mới
         }
 
+        // ... Các hàm fetchAllInitialData, fetchGhepxeData, fetchMauXeData, fetchWaitingList không thay đổi ...
         async function fetchAllInitialData() {
-            // ... (Phần này giữ nguyên)
             showLoading(true);
             try {
                 await Promise.all([
@@ -163,9 +165,7 @@
                 showLoading(false);
             }
         }
-        
         async function fetchGhepxeData() {
-            // ... (Phần này giữ nguyên)
             const selectLoaiXe = document.getElementById('loai_xe');
             try {
                 const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getGhepxeData`);
@@ -185,9 +185,7 @@
                 throw err;
             }
         }
-
         async function fetchMauXeData() {
-            // ... (Phần này giữ nguyên)
             const selectNgoaiThat = document.getElementById('ngoai_that');
             try {
                 const res = await fetch(`${KHO_XE_APPS_SCRIPT_URL}?action=getMauXeData`);
@@ -206,9 +204,7 @@
                 throw err;
             }
         }
-
         async function fetchWaitingList() {
-            // ... (Phần này giữ nguyên)
             const tbody = document.getElementById('waiting-list-body');
             tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">Đang tải...</td></tr>`;
             try {
@@ -226,27 +222,18 @@
         }
 
         // === CÁC HÀM XỬ LÝ SỰ KIỆN ĐÃ ĐƯỢC CẬP NHẬT ===
-
         function handleLoaiXeChange(event) {
             const selectedLoaiXe = event.target.value;
             const selectPhienBan = document.getElementById('phien_ban');
-
-            // Reset tất cả các trường phụ thuộc
             document.getElementById('ma_san_pham').value = '';
             document.getElementById('ma_phien_ban').value = '';
             document.getElementById('ghi_chu').value = '';
             selectPhienBan.innerHTML = '<option value="" disabled selected>-- Chọn phiên bản --</option>';
-
             if (!selectedLoaiXe) return;
-            
-            // Lấy Mã sản phẩm (thường là giống nhau cho cùng 1 loại xe)
             const firstMatch = GHEPXE_DATA.find(item => item['LOẠI XE'] === selectedLoaiXe);
             if (firstMatch) {
                 document.getElementById('ma_san_pham').value = firstMatch['MÃ SP'] || '';
             }
-
-            // Lọc và thêm TẤT CẢ phiên bản (không lấy duy nhất) vào dropdown
-            // Mỗi option sẽ có value là index của dòng đó trong mảng GHEPXE_DATA gốc
             GHEPXE_DATA.forEach((item, index) => {
                 if (item['LOẠI XE'] === selectedLoaiXe) {
                     selectPhienBan.innerHTML += `<option value="${index}">${item['PB TV']}</option>`;
@@ -256,16 +243,10 @@
 
         function handlePhienBanChange(event) {
             const selectedIndex = event.target.value;
-
-            // Reset các trường phụ thuộc vào phiên bản
             document.getElementById('ma_phien_ban').value = '';
             document.getElementById('ghi_chu').value = '';
-
             if (!selectedIndex) return;
-            
-            // Lấy dữ liệu của dòng được chọn trực tiếp từ mảng gốc bằng index
             const dataRow = GHEPXE_DATA[parseInt(selectedIndex)];
-            
             if (dataRow) {
                 document.getElementById('ma_phien_ban').value = dataRow['MÃ PB'] || '';
                 document.getElementById('ghi_chu').value = dataRow['NOTE'] || '';
@@ -273,7 +254,6 @@
         }
 
         function handleNgoaiThatChange(event) {
-            // ... (Phần này giữ nguyên)
             const selectedNgoaiThat = event.target.value;
             document.getElementById('ext').value = '';
             if (!selectedNgoaiThat) return;
@@ -282,11 +262,22 @@
                 document.getElementById('ext').value = dataRow['EXT'] || '';
             }
         }
-
-        // === CÁC HÀM CÒN LẠI GIỮ NGUYÊN ===
+        
+        // === HÀM MỚI ĐỂ XỬ LÝ MÀU NỘI THẤT ===
+        function handleNoiThatChange(event) {
+            const selectedNoiThat = event.target.value;
+            const intInput = document.getElementById('int');
+            const intMap = {
+                "Màu Đen": "CI11",
+                "Màu Mocha Nâu": "CI18",
+                "Màu Nâu": "CI12",
+                "Màu Be": "CI13"
+            };
+            intInput.value = intMap[selectedNoiThat] || '';
+        }
 
         function renderWaitingList(data) {
-            // ... (Phần này giữ nguyên)
+            // ... (Hàm này giữ nguyên)
             const thead = document.getElementById('waiting-list-header');
             const tbody = document.getElementById('waiting-list-body');
             thead.innerHTML = `<tr>
@@ -317,17 +308,16 @@
         }
 
         async function handleFormSubmit(event) {
-            // ... (Phần này giữ nguyên)
             event.preventDefault();
             showLoading(true);
             const form = event.target;
             const formData = new FormData(form);
             const dataObject = {};
-            formData.forEach((value, key) => { 
-                // Xử lý name 'phien_ban' để chỉ lấy text hiển thị, không lấy index
+            formData.forEach((value, key) => {
                 if (key === 'phien_ban') {
                     const select = form.querySelector('[name="phien_ban"]');
-                    dataObject[key] = select.options[select.selectedIndex].text;
+                    const selectedOption = select.options[select.selectedIndex];
+                    dataObject[key] = selectedOption ? selectedOption.text : '';
                 } else {
                     dataObject[key] = value;
                 }
@@ -352,7 +342,6 @@
                 showLoading(false);
             }
         }
-
         function showLoading(isLoading) { document.getElementById('loading-overlay').style.display = isLoading ? 'flex' : 'none'; }
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
