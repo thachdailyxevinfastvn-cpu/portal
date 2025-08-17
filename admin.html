@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị Kho xe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --brand-color: #1464f4; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .tab-button { transition: all 0.3s; }
+        .tab-button.active { color: var(--brand-color); border-color: var(--brand-color); background-color: #eef5ff; }
+        .table-container { max-height: 400px; overflow-y: auto; }
+        table thead th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
+        .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal { display: none; /* Controlled by JS */ }
+        .modal-content { animation: slide-down 0.3s ease-out; }
+        @keyframes slide-down { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="p-4 md:p-6">
+
+    <!-- Loader Overlay -->
+    <div id="loader-overlay" class="loader-overlay hidden">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-5 md:p-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">🚘 Quản Trị Kho Xe</h1>
+                <p class="text-gray-500 mt-1">Giao diện quản lý ghép xe và hoán đổi xe chuyên nghiệp.</p>
+            </div>
+            <button onclick="location.reload()" class="mt-4 md:mt-0 flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                Tải lại dữ liệu
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="flex space-x-4" aria-label="Tabs">
+                <button id="tab-ghep-xe" onclick="switchTab('ghep-xe')" class="tab-button active whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-link mr-2"></i>GHÉP XE
+                </button>
+                <button id="tab-doi-xe" onclick="switchTab('doi-xe')" class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-right-left mr-2"></i>ĐỔI XE
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content: Ghep Xe -->
+        <div id="content-ghep-xe">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Column 1: Waiting List -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Hàng chờ ghép xe</h2>
+                    <div id="ghep-xe-waiting-list-container" class="table-container border rounded-lg">
+                        <!-- Waiting list table will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Column 2: Car Search & Approval -->
+                <div>
+                    <div id="ghep-xe-customer-info" class="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200 hidden">
+                        <!-- Selected customer info will be shown here -->
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Xe phù hợp trong kho</h2>
+                    <div id="ghep-xe-car-results-container" class="table-container border rounded-lg">
+                        <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
+                    </div>
+                    <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check-circle"></i>
+                        PHÊ DUYỆT GHÉP XE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Doi Xe -->
+        <div id="content-doi-xe" class="hidden">
+            <!-- Doi Xe content will be similar to Ghep Xe, but with different logic -->
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Column 1: Paired List -->
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Chọn khách hàng cần đổi xe</h2>
+                    <div id="doi-xe-paired-list-container" class="table-container border rounded-lg">
+                        <!-- Paired list table will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Column 2: New Car Search & Swap -->
+                <div>
+                    <div id="doi-xe-customer-info" class="bg-green-50 p-4 rounded-lg mb-4 border border-green-200 hidden">
+                        <!-- Selected customer info for swapping will be shown here -->
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Tìm và chọn xe mới để đổi</h2>
+                    <div id="doi-xe-car-results-container" class="table-container border rounded-lg">
+                         <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
+                    </div>
+                    <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-retweet"></i>
+                        THỰC HIỆN ĐỔI XE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let waitingList = [];
+        let pairedList = [];
+        let selectedWaitingCustomer = null;
+        let selectedPairedCustomer = null;
+        let selectedCarToPairRow = null;
+        let selectedCarToSwapRow = null;
+
+        // --- UTILITY FUNCTIONS ---
+        const showLoader = () => document.getElementById('loader-overlay').classList.remove('hidden');
+        const hideLoader = () => document.getElementById('loader-overlay').classList.add('hidden');
+        
+        function showAlert(message, isSuccess = true) {
+            alert(message); // Simple alert for now, can be replaced with a custom modal
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                const day = ('0' + date.getDate()).slice(-2);
+                const month = ('0' + (date.getMonth() + 1)).slice(-2);
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabName) {
+            document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(`content-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        // --- INITIAL DATA LOADING ---
+        window.onload = function() {
+            showLoader();
+            google.script.run
+                .withSuccessHandler(onDataLoaded)
+                .withFailureHandler(onDataLoadError)
+                .getAdminData();
+        };
+
+        function onDataLoaded(data) {
+            waitingList = data.waitingList || [];
+            pairedList = data.pairedList || [];
+            renderWaitingList();
+            renderPairedList();
+            hideLoader();
+        }
+        
+        function onDataLoadError(error) {
+            hideLoader();
+            showAlert(`Lỗi tải dữ liệu: ${error.message}`, false);
+        }
+
+        // --- GHÉP XE LOGIC ---
+        function renderWaitingList() {
+            const container = document.getElementById('ghep-xe-waiting-list-container');
+            if (waitingList.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có khách hàng nào trong hàng chờ.</div>`;
+                return;
+            }
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th scope="col" class="py-3 px-4">Tên KH</th>
+                        <th scope="col" class="py-3 px-4">Loại Xe</th>
+                        <th scope="col" class="py-3 px-4">TVBH</th>
+                        <th scope="col" class="py-3 px-4"></th>
+                    </tr>
+                </thead><tbody>`;
+            waitingList.forEach(customer => {
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-semibold text-gray-900">${customer.tenKH}</td>
+                    <td class="py-3 px-4">${customer.loaiXe}</td>
+                    <td class="py-3 px-4">${customer.tvbh}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="selectWaitingCustomer('${customer.uniqueId}')" class="font-medium text-blue-600 hover:underline">Chọn</button>
+                    </td>
+                </tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        }
+
+        function selectWaitingCustomer(uniqueId) {
+            selectedWaitingCustomer = waitingList.find(c => c.uniqueId === uniqueId);
+            if (!selectedWaitingCustomer) return;
+
+            // Highlight selected row
+            document.querySelectorAll('#ghep-xe-waiting-list-container tr').forEach(row => row.classList.remove('bg-blue-100'));
+            const button = document.querySelector(`button[onclick="selectWaitingCustomer('${uniqueId}')"]`);
+            if(button) button.closest('tr').classList.add('bg-blue-100');
+
+            // Show customer info
+            const infoDiv = document.getElementById('ghep-xe-customer-info');
+            infoDiv.innerHTML = `<h3 class="font-bold text-blue-800">Đang tìm xe cho: ${selectedWaitingCustomer.tenKH}</h3>
+                <p class="text-sm text-blue-700 mt-1">
+                    ${selectedWaitingCustomer.loaiXe} - ${selectedWaitingCustomer.phienBan} - ${selectedWaitingCustomer.ngoaiThat} - ${selectedWaitingCustomer.noiThat}
+                </p>`;
+            infoDiv.classList.remove('hidden');
+
+            // Reset car selection
+            selectedCarToPairRow = null;
+            document.getElementById('ghep-xe-approve-btn').disabled = true;
+
+            // Find matching cars
+            const carResultsContainer = document.getElementById('ghep-xe-car-results-container');
+            carResultsContainer.innerHTML = `<div class="p-6 text-center text-gray-500">Đang tìm xe...</div>`;
+            showLoader();
+            google.script.run
+                .withSuccessHandler(renderCarResultsForPairing)
+                .withFailureHandler(onDataLoadError)
+                .findCars(selectedWaitingCustomer);
+        }
+
+        function renderCarResultsForPairing(cars) {
+            hideLoader();
+            const container = document.getElementById('ghep-xe-car-results-container');
+            if (cars.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không tìm thấy xe nào phù hợp trong kho.</div>`;
+                return;
+            }
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-4 w-12">Chọn</th>
+                        <th class="py-3 px-4">Số VIN</th>
+                        <th class="py-3 px-4">Phiên bản</th>
+                        <th class="py-3 px-4">Màu sắc</th>
+                    </tr>
+                </thead><tbody>`;
+            cars.forEach(car => {
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4"><input type="radio" name="selectedCarToPair" onchange="selectCarToPair(${car.row})"></td>
+                    <td class="py-3 px-4 font-semibold text-gray-900">${car.soVin}</td>
+                    <td class="py-3 px-4">${car.phienBan}</td>
+                    <td class="py-3 px-4">${car.ngoaiThat}</td>
+                </tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        }
+        
+        function selectCarToPair(carRow) {
+            selectedCarToPairRow = carRow;
+            document.getElementById('ghep-xe-approve-btn').disabled = false;
+        }
+
+        function approveGhepXe() {
+            if (!selectedWaitingCustomer || !selectedCarToPairRow) {
+                showAlert('Vui lòng chọn khách hàng và xe để ghép.', false);
+                return;
+            }
+            if (!confirm(`Bạn có chắc chắn muốn ghép xe VIN (row ${selectedCarToPairRow}) cho khách hàng ${selectedWaitingCustomer.tenKH}?`)) {
+                return;
+            }
+            showLoader();
+            const ghepXeInfo = {
+                carRow: selectedCarToPairRow,
+                customerName: selectedWaitingCustomer.tenKH
+            };
+            google.script.run
+                .withSuccessHandler(onGhepXeSuccess)
+                .withFailureHandler(onDataLoadError)
+                .processGhepXe(ghepXeInfo);
+        }
+
+        function onGhepXeSuccess(message) {
+            showAlert(message, true);
+            location.reload(); // Reload to get fresh data
+        }
+
+        // --- ĐỔI XE LOGIC ---
+        function renderPairedList() {
+            const container = document.getElementById('doi-xe-paired-list-container');
+            if (pairedList.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500">Chưa có khách hàng nào được ghép xe.</div>`;
+                return;
+            }
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-4">Tên KH</th>
+                        <th class="py-3 px-4">Xe hiện tại (VIN)</th>
+                        <th class="py-3 px-4">TVBH</th>
+                        <th class="py-3 px-4"></th>
+                    </tr>
+                </thead><tbody>`;
+            pairedList.forEach(customer => {
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-semibold text-gray-900">${customer.tenKH}</td>
+                    <td class="py-3 px-4">${customer.soVin}</td>
+                    <td class="py-3 px-4">${customer.tvbh}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="selectPairedCustomer('${customer.uniqueId}')" class="font-medium text-green-600 hover:underline">Chọn</button>
+                    </td>
+                </tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        }
+
+        function selectPairedCustomer(uniqueId) {
+            selectedPairedCustomer = pairedList.find(c => c.uniqueId === uniqueId);
+            if (!selectedPairedCustomer) return;
+
+            document.querySelectorAll('#doi-xe-paired-list-container tr').forEach(row => row.classList.remove('bg-green-100'));
+            const button = document.querySelector(`button[onclick="selectPairedCustomer('${uniqueId}')"]`);
+            if(button) button.closest('tr').classList.add('bg-green-100');
+
+            const infoDiv = document.getElementById('doi-xe-customer-info');
+            infoDiv.innerHTML = `<h3 class="font-bold text-green-800">Đổi xe cho: ${selectedPairedCustomer.tenKH}</h3>
+                <p class="text-sm text-green-700 mt-1">
+                    Xe hiện tại: ${selectedPairedCustomer.loaiXe} - VIN: ${selectedPairedCustomer.soVin}
+                </p>`;
+            infoDiv.classList.remove('hidden');
+
+            selectedCarToSwapRow = null;
+            document.getElementById('doi-xe-approve-btn').disabled = true;
+
+            const carResultsContainer = document.getElementById('doi-xe-car-results-container');
+            carResultsContainer.innerHTML = `<div class="p-6 text-center text-gray-500">Đang tải danh sách xe trong kho...</div>`;
+            showLoader();
+            // We find all cars, as the swap can be to any car
+            google.script.run
+                .withSuccessHandler(renderCarResultsForSwapping)
+                .withFailureHandler(onDataLoadError)
+                .findCars({}); // Empty filter to get all cars
+        }
+        
+        function renderCarResultsForSwapping(cars) {
+            hideLoader();
+            const container = document.getElementById('doi-xe-car-results-container');
+            if (cars.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có xe nào trong kho để đổi.</div>`;
+                return;
+            }
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-4 w-12">Chọn</th>
+                        <th class="py-3 px-4">Số VIN</th>
+                        <th class="py-3 px-4">Loại Xe</th>
+                        <th class="py-3 px-4">Màu sắc</th>
+                    </tr>
+                </thead><tbody>`;
+            cars.forEach(car => {
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4"><input type="radio" name="selectedCarToSwap" onchange="selectCarToSwap(${car.row})"></td>
+                    <td class="py-3 px-4 font-semibold text-gray-900">${car.soVin}</td>
+                    <td class="py-3 px-4">${car.loaiXe}</td>
+                    <td class="py-3 px-4">${car.ngoaiThat}</td>
+                </tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            container.innerHTML = tableHtml;
+        }
+
+        function selectCarToSwap(carRow) {
+            selectedCarToSwapRow = carRow;
+            document.getElementById('doi-xe-approve-btn').disabled = false;
+        }
+
+        function approveDoiXe() {
+             if (!selectedPairedCustomer || !selectedCarToSwapRow) {
+                showAlert('Vui lòng chọn khách hàng và xe mới để đổi.', false);
+                return;
+            }
+            if (!confirm(`Bạn có chắc chắn muốn đổi xe cho khách hàng ${selectedPairedCustomer.tenKH} sang xe mới (row ${selectedCarToSwapRow})?`)) {
+                return;
+            }
+            showLoader();
+            const doiXeInfo = {
+                customerName: selectedPairedCustomer.tenKH,
+                newCarRow: selectedCarToSwapRow
+            };
+            google.script.run
+                .withSuccessHandler(onDoiXeSuccess)
+                .withFailureHandler(onDataLoadError)
+                .processDoiXe(doiXeInfo);
+        }
+
+        function onDoiXeSuccess(message) {
+            showAlert(message, true);
+            location.reload();
+        }
+
+    </script>
+</body>
+</html>
