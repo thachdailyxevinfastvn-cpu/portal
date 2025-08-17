@@ -17,7 +17,6 @@
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Thêm style cho menu active giống khoxe.html */
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,7 +127,6 @@
         </div>
     </main>
     <script>
-        // Các biến và hàm tiện ích giữ nguyên
         const SCRIPT_URL = KHO_XE_APPS_SCRIPT_URL; 
         let waitingList = [], pairedList = [];
         let selectedWaitingCustomer = null, selectedPairedCustomer = null;
@@ -138,7 +136,6 @@
         function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); const year = date.getFullYear(); return `${day}/${month}/${year}`; }
 
         window.onload = async function() {
-            // THAY ĐỔI: Thêm logic xử lý menu và user info
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
                 const userData = JSON.parse(userDataString);
@@ -153,7 +150,6 @@
                 document.getElementById('mobile-menu').classList.toggle('hidden');
             });
 
-
             if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
                 showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.", false);
                 return;
@@ -162,6 +158,9 @@
             try {
                 const url = new URL(SCRIPT_URL);
                 url.searchParams.append('action', 'getAdminData');
+                // === THAY ĐỔI: Thêm tham số timestamp để vô hiệu hóa cache của trình duyệt ===
+                url.searchParams.append('timestamp', new Date().getTime());
+
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
