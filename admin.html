@@ -6,6 +6,8 @@
     <title>Quản trị Kho xe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Nạp tệp cấu hình API -->
+    <script src="config.js"></script>
     <style>
         :root { --brand-color: #1464f4; }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
@@ -101,8 +103,8 @@
     </div>
 
     <script>
-        // !!! QUAN TRỌNG: Dán URL triển khai Web App của bạn vào đây
-        const SCRIPT_URL = "URL_WEB_APP_CUA_BAN"; 
+        // Sử dụng URL từ tệp config.js
+        const SCRIPT_URL = KHO_XE_APPS_SCRIPT_URL; 
 
         // Global state
         let waitingList = [];
@@ -129,12 +131,11 @@
                 } else { // POST
                     response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // Important for simple POST to Apps Script
-                        headers: { 'Content-Type': 'application/json' },
+                        // Apps Script yêu cầu chuyển hướng thủ công khi POST từ domain khác
+                        redirect: 'follow', 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Dùng text/plain cho đơn giản
                         body: JSON.stringify({ action, params })
                     });
-                     // For 'no-cors', we can't read the response, so we just assume it's OK
-                    return await response.text(); // This will be empty but we need to consume it
                 }
 
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
@@ -151,8 +152,8 @@
         
         // --- INITIAL DATA LOADING ---
         window.onload = async function() {
-            if (SCRIPT_URL === "URL_WEB_APP_CUA_BAN" || !SCRIPT_URL) {
-                showAlert("Lỗi cấu hình: Vui lòng cập nhật biến SCRIPT_URL trong file admin.html với URL triển khai Web App của bạn.", false);
+            if (typeof KHO_XE_APPS_SCRIPT_URL === 'undefined' || !KHO_XE_APPS_SCRIPT_URL) {
+                showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL. Hãy đảm bảo tệp config.js đã được nạp đúng.", false);
                 return;
             }
             try {
@@ -237,13 +238,10 @@
             
             const ghepXeInfo = { carRow: selectedCarToPairRow, customerName: selectedWaitingCustomer.tenKH };
             try {
-                // We use a special fetch for POST because of Apps Script redirect behavior
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'processGhepXe', params: ghepXeInfo }), mode: 'no-cors' });
-                showAlert("Yêu cầu ghép xe đã được gửi. Vui lòng tải lại trang sau giây lát để cập nhật.", true);
-                setTimeout(() => location.reload(), 2000);
-            } catch (error) {
-                showAlert(`Lỗi khi gửi yêu cầu: ${error.message}`, false);
-            }
+                await apiCall('POST', 'processGhepXe', ghepXeInfo);
+                showAlert("Yêu cầu ghép xe đã được gửi thành công. Trang sẽ tự động tải lại.", true);
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) { /* Handled */ }
         }
 
         // --- ĐỔI XE LOGIC ---
@@ -305,12 +303,10 @@
 
             const doiXeInfo = { customerName: selectedPairedCustomer.tenKH, newCarRow: selectedCarToSwapRow };
             try {
-                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'processDoiXe', params: doiXeInfo }), mode: 'no-cors' });
-                showAlert("Yêu cầu đổi xe đã được gửi. Vui lòng tải lại trang sau giây lát để cập nhật.", true);
-                setTimeout(() => location.reload(), 2000);
-            } catch (error) {
-                 showAlert(`Lỗi khi gửi yêu cầu: ${error.message}`, false);
-            }
+                await apiCall('POST', 'processDoiXe', doiXeInfo);
+                showAlert("Yêu cầu đổi xe đã được gửi thành công. Trang sẽ tự động tải lại.", true);
+                setTimeout(() => location.reload(), 1500);
+            } catch (error) { /* Handled */ }
         }
     </script>
 </body>
