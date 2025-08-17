@@ -92,7 +92,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = APPS_SCRIPT_URL; 
+        // === THAY ĐỔI QUAN TRỌNG: SỬ DỤNG SCRIPT URL GIỐNG CÁC TRANG KHÁC ===
+        const SCRIPT_URL = KHO_XE_APPS_SCRIPT_URL; 
 
         // Global state
         let waitingList = [];
@@ -103,66 +104,40 @@
         let selectedCarToSwap = null; 
 
         // --- UTILITY FUNCTIONS ---
-        const showLoader = () => document.getElementById('loader-overlay').classList.remove('hidden');
-        const hideLoader = () => document.getElementById('loader-overlay').classList.add('hidden');
+        const showLoader = (show) => document.getElementById('loader-overlay').style.display = show ? 'flex' : 'none';
         const showAlert = (message, isSuccess = true) => alert(message);
 
-        // --- API HELPER ---
-        async function apiCall(method, action, params = {}) {
-            showLoader();
+        
+        // --- DATA FETCHING & INITIALIZATION ---
+        window.onload = async function() {
+            if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
+                showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.", false);
+                return;
+            }
+            showLoader(true);
             try {
-                let response;
-                if (method.toUpperCase() === 'GET') {
-                    const url = new URL(SCRIPT_URL);
-                    url.searchParams.append('action', action);
-                    response = await fetch(url);
-                } else { // POST
-                    response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        redirect: 'follow', 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: action, params: params })
-                    });
-                }
+                const url = new URL(SCRIPT_URL);
+                url.searchParams.append('action', 'getAdminData');
+                const response = await fetch(url);
 
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 
-                const responseText = await response.text();
-                if (!responseText) {
-                    return { success: true, message: "Yêu cầu đã được xử lý." };
-                }
-
-                const result = JSON.parse(responseText);
+                const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
-                return result.data;
 
-            } catch (error) {
-                if (error instanceof SyntaxError) {
-                    console.error("Lỗi phân tích JSON. Phản hồi từ server:", error);
-                    showAlert("Đã xảy ra lỗi khi đọc phản hồi từ máy chủ. Vui lòng kiểm tra Console.", false);
-                } else {
-                    showAlert(`Đã xảy ra lỗi: ${error.message}`, false);
-                }
-                throw error;
-            } finally {
-                hideLoader();
-            }
-        }
-        
-        // --- INITIAL DATA LOADING ---
-        window.onload = async function() {
-            if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL) {
-                showAlert("Lỗi cấu hình: Không tìm thấy APPS_SCRIPT_URL. Hãy đảm bảo tệp config.js đã được nạp đúng.", false);
-                return;
-            }
-            try {
-                const data = await apiCall('GET', 'getAdminData');
+                // Backend trả về { data: { waitingList: [], pairedList: [] } }
+                // Ta cần lấy result.data
+                const data = result.data;
                 waitingList = data.waitingList || [];
                 pairedList = data.pairedList || [];
+
                 renderWaitingList();
                 renderPairedList();
             } catch (error) {
+                showAlert(`Đã xảy ra lỗi khi tải dữ liệu ban đầu: ${error.message}`, false);
                 console.error("Lỗi tải dữ liệu ban đầu:", error);
+            } finally {
+                showLoader(false);
             }
         };
 
@@ -203,10 +178,22 @@
             document.getElementById('ghep-xe-approve-btn').disabled = true;
             document.getElementById('ghep-xe-car-results-container').innerHTML = `<div class="p-6 text-center text-gray-500">Đang tìm xe...</div>`;
             
+            showLoader(true);
             try {
-                const cars = await apiCall('POST', 'findCars', selectedWaitingCustomer);
-                renderCarResultsForPairing(cars);
-            } catch (error) { /* Handled in apiCall */ }
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'findCars', params: selectedWaitingCustomer })
+                });
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                const result = await response.json();
+                if (result.status === 'ERROR') throw new Error(result.message);
+                renderCarResultsForPairing(result.data); // Backend trả về { data: [...] }
+            } catch (error) {
+                showAlert(`Lỗi khi tìm xe: ${error.message}`, false);
+            } finally {
+                showLoader(false);
+            }
         }
 
         function renderCarResultsForPairing(cars) {
@@ -237,18 +224,30 @@
             if (!selectedWaitingCustomer || !selectedCarToPair) return showAlert('Vui lòng chọn khách hàng và xe.', false);
             if (!confirm(`Bạn chắc chắn muốn ghép xe có VIN ${selectedCarToPair.soVin} cho khách hàng ${selectedWaitingCustomer.tenKH}?`)) return;
             
-            // === THAY ĐỔI 1: Gửi đi đối tượng phẳng chứa các ID cần thiết ===
             const ghepXeInfo = { 
                 carRow: selectedCarToPair.row,
                 carSheetName: selectedCarToPair.sheetName,
-                customerUniqueId: selectedWaitingCustomer.uniqueId // Gửi uniqueId để định danh chính xác
+                customerUniqueId: selectedWaitingCustomer.uniqueId
             };
 
+            showLoader(true);
             try {
-                await apiCall('POST', 'processGhepXe', ghepXeInfo);
-                showAlert("Yêu cầu ghép xe đã được gửi thành công. Trang sẽ tự động tải lại.", true);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'processGhepXe', params: ghepXeInfo })
+                });
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                const result = await response.json();
+                if (result.status !== 'SUCCESS') throw new Error(result.message);
+                
+                showAlert(result.message, true);
                 setTimeout(() => location.reload(), 1500);
-            } catch (error) { /* Handled */ }
+            } catch (error) {
+                showAlert(`Lỗi khi ghép xe: ${error.message}`, false);
+            } finally {
+                showLoader(false);
+            }
         }
 
         // --- ĐỔI XE LOGIC ---
@@ -280,10 +279,22 @@
             document.getElementById('doi-xe-approve-btn').disabled = true;
             document.getElementById('doi-xe-car-results-container').innerHTML = `<div class="p-6 text-center text-gray-500">Đang tìm xe...</div>`;
             
+            showLoader(true);
             try {
-                const cars = await apiCall('POST', 'findCars', {}); // Empty filter gets all available cars
-                renderCarResultsForSwapping(cars);
-            } catch (error) { /* Handled */ }
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'findCars', params: {} }) // Params rỗng để lấy tất cả xe
+                });
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                const result = await response.json();
+                if (result.status === 'ERROR') throw new Error(result.message);
+                renderCarResultsForSwapping(result.data);
+            } catch (error) {
+                showAlert(`Lỗi khi tìm xe để đổi: ${error.message}`, false);
+            } finally {
+                showLoader(false);
+            }
         }
         
         function renderCarResultsForSwapping(cars) {
@@ -294,7 +305,7 @@
             }
             let tableHtml = `<table class="w-full text-sm text-left text-gray-600"><thead class="text-xs text-gray-700 uppercase"><tr><th class="py-3 px-4 w-12">Chọn</th><th class="py-3 px-4">Số VIN</th><th class="py-3 px-4">Loại Xe</th><th class="py-3 px-4">Màu sắc</th><th class="py-3 px-4">Kho</th></tr></thead><tbody>`;
             cars.forEach(car => {
-                if (car.soVin === selectedPairedCustomer.soVin) return;
+                if (car.soVin && selectedPairedCustomer.soVin && car.soVin === selectedPairedCustomer.soVin) return;
                 const carData = JSON.stringify(car).replace(/"/g, '&quot;');
                 tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
                     <td class="py-3 px-4"><input type="radio" name="selectedCarToSwap" onchange="selectCarToSwap(${carData})"></td>
@@ -315,17 +326,30 @@
             if (!selectedPairedCustomer || !selectedCarToSwap) return showAlert('Vui lòng chọn khách hàng và xe mới.', false);
             if (!confirm(`Bạn chắc chắn muốn đổi xe cho ${selectedPairedCustomer.tenKH} sang xe mới có VIN ${selectedCarToSwap.soVin}?`)) return;
 
-            // === THAY ĐỔI 2: Gửi đi đối tượng phẳng chứa các ID cần thiết ===
             const doiXeInfo = { 
                 oldCarSheetRow: selectedPairedCustomer.sheetRow,
                 newCarRow: selectedCarToSwap.row,
                 newCarSheetName: selectedCarToSwap.sheetName
             };
+            
+            showLoader(true);
             try {
-                await apiCall('POST', 'processDoiXe', doiXeInfo);
-                showAlert("Yêu cầu đổi xe đã được gửi thành công. Trang sẽ tự động tải lại.", true);
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'processDoiXe', params: doiXeInfo })
+                });
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
+                const result = await response.json();
+                if (result.status !== 'SUCCESS') throw new Error(result.message);
+
+                showAlert(result.message, true);
                 setTimeout(() => location.reload(), 1500);
-            } catch (error) { /* Handled */ }
+            } catch (error) {
+                showAlert(`Lỗi khi đổi xe: ${error.message}`, false);
+            } finally {
+                showLoader(false);
+            }
         }
     </script>
 </body>
