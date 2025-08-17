@@ -17,101 +17,143 @@
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Thêm style cho menu active giống khoxe.html */
+        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="p-4 md:p-6">
+<body class="antialiased text-gray-800">
 
     <div id="loader-overlay" class="loader-overlay hidden">
         <div class="loader"></div>
     </div>
-
-    <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-5 md:p-8">
-        
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">🚘 Quản Trị Kho Xe</h1>
-                <p class="text-gray-500 mt-1">Giao diện quản lý ghép xe, hoán đổi và gửi email thông báo.</p>
+    
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
+                <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
+                <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
+                <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
+                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">KPI</a>
+                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
+                <a href="admin.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Admin</a>
             </div>
-            <button onclick="location.reload()" class="mt-4 md:mt-0 flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
-                <i class="fa-solid fa-arrows-rotate"></i>
-                Tải lại dữ liệu
-            </button>
-        </div>
-
-        <div class="border-b border-gray-200 mb-6">
-            <nav class="flex space-x-4" aria-label="Tabs">
-                <button id="tab-ghep-xe" onclick="switchTab('ghep-xe')" class="tab-button active whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
-                    <i class="fa-solid fa-link mr-2"></i>GHÉP XE
+            <div class="flex items-center">
+                <div id="user-profile" class="flex items-center space-x-3">
+                     <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
+                     <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
+                </div>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 </button>
-                <button id="tab-doi-xe" onclick="switchTab('doi-xe')" class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
-                    <i class="fa-solid fa-right-left mr-2"></i>ĐỔI XE
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
-            </nav>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+            <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
+            <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
+            <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+            <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">KPI</a>
+            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+            <a href="admin.html" class="block px-4 py-2 text-sm text-gray-700 nav-link-active">Admin</a>
         </div>
+    </header>
 
-        <div id="content-ghep-xe">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Hàng chờ ghép xe</h2>
-                    <div id="ghep-xe-waiting-list-container" class="table-container border rounded-lg"></div>
-                </div>
-                <div>
-                    <div id="ghep-xe-customer-info" class="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200 hidden"></div>
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Xe phù hợp trong kho</h2>
-                    <div id="ghep-xe-car-results-container" class="table-container border rounded-lg">
-                        <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
-                    </div>
-                    <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE & GỬI EMAIL
+    <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto bg-white rounded-xl shadow-lg p-5 md:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Trang Quản Trị Ghép Xe</h1>
+                <button onclick="location.reload()" class="flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    Tải lại
+                </button>
+            </div>
+
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <button id="tab-ghep-xe" onclick="switchTab('ghep-xe')" class="tab-button active whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-link mr-2"></i>GHÉP XE
                     </button>
+                    <button id="tab-doi-xe" onclick="switchTab('doi-xe')" class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm text-gray-500 hover:text-gray-700">
+                        <i class="fa-solid fa-right-left mr-2"></i>ĐỔI XE
+                    </button>
+                </nav>
+            </div>
+
+            <div id="content-ghep-xe">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Hàng chờ ghép xe</h2>
+                        <div id="ghep-xe-waiting-list-container" class="table-container border rounded-lg"></div>
+                    </div>
+                    <div>
+                        <div id="ghep-xe-customer-info" class="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200 hidden"></div>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Xe phù hợp trong kho</h2>
+                        <div id="ghep-xe-car-results-container" class="table-container border rounded-lg">
+                            <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
+                        </div>
+                        <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE & GỬI EMAIL
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="content-doi-xe" class="hidden">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Chọn khách hàng cần đổi xe</h2>
+                        <div id="doi-xe-paired-list-container" class="table-container border rounded-lg"></div>
+                    </div>
+                    <div>
+                        <div id="doi-xe-customer-info" class="bg-green-50 p-4 rounded-lg mb-4 border border-green-200 hidden"></div>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Tìm và chọn xe mới để đổi</h2>
+                        <div id="doi-xe-car-results-container" class="table-container border rounded-lg">
+                             <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
+                        </div>
+                        <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE & GỬI EMAIL
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div id="content-doi-xe" class="hidden">
-             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Chọn khách hàng cần đổi xe</h2>
-                    <div id="doi-xe-paired-list-container" class="table-container border rounded-lg"></div>
-                </div>
-                <div>
-                    <div id="doi-xe-customer-info" class="bg-green-50 p-4 rounded-lg mb-4 border border-green-200 hidden"></div>
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Tìm và chọn xe mới để đổi</h2>
-                    <div id="doi-xe-car-results-container" class="table-container border rounded-lg">
-                         <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
-                    </div>
-                    <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE & GỬI EMAIL
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    </main>
     <script>
+        // Các biến và hàm tiện ích giữ nguyên
         const SCRIPT_URL = KHO_XE_APPS_SCRIPT_URL; 
         let waitingList = [], pairedList = [];
         let selectedWaitingCustomer = null, selectedPairedCustomer = null;
         let selectedCarToPair = null, selectedCarToSwap = null; 
-
         const showLoader = (show) => document.getElementById('loader-overlay').style.display = show ? 'flex' : 'none';
         const showAlert = (message, isSuccess = true) => alert(message);
-
-        // === THAY ĐỔI: Bổ sung hàm định dạng ngày tháng ===
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) return dateString; // Trả về chuỗi gốc nếu không phải ngày hợp lệ
-            const day = ('0' + date.getDate()).slice(-2);
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
-        }
+        function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); const year = date.getFullYear(); return `${day}/${month}/${year}`; }
 
         window.onload = async function() {
+            // THAY ĐỔI: Thêm logic xử lý menu và user info
+            const userDataString = sessionStorage.getItem('loggedInUser');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                document.getElementById('user-fullname').textContent = userData.fullName;
+                document.getElementById('user-avatar').src = userData.imageUrl || `https://placehold.co/40x40/EBF4FF/76A9FA?text=${userData.fullName.charAt(0)}`;
+            }
+             document.getElementById('logout-btn').addEventListener('click', () => {
+                sessionStorage.removeItem('loggedInUser');
+                window.location.href = 'index.html';
+            });
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+
+
             if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
                 showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.", false);
                 return;
@@ -138,6 +180,7 @@
             }
         };
 
+        // ... Các hàm logic còn lại (từ switchTab đến hết) giữ nguyên không đổi ...
         function switchTab(tabName) {
             document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
@@ -146,7 +189,6 @@
         }
 
         function renderWaitingList() {
-            // ... (Hàm này giữ nguyên)
             const container = document.getElementById('ghep-xe-waiting-list-container');
             if (waitingList.length === 0) {
                 container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có khách hàng nào trong hàng chờ.</div>`;
@@ -216,7 +258,6 @@
             }
         }
         
-        // --- ĐỔI XE LOGIC ---
         function renderPairedList() {
             const container = document.getElementById('doi-xe-paired-list-container');
             if (pairedList.length === 0) {
@@ -287,7 +328,6 @@
             }
         }
 
-        // === THAY ĐỔI: HÀM HIỂN THỊ KẾT QUẢ TÌM XE DÙNG CHUNG ===
         function renderCarResults(cars, containerId, radioName, onchangeFunction) {
             const container = document.getElementById(containerId);
             if (!cars || cars.length === 0) {
@@ -310,7 +350,6 @@
                 </thead>
                 <tbody>`;
             cars.forEach(car => {
-                // Lọc ra xe hiện tại của khách hàng trong chức năng Đổi xe
                 if (radioName === 'selectedCarToSwap' && selectedPairedCustomer && car.soVin && car.soVin === selectedPairedCustomer.soVin) return;
 
                 const carData = JSON.stringify(car).replace(/"/g, '&quot;');
