@@ -131,19 +131,34 @@
                 } else { // POST
                     response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        // Apps Script yêu cầu chuyển hướng thủ công khi POST từ domain khác
                         redirect: 'follow', 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Dùng text/plain cho đơn giản
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({ action, params })
                     });
                 }
 
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
-                const result = await response.json();
+                
+                // Xử lý phản hồi một cách an toàn hơn
+                const responseText = await response.text();
+                if (!responseText) {
+                    // Nếu phản hồi rỗng (thường xảy ra với POST thành công), trả về một đối tượng mặc định
+                    return { success: true, message: "Yêu cầu đã được xử lý." };
+                }
+
+                const result = JSON.parse(responseText);
                 if (result.status === 'ERROR') throw new Error(result.message);
                 return result.data;
+
             } catch (error) {
-                showAlert(`Đã xảy ra lỗi: ${error.message}`, false);
+                // Phân tích lỗi cụ thể hơn
+                if (error instanceof SyntaxError) {
+                    // Lỗi này xảy ra khi JSON.parse thất bại, thường là do phản hồi không phải JSON
+                    console.error("Lỗi phân tích JSON. Phản hồi từ server:", error);
+                    showAlert("Đã xảy ra lỗi khi đọc phản hồi từ máy chủ. Vui lòng kiểm tra Console.", false);
+                } else {
+                    showAlert(`Đã xảy ra lỗi: ${error.message}`, false);
+                }
                 throw error;
             } finally {
                 hideLoader();
