@@ -13,7 +13,7 @@
         .tab-button { transition: all 0.3s; }
         .tab-button.active { color: var(--brand-color); border-color: var(--brand-color); background-color: #eef5ff; }
         .table-container { max-height: 400px; overflow-y: auto; }
-        table thead th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+        table thead th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; white-space: nowrap; }
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -33,7 +33,7 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800">🚘 Quản Trị Kho Xe</h1>
-                <p class="text-gray-500 mt-1">Giao diện quản lý ghép xe và hoán đổi xe chuyên nghiệp.</p>
+                <p class="text-gray-500 mt-1">Giao diện quản lý ghép xe, hoán đổi và gửi email thông báo.</p>
             </div>
             <button onclick="location.reload()" class="mt-4 md:mt-0 flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
                 <i class="fa-solid fa-arrows-rotate"></i>
@@ -65,7 +65,7 @@
                         <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
                     </div>
                     <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE
+                        <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE & GỬI EMAIL
                     </button>
                 </div>
             </div>
@@ -84,7 +84,7 @@
                          <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
                     </div>
                     <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE
+                        <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE & GỬI EMAIL
                     </button>
                 </div>
             </div>
@@ -92,23 +92,25 @@
     </div>
 
     <script>
-        // === THAY ĐỔI QUAN TRỌNG: SỬ DỤNG SCRIPT URL GIỐNG CÁC TRANG KHÁC ===
         const SCRIPT_URL = KHO_XE_APPS_SCRIPT_URL; 
+        let waitingList = [], pairedList = [];
+        let selectedWaitingCustomer = null, selectedPairedCustomer = null;
+        let selectedCarToPair = null, selectedCarToSwap = null; 
 
-        // Global state
-        let waitingList = [];
-        let pairedList = [];
-        let selectedWaitingCustomer = null;
-        let selectedPairedCustomer = null;
-        let selectedCarToPair = null; 
-        let selectedCarToSwap = null; 
-
-        // --- UTILITY FUNCTIONS ---
         const showLoader = (show) => document.getElementById('loader-overlay').style.display = show ? 'flex' : 'none';
         const showAlert = (message, isSuccess = true) => alert(message);
 
-        
-        // --- DATA FETCHING & INITIALIZATION ---
+        // === THAY ĐỔI: Bổ sung hàm định dạng ngày tháng ===
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString; // Trả về chuỗi gốc nếu không phải ngày hợp lệ
+            const day = ('0' + date.getDate()).slice(-2);
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
         window.onload = async function() {
             if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
                 showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.", false);
@@ -119,18 +121,13 @@
                 const url = new URL(SCRIPT_URL);
                 url.searchParams.append('action', 'getAdminData');
                 const response = await fetch(url);
-
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
-                
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
-
-                // Backend trả về { data: { waitingList: [], pairedList: [] } }
-                // Ta cần lấy result.data
+                
                 const data = result.data;
                 waitingList = data.waitingList || [];
                 pairedList = data.pairedList || [];
-
                 renderWaitingList();
                 renderPairedList();
             } catch (error) {
@@ -141,7 +138,6 @@
             }
         };
 
-        // --- TAB SWITCHING ---
         function switchTab(tabName) {
             document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
@@ -149,8 +145,8 @@
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
-        // --- GHÉP XE LOGIC ---
         function renderWaitingList() {
+            // ... (Hàm này giữ nguyên)
             const container = document.getElementById('ghep-xe-waiting-list-container');
             if (waitingList.length === 0) {
                 container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có khách hàng nào trong hàng chờ.</div>`;
@@ -166,18 +162,14 @@
         async function selectWaitingCustomer(uniqueId) {
             selectedWaitingCustomer = waitingList.find(c => c.uniqueId === uniqueId);
             if (!selectedWaitingCustomer) return;
-
             document.querySelectorAll('#ghep-xe-waiting-list-container tr').forEach(r => r.classList.remove('bg-blue-100'));
             document.querySelector(`button[onclick="selectWaitingCustomer('${uniqueId}')"]`).closest('tr').classList.add('bg-blue-100');
-
             const infoDiv = document.getElementById('ghep-xe-customer-info');
             infoDiv.innerHTML = `<h3 class="font-bold text-blue-800">Đang tìm xe cho: ${selectedWaitingCustomer.tenKH}</h3><p class="text-sm text-blue-700 mt-1">${selectedWaitingCustomer.loaiXe} - ${selectedWaitingCustomer.phienBan} - ${selectedWaitingCustomer.ngoaiThat}</p>`;
             infoDiv.classList.remove('hidden');
-
             selectedCarToPair = null;
             document.getElementById('ghep-xe-approve-btn').disabled = true;
             document.getElementById('ghep-xe-car-results-container').innerHTML = `<div class="p-6 text-center text-gray-500">Đang tìm xe...</div>`;
-            
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -188,7 +180,7 @@
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
-                renderCarResultsForPairing(result.data); // Backend trả về { data: [...] }
+                renderCarResults(result.data, 'ghep-xe-car-results-container', 'selectedCarToPair', 'selectCarToPair');
             } catch (error) {
                 showAlert(`Lỗi khi tìm xe: ${error.message}`, false);
             } finally {
@@ -196,25 +188,6 @@
             }
         }
 
-        function renderCarResultsForPairing(cars) {
-            const container = document.getElementById('ghep-xe-car-results-container');
-            if (!cars || cars.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không tìm thấy xe nào phù hợp.</div>`;
-                return;
-            }
-            let tableHtml = `<table class="w-full text-sm text-left text-gray-600"><thead class="text-xs text-gray-700 uppercase"><tr><th class="py-3 px-4 w-12">Chọn</th><th class="py-3 px-4">Số VIN</th><th class="py-3 px-4">Phiên bản</th><th class="py-3 px-4">Màu sắc</th><th class="py-3 px-4">Kho</th></tr></thead><tbody>`;
-            cars.forEach(car => {
-                const carData = JSON.stringify(car).replace(/"/g, '&quot;');
-                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="py-3 px-4"><input type="radio" name="selectedCarToPair" onchange="selectCarToPair(${carData})"></td>
-                    <td class="py-3 px-4 font-semibold text-gray-900">${car.soVin}</td>
-                    <td class="py-3 px-4">${car.phienBan}</td>
-                    <td class="py-3 px-4">${car.ngoaiThat}</td>
-                    <td class="py-3 px-4">${car.sheetName}</td></tr>`;
-            });
-            container.innerHTML = tableHtml + `</tbody></table>`;
-        }
-        
         function selectCarToPair(carObject) {
             selectedCarToPair = carObject;
             document.getElementById('ghep-xe-approve-btn').disabled = false;
@@ -223,13 +196,7 @@
         async function approveGhepXe() {
             if (!selectedWaitingCustomer || !selectedCarToPair) return showAlert('Vui lòng chọn khách hàng và xe.', false);
             if (!confirm(`Bạn chắc chắn muốn ghép xe có VIN ${selectedCarToPair.soVin} cho khách hàng ${selectedWaitingCustomer.tenKH}?`)) return;
-            
-            const ghepXeInfo = { 
-                carRow: selectedCarToPair.row,
-                carSheetName: selectedCarToPair.sheetName,
-                customerUniqueId: selectedWaitingCustomer.uniqueId
-            };
-
+            const ghepXeInfo = { carRow: selectedCarToPair.row, carSheetName: selectedCarToPair.sheetName, customerUniqueId: selectedWaitingCustomer.uniqueId };
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -240,7 +207,6 @@
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
-                
                 showAlert(result.message, true);
                 setTimeout(() => location.reload(), 1500);
             } catch (error) {
@@ -249,7 +215,7 @@
                 showLoader(false);
             }
         }
-
+        
         // --- ĐỔI XE LOGIC ---
         function renderPairedList() {
             const container = document.getElementById('doi-xe-paired-list-container');
@@ -267,29 +233,25 @@
         async function selectPairedCustomer(uniqueId) {
             selectedPairedCustomer = pairedList.find(c => c.uniqueId === uniqueId);
             if (!selectedPairedCustomer) return;
-
             document.querySelectorAll('#doi-xe-paired-list-container tr').forEach(r => r.classList.remove('bg-green-100'));
             document.querySelector(`button[onclick="selectPairedCustomer('${uniqueId}')"]`).closest('tr').classList.add('bg-green-100');
-
             const infoDiv = document.getElementById('doi-xe-customer-info');
             infoDiv.innerHTML = `<h3 class="font-bold text-green-800">Đổi xe cho: ${selectedPairedCustomer.tenKH}</h3><p class="text-sm text-green-700 mt-1">Xe hiện tại: ${selectedPairedCustomer.loaiXe} - VIN: ${selectedPairedCustomer.soVin}</p>`;
             infoDiv.classList.remove('hidden');
-
             selectedCarToSwap = null;
             document.getElementById('doi-xe-approve-btn').disabled = true;
             document.getElementById('doi-xe-car-results-container').innerHTML = `<div class="p-6 text-center text-gray-500">Đang tìm xe...</div>`;
-            
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'findCars', params: {} }) // Params rỗng để lấy tất cả xe
+                    body: JSON.stringify({ action: 'findCars', params: {} })
                 });
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
-                renderCarResultsForSwapping(result.data);
+                renderCarResults(result.data, 'doi-xe-car-results-container', 'selectedCarToSwap', 'selectCarToSwap');
             } catch (error) {
                 showAlert(`Lỗi khi tìm xe để đổi: ${error.message}`, false);
             } finally {
@@ -297,26 +259,6 @@
             }
         }
         
-        function renderCarResultsForSwapping(cars) {
-            const container = document.getElementById('doi-xe-car-results-container');
-            if (!cars || cars.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có xe nào trong kho để đổi.</div>`;
-                return;
-            }
-            let tableHtml = `<table class="w-full text-sm text-left text-gray-600"><thead class="text-xs text-gray-700 uppercase"><tr><th class="py-3 px-4 w-12">Chọn</th><th class="py-3 px-4">Số VIN</th><th class="py-3 px-4">Loại Xe</th><th class="py-3 px-4">Màu sắc</th><th class="py-3 px-4">Kho</th></tr></thead><tbody>`;
-            cars.forEach(car => {
-                if (car.soVin && selectedPairedCustomer.soVin && car.soVin === selectedPairedCustomer.soVin) return;
-                const carData = JSON.stringify(car).replace(/"/g, '&quot;');
-                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="py-3 px-4"><input type="radio" name="selectedCarToSwap" onchange="selectCarToSwap(${carData})"></td>
-                    <td class="py-3 px-4 font-semibold text-gray-900">${car.soVin}</td>
-                    <td class="py-3 px-4">${car.loaiXe}</td>
-                    <td class="py-3 px-4">${car.ngoaiThat}</td>
-                    <td class="py-3 px-4">${car.sheetName}</td></tr>`;
-            });
-            container.innerHTML = tableHtml + `</tbody></table>`;
-        }
-
         function selectCarToSwap(carObject) {
             selectedCarToSwap = carObject;
             document.getElementById('doi-xe-approve-btn').disabled = false;
@@ -325,13 +267,7 @@
         async function approveDoiXe() {
             if (!selectedPairedCustomer || !selectedCarToSwap) return showAlert('Vui lòng chọn khách hàng và xe mới.', false);
             if (!confirm(`Bạn chắc chắn muốn đổi xe cho ${selectedPairedCustomer.tenKH} sang xe mới có VIN ${selectedCarToSwap.soVin}?`)) return;
-
-            const doiXeInfo = { 
-                oldCarSheetRow: selectedPairedCustomer.sheetRow,
-                newCarRow: selectedCarToSwap.row,
-                newCarSheetName: selectedCarToSwap.sheetName
-            };
-            
+            const doiXeInfo = { oldCarSheetRow: selectedPairedCustomer.sheetRow, newCarRow: selectedCarToSwap.row, newCarSheetName: selectedCarToSwap.sheetName };
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
@@ -342,7 +278,6 @@
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
-
                 showAlert(result.message, true);
                 setTimeout(() => location.reload(), 1500);
             } catch (error) {
@@ -350,6 +285,48 @@
             } finally {
                 showLoader(false);
             }
+        }
+
+        // === THAY ĐỔI: HÀM HIỂN THỊ KẾT QUẢ TÌM XE DÙNG CHUNG ===
+        function renderCarResults(cars, containerId, radioName, onchangeFunction) {
+            const container = document.getElementById(containerId);
+            if (!cars || cars.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không tìm thấy xe nào phù hợp.</div>`;
+                return;
+            }
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-2">Chọn</th>
+                        <th class="py-3 px-2">Số VIN</th>
+                        <th class="py-3 px-2">Số Máy</th>
+                        <th class="py-3 px-2">PO</th>
+                        <th class="py-3 px-2">Loại Xe</th>
+                        <th class="py-3 px-2">Nội thất</th>
+                        <th class="py-3 px-2">Ngày Về</th>
+                        <th class="py-3 px-2">Ghi Chú</th>
+                        <th class="py-3 px-2">Kho</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            cars.forEach(car => {
+                // Lọc ra xe hiện tại của khách hàng trong chức năng Đổi xe
+                if (radioName === 'selectedCarToSwap' && selectedPairedCustomer && car.soVin && car.soVin === selectedPairedCustomer.soVin) return;
+
+                const carData = JSON.stringify(car).replace(/"/g, '&quot;');
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-2 px-2"><input type="radio" name="${radioName}" onchange="${onchangeFunction}(${carData})"></td>
+                    <td class="py-2 px-2 font-semibold text-gray-900">${car.soVin || ''}</td>
+                    <td class="py-2 px-2">${car.soMay || ''}</td>
+                    <td class="py-2 px-2">${car.po || ''}</td>
+                    <td class="py-2 px-2">${car.loaiXe || ''}<div class="text-xs text-gray-500">${car.phienBan || ''}</div><div class="font-medium">${car.ngoaiThat || ''}</div></td>
+                    <td class="py-2 px-2">${car.noiThat || ''}</td>
+                    <td class="py-2 px-2">${formatDate(car.ngayVe)}</td>
+                    <td class="py-2 px-2">${car.ghiChu || ''}</td>
+                    <td class="py-2 px-2">${car.kho || ''}</td>
+                </tr>`;
+            });
+            container.innerHTML = tableHtml + `</tbody></table>`;
         }
     </script>
 </body>
