@@ -367,44 +367,50 @@
         }
 
         function renderCarResults(cars, containerId, radioName, onchangeFunction) {
-            const container = document.getElementById(containerId);
-            if (!cars || cars.length === 0) {
-                container.innerHTML = `<div class="p-6 text-center text-gray-500">Không tìm thấy xe nào phù hợp.</div>`;
-                return;
-            }
-            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
-                <thead class="text-xs text-gray-700 uppercase">
-                    <tr>
-                        <th class="py-3 px-2">Chọn</th>
-                        <th class="py-3 px-2">Số VIN</th>
-                        <th class="py-3 px-2">Số Máy</th>
-                        <th class="py-3 px-2">PO</th>
-                        <th class="py-3 px-2">Loại Xe</th>
-                        <th class="py-3 px-2">Nội thất</th>
-                        <th class="py-3 px-2">Ngày Về</th>
-                        <th class="py-3 px-2">Ghi Chú</th>
-                        <th class="py-3 px-2">Kho</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-            cars.forEach(car => {
-                if (radioName === 'selectedCarToSwap' && selectedPairedCustomer && car.soVin && car.soVin === selectedPairedCustomer.soVin) return;
+    const container = document.getElementById(containerId);
+    if (!cars || cars.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-gray-500">Không tìm thấy xe nào phù hợp.</div>`;
+        return;
+    }
 
-                const carData = JSON.stringify(car).replace(/"/g, '&quot;');
-                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="py-2 px-2"><input type="radio" name="${radioName}" onchange="${onchangeFunction}(${carData})"></td>
-                    <td class="py-2 px-2 font-semibold text-gray-900">${car.soVin || ''}</td>
-                    <td class="py-2 px-2">${car.soMay || ''}</td>
-                    <td class="py-2 px-2">${car.po || ''}</td>
-                    <td class="py-2 px-2">${car.loaiXe || ''}<div class="text-xs text-gray-500">${car.phienBan || ''}</div><div class="font-medium">${car.ngoaiThat || ''}</div></td>
-                    <td class="py-2 px-2">${car.noiThat || ''}</td>
-                    <td class="py-2 px-2">${formatDate(car.ngayVe)}</td>
-                    <td class="py-2 px-2">${car.ghiChu || ''}</td>
-                    <td class="py-2 px-2">${car.kho || ''}</td>
-                </tr>`;
-            });
-            container.innerHTML = tableHtml + `</tbody></table>`;
-        }
+    // === THỨ TỰ TIÊU ĐỀ CỘT ĐÃ ĐƯỢC THAY ĐỔI ===
+    let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+        <thead class="text-xs text-gray-700 uppercase">
+            <tr>
+                <th class="py-3 px-2">Chọn</th>
+                <th class="py-3 px-2">Loại Xe</th>
+                <th class="py-3 px-2">Ngoại Thất</th>
+                <th class="py-3 px-2">Nội Thất</th>
+                <th class="py-3 px-2">Số VIN</th>
+                <th class="py-3 px-2">Số Máy</th>
+                <th class="py-3 px-2">Ngày Về</th>
+                <th class="py-3 px-2">Ghi Chú</th>
+                <th class="py-3 px-2">Kho</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    cars.forEach(car => {
+        // Bỏ qua xe hiện tại của khách trong danh sách đổi
+        if (radioName === 'selectedCarToSwap' && selectedPairedCustomer && car.soVin && car.soVin === selectedPairedCustomer.soVin) return;
+
+        const carData = JSON.stringify(car).replace(/"/g, '&quot;');
+        
+        // === THỨ TỰ DỮ LIỆU TRONG CỘT ĐÃ ĐƯỢC THAY ĐỔI TƯƠNG ỨNG ===
+        tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+            <td class="py-2 px-2"><input type="radio" name="${radioName}" onchange="${onchangeFunction}(${carData})"></td>
+            <td class="py-2 px-2">${car.loaiXe || ''}<div class="text-xs text-gray-500">${car.phienBan || ''}</div></td>
+            <td class="py-2 px-2 font-medium">${car.ngoaiThat || ''}</td>
+            <td class="py-2 px-2">${car.noiThat || ''}</td>
+            <td class="py-2 px-2 font-semibold text-gray-900">${car.soVin || ''}</td>
+            <td class="py-2 px-2">${car.soMay || ''}</td>
+            <td class="py-2 px-2">${formatDate(car.ngayVe)}</td>
+            <td class="py-2 px-2">${car.ghiChu || ''}</td>
+            <td class="py-2 px-2">${car.kho || ''}</td>
+        </tr>`;
+    });
+    container.innerHTML = tableHtml + `</tbody></table>`;
+}
     </script>
 </body>
 </html>
