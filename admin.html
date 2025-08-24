@@ -12,7 +12,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .tab-button { transition: all 0.3s; }
         .tab-button.active { color: var(--brand-color); border-color: var(--brand-color); background-color: #eef5ff; }
-        .table-container { max-height: 400px; overflow-y: auto; }
+        .table-container { max-height: 450px; overflow-y: auto; }
         table thead th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; white-space: nowrap; }
         .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
@@ -23,9 +23,7 @@
 </head>
 <body class="antialiased text-gray-800">
 
-    <div id="loader-overlay" class="loader-overlay hidden">
-        <div class="loader"></div>
-    </div>
+    <div id="loader-overlay" class="loader-overlay hidden"><div class="loader"></div></div>
     
     <header class="bg-white shadow-md sticky top-0 z-50">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
@@ -70,8 +68,7 @@
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800">Trang Quản Trị Ghép Xe</h1>
                 <button onclick="location.reload()" class="flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    Tải lại
+                    <i class="fa-solid fa-arrows-rotate"></i> Tải lại
                 </button>
             </div>
 
@@ -87,39 +84,46 @@
             </div>
 
             <div id="content-ghep-xe">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="space-y-8">
                     <div>
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Hàng chờ ghép xe</h2>
                         <div id="ghep-xe-waiting-list-container" class="table-container border rounded-lg"></div>
                     </div>
+                    
+                    <div id="ghep-xe-customer-info" class="bg-blue-50 p-4 rounded-lg border border-blue-200 hidden"></div>
+
                     <div>
-                        <div id="ghep-xe-customer-info" class="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-200 hidden"></div>
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Xe phù hợp trong kho</h2>
                         <div id="ghep-xe-car-results-container" class="table-container border rounded-lg">
                             <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
                         </div>
-                        <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE
-                        </button>
                     </div>
+
+                    <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE & GỬI EMAIL
+                    </button>
                 </div>
             </div>
+
             <div id="content-doi-xe" class="hidden">
-                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                 <div class="space-y-8">
                     <div>
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">1. Chọn khách hàng cần đổi xe</h2>
                         <div id="doi-xe-paired-list-container" class="table-container border rounded-lg"></div>
                     </div>
+                    
+                    <div id="doi-xe-customer-info" class="bg-green-50 p-4 rounded-lg border border-green-200 hidden"></div>
+                    
                     <div>
-                        <div id="doi-xe-customer-info" class="bg-green-50 p-4 rounded-lg mb-4 border border-green-200 hidden"></div>
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">2. Tìm và chọn xe mới để đổi</h2>
                         <div id="doi-xe-car-results-container" class="table-container border rounded-lg">
                              <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
                         </div>
-                        <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE
-                        </button>
                     </div>
+                    
+                    <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE & GỬI EMAIL
+                    </button>
                 </div>
             </div>
         </div>
@@ -129,10 +133,10 @@
         let waitingList = [], pairedList = [];
         let selectedWaitingCustomer = null, selectedPairedCustomer = null;
         let selectedCarToPair = null, selectedCarToSwap = null; 
-        const showLoader = (show) => document.getElementById('loader-overlay').classList.toggle('hidden', !show);
+        const showLoader = (show) => document.getElementById('loader-overlay').style.display = show ? 'flex' : 'none';
         const showAlert = (message, isSuccess = true) => alert(message);
         function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); const year = date.getFullYear(); return `${day}/${month}/${year}`; }
-
+        
         window.onload = async function() {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (userDataString) {
@@ -149,8 +153,7 @@
             });
 
             if (typeof SCRIPT_URL === 'undefined' || !SCRIPT_URL) {
-                showAlert("Lỗi cấu hình: Không tìm thấy KHO_XE_APPS_SCRIPT_URL trong file config.js.", false);
-                return;
+                return showAlert("Lỗi cấu hình: KHO_XE_APPS_SCRIPT_URL không tồn tại.", false);
             }
             showLoader(true);
             try {
@@ -162,15 +165,15 @@
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 
-                const data = result.data || result;
-                if (data.status === 'ERROR') throw new Error(data.message);
+                if (result.status === 'ERROR') throw new Error(result.message);
                 
+                const data = result.data || result; 
                 waitingList = data.waitingList || [];
                 pairedList = data.pairedList || [];
                 renderWaitingList();
                 renderPairedList();
             } catch (error) {
-                showAlert(`Đã xảy ra lỗi khi tải dữ liệu ban đầu: ${error.message}`, false);
+                showAlert(`Lỗi tải dữ liệu: ${error.message}`, false);
             } finally {
                 showLoader(false);
             }
@@ -189,9 +192,31 @@
                 container.innerHTML = `<div class="p-6 text-center text-gray-500">Không có khách hàng nào trong hàng chờ.</div>`;
                 return;
             }
-            let tableHtml = `<table class="w-full text-sm text-left text-gray-600"><thead class="text-xs text-gray-700 uppercase"><tr><th class="py-3 px-4">Tên KH</th><th class="py-3 px-4">Loại Xe</th><th class="py-3 px-4">TVBH</th><th class="py-3 px-4"></th></tr></thead><tbody>`;
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-4">Tên KH</th>
+                        <th class="py-3 px-4">TVBH</th>
+                        <th class="py-3 px-4">Loại Xe</th>
+                        <th class="py-3 px-4">Ngoại Thất</th>
+                        <th class="py-3 px-4">Nội Thất</th>
+                        <th class="py-3 px-4">Ngày Cọc</th>
+                        <th class="py-3 px-4"></th>
+                    </tr>
+                </thead>
+                <tbody>`;
             waitingList.forEach(c => {
-                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50"><td class="py-3 px-4 font-semibold text-gray-900">${c.tenKH}</td><td class="py-3 px-4">${c.loaiXe}</td><td class="py-3 px-4">${c.tvbh}</td><td class="py-3 px-4 text-right"><button onclick="selectWaitingCustomer('${c.uniqueId}')" class="font-medium text-blue-600 hover:underline">Chọn</button></td></tr>`;
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-semibold text-gray-900">${c.tenKH || ''}</td>
+                    <td class="py-3 px-4">${c.tvbh || ''}</td>
+                    <td class="py-3 px-4">${c.loaiXe || ''}</td>
+                    <td class="py-3 px-4">${c.ngoaiThat || ''}</td>
+                    <td class="py-3 px-4">${c.noiThat || ''}</td>
+                    <td class="py-3 px-4">${c.ngayCoc || ''}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="selectWaitingCustomer('${c.uniqueId}')" class="font-medium text-blue-600 hover:underline">Chọn</button>
+                    </td>
+                </tr>`;
             });
             container.innerHTML = tableHtml + `</tbody></table>`;
         }
@@ -202,7 +227,10 @@
             document.querySelectorAll('#ghep-xe-waiting-list-container tr').forEach(r => r.classList.remove('bg-blue-100'));
             document.querySelector(`button[onclick="selectWaitingCustomer('${uniqueId}')"]`).closest('tr').classList.add('bg-blue-100');
             const infoDiv = document.getElementById('ghep-xe-customer-info');
-            infoDiv.innerHTML = `<h3 class="font-bold text-blue-800">Đang tìm xe cho: ${selectedWaitingCustomer.tenKH}</h3><p class="text-sm text-blue-700 mt-1">${selectedWaitingCustomer.loaiXe} - ${selectedWaitingCustomer.phienBan} - ${selectedWaitingCustomer.ngoaiThat}</p>`;
+            infoDiv.innerHTML = `<h3 class="font-bold text-blue-800">Đang tìm xe cho: ${selectedWaitingCustomer.tenKH}</h3>
+                                 <p class="text-sm text-blue-700 mt-1">
+                                    ${selectedWaitingCustomer.loaiXe} - ${selectedWaitingCustomer.phienBan} - ${selectedWaitingCustomer.ngoaiThat} - ${selectedWaitingCustomer.noiThat}
+                                 </p>`;
             infoDiv.classList.remove('hidden');
             selectedCarToPair = null;
             document.getElementById('ghep-xe-approve-btn').disabled = true;
@@ -239,7 +267,6 @@
                     method: 'POST',
                     body: JSON.stringify({ action: 'processGhepXe', params: ghepXeInfo })
                 });
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
                 showAlert(result.message, true);
@@ -257,13 +284,35 @@
                 container.innerHTML = `<div class="p-6 text-center text-gray-500">Chưa có khách hàng nào được ghép xe.</div>`;
                 return;
             }
-            let tableHtml = `<table class="w-full text-sm text-left text-gray-600"><thead class="text-xs text-gray-700 uppercase"><tr><th class="py-3 px-4">Tên KH</th><th class="py-3 px-4">Xe hiện tại (VIN)</th><th class="py-3 px-4">TVBH</th><th class="py-3 px-4"></th></tr></thead><tbody>`;
+            let tableHtml = `<table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase">
+                    <tr>
+                        <th class="py-3 px-4">Tên KH</th>
+                        <th class="py-3 px-4">TVBH</th>
+                        <th class="py-3 px-4">Loại Xe (VIN)</th>
+                        <th class="py-3 px-4">Ngoại Thất</th>
+                        <th class="py-3 px-4">Nội Thất</th>
+                        <th class="py-3 px-4">Ngày Cọc</th>
+                        <th class="py-3 px-4"></th>
+                    </tr>
+                </thead>
+                <tbody>`;
             pairedList.forEach(c => {
-                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50"><td class="py-3 px-4 font-semibold text-gray-900">${c.tenKH}</td><td class="py-3 px-4">${c.soVin}</td><td class="py-3 px-4">${c.tvbh}</td><td class="py-3 px-4 text-right"><button onclick="selectPairedCustomer('${c.uniqueId}')" class="font-medium text-green-600 hover:underline">Chọn</button></td></tr>`;
+                tableHtml += `<tr class="bg-white border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-semibold text-gray-900">${c.tenKH || ''}</td>
+                    <td class="py-3 px-4">${c.tvbh || ''}</td>
+                    <td class="py-3 px-4">${c.loaiXe || ''}<div class="text-xs text-gray-500 font-mono">${c.soVin || ''}</div></td>
+                    <td class="py-3 px-4">${c.ngoaiThat || ''}</td>
+                    <td class="py-3 px-4">${c.noiThat || ''}</td>
+                    <td class="py-3 px-4">${c.ngayCoc || ''}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="selectPairedCustomer('${c.uniqueId}')" class="font-medium text-green-600 hover:underline">Chọn</button>
+                    </td>
+                </tr>`;
             });
             container.innerHTML = tableHtml + `</tbody></table>`;
         }
-
+        
         async function selectPairedCustomer(uniqueId) {
             selectedPairedCustomer = pairedList.find(c => c.uniqueId === uniqueId);
             if (!selectedPairedCustomer) return;
@@ -281,7 +330,6 @@
                     method: 'POST',
                     body: JSON.stringify({ action: 'findCars', params: {} })
                 });
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
                 renderCarResults(result.data, 'doi-xe-car-results-container', 'selectedCarToSwap', 'selectCarToSwap');
@@ -307,7 +355,6 @@
                     method: 'POST',
                     body: JSON.stringify({ action: 'processDoiXe', params: doiXeInfo })
                 });
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status !== 'SUCCESS') throw new Error(result.message);
                 showAlert(result.message, true);
