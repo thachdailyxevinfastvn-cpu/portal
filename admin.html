@@ -14,13 +14,11 @@
         .tab-button.active { color: var(--brand-color); border-color: var(--brand-color); background-color: #eef5ff; }
         .table-container { max-height: 400px; overflow-y: auto; }
         table thead th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; white-space: nowrap; }
-        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
+        .loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid var(--brand-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="antialiased text-gray-800">
@@ -101,7 +99,7 @@
                             <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách chờ.</div>
                         </div>
                         <button id="ghep-xe-approve-btn" disabled onclick="approveGhepXe()" class="mt-6 w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE & GỬI EMAIL
+                            <i class="fa-solid fa-check-circle"></i> PHÊ DUYỆT GHÉP XE
                         </button>
                     </div>
                 </div>
@@ -119,7 +117,7 @@
                              <div class="p-6 text-center text-gray-500">Vui lòng chọn một khách hàng từ danh sách đã ghép.</div>
                         </div>
                         <button id="doi-xe-approve-btn" disabled onclick="approveDoiXe()" class="mt-6 w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE & GỬI EMAIL
+                            <i class="fa-solid fa-retweet"></i> THỰC HIỆN ĐỔI XE
                         </button>
                     </div>
                 </div>
@@ -131,7 +129,7 @@
         let waitingList = [], pairedList = [];
         let selectedWaitingCustomer = null, selectedPairedCustomer = null;
         let selectedCarToPair = null, selectedCarToSwap = null; 
-        const showLoader = (show) => document.getElementById('loader-overlay').style.display = show ? 'flex' : 'none';
+        const showLoader = (show) => document.getElementById('loader-overlay').classList.toggle('hidden', !show);
         const showAlert = (message, isSuccess = true) => alert(message);
         function formatDate(dateString) { if (!dateString) return ''; const date = new Date(dateString); if (isNaN(date.getTime())) return dateString; const day = ('0' + date.getDate()).slice(-2); const month = ('0' + (date.getMonth() + 1)).slice(-2); const year = date.getFullYear(); return `${day}/${month}/${year}`; }
 
@@ -158,28 +156,26 @@
             try {
                 const url = new URL(SCRIPT_URL);
                 url.searchParams.append('action', 'getAdminData');
-                // === THAY ĐỔI: Thêm tham số timestamp để vô hiệu hóa cache của trình duyệt ===
                 url.searchParams.append('timestamp', new Date().getTime());
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
-                if (result.status === 'ERROR') throw new Error(result.message);
                 
-                const data = result.data;
+                const data = result.data || result;
+                if (data.status === 'ERROR') throw new Error(data.message);
+                
                 waitingList = data.waitingList || [];
                 pairedList = data.pairedList || [];
                 renderWaitingList();
                 renderPairedList();
             } catch (error) {
                 showAlert(`Đã xảy ra lỗi khi tải dữ liệu ban đầu: ${error.message}`, false);
-                console.error("Lỗi tải dữ liệu ban đầu:", error);
             } finally {
                 showLoader(false);
             }
         };
 
-        // ... Các hàm logic còn lại (từ switchTab đến hết) giữ nguyên không đổi ...
         function switchTab(tabName) {
             document.querySelectorAll('[id^="content-"]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
@@ -215,7 +211,6 @@
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'findCars', params: selectedWaitingCustomer })
                 });
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
@@ -237,12 +232,11 @@
         async function approveGhepXe() {
             if (!selectedWaitingCustomer || !selectedCarToPair) return showAlert('Vui lòng chọn khách hàng và xe.', false);
             if (!confirm(`Bạn chắc chắn muốn ghép xe có VIN ${selectedCarToPair.soVin} cho khách hàng ${selectedWaitingCustomer.tenKH}?`)) return;
-            const ghepXeInfo = { carRow: selectedCarToPair.row, carSheetName: selectedCarToPair.sheetName, customerUniqueId: selectedWaitingCustomer.uniqueId };
+            const ghepXeInfo = { carVin: selectedCarToPair.soVin, customerUniqueId: selectedWaitingCustomer.uniqueId };
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'processGhepXe', params: ghepXeInfo })
                 });
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
@@ -285,7 +279,6 @@
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'findCars', params: {} })
                 });
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
@@ -307,12 +300,11 @@
         async function approveDoiXe() {
             if (!selectedPairedCustomer || !selectedCarToSwap) return showAlert('Vui lòng chọn khách hàng và xe mới.', false);
             if (!confirm(`Bạn chắc chắn muốn đổi xe cho ${selectedPairedCustomer.tenKH} sang xe mới có VIN ${selectedCarToSwap.soVin}?`)) return;
-            const doiXeInfo = { oldCarSheetRow: selectedPairedCustomer.sheetRow, newCarRow: selectedCarToSwap.row, newCarSheetName: selectedCarToSwap.sheetName };
+            const doiXeInfo = { oldCarVin: selectedPairedCustomer.soVin, newCarVin: selectedCarToSwap.soVin };
             showLoader(true);
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({ action: 'processDoiXe', params: doiXeInfo })
                 });
                 if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
