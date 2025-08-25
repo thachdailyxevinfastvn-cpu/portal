@@ -298,6 +298,7 @@
                 return;
             }
             
+            // Logic tìm placeholder không thay đổi
             const dateTextPlaceholder = placeholders.find(p => p.label.toLowerCase() === dateTextLabel);
             const dateSourcePlaceholder = placeholders.find(p => p.label.toLowerCase() === dateSourceLabel);
             dateTextPlaceholderName = dateTextPlaceholder ? dateTextPlaceholder.name : '';
@@ -323,13 +324,11 @@
 
                 if (hiddenLabels.includes(pLabelLower)) return;
                 
-                // --- LOGIC NÂNG CẤP ---
-                // Chuẩn hóa key từ sheet Kho Xe để so sánh với placeholder name
-                // Ví dụ: header "Tên KH" -> "<<TEN_KH>>"
-                const normalizedPrefillKey = `<<${p.label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s/g, '_')}>>`;
-                const prefilledValue = (prefillData && (prefillData[p.name] || prefillData[normalizedPrefillKey])) || '';
+                // --- LOGIC ÁNH XẠ MỚI VÀ CHÍNH XÁC ---
+                // Lấy dữ liệu bằng cách so khớp "label" của placeholder với "tên cột" từ Kho Xe
+                const prefilledValue = (prefillData && prefillData[p.label]) || '';
                 const isReadonly = prefilledValue !== '';
-                // --- KẾT THÚC LOGIC NÂNG CẤP ---
+                // --- KẾT THÚC LOGIC MỚI ---
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
@@ -344,8 +343,6 @@
                 }
                 else if (dropdownLabels.some(l => pLabelLower.includes(l))) {
                     formHtml += `<select id="${p.name}" name="${p.name}" class="${finalClasses}" ${isReadonly ? 'disabled' : ''}>`;
-                    // Note: Logic to pre-select the correct option would be needed here if data comes from Kho Xe.
-                    // For simplicity, we'll just show the options.
                     const option1 = "Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội";
                     const option2 = "BỘ CÔNG AN";
                     formHtml += `<option ${prefilledValue === option1 ? 'selected' : ''}>${option1}</option>`;
@@ -356,10 +353,22 @@
                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động" readonly class="${commonClasses} ${readonlyClasses}">`;
                 }
                 else if (pLabelLower === dateSourceLabel || otherDateLabels.includes(pLabelLower)) {
-                     formHtml += `<input type="date" id="${p.name}" name="${p.name}" value="${prefilledValue}" class="${finalClasses}" ${isReadonly ? 'readonly' : 'required'}>`;
+                     // Chuyển đổi ngày từ dd/MM/yyyy sang yyyy-MM-dd để input type="date" hiểu
+                     let dateValue = '';
+                     if (isReadonly && prefilledValue.includes('/')) {
+                         const parts = prefilledValue.split('/');
+                         dateValue = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                     }
+                     formHtml += `<input type="date" id="${p.name}" name="${p.name}" value="${dateValue}" class="${finalClasses}" ${isReadonly ? 'readonly' : 'required'}>`;
                 }
                 else {
-                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${prefilledValue}" 
+                     // Đối với các trường tiền tệ, định dạng lại số
+                     let displayValue = prefilledValue;
+                     if (isReadonly && currencyLabels.some(l => pLabelLower.includes(l))) {
+                        let numValue = String(prefilledValue).replace(/[^0-9]/g, '');
+                        displayValue = numValue ? Number(numValue).toLocaleString('vi-VN') : '';
+                     }
+                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${displayValue}" 
                                 placeholder="${isReadonly ? '' : p.label}" 
                                 class="${finalClasses}" 
                                 ${isReadonly ? 'readonly' : 'required'}>`;
@@ -368,6 +377,14 @@
             });
             formContainer.innerHTML = formHtml;
             submitBtn.disabled = false;
+
+            // Tự động tính toán các giá trị odv-generated ngay sau khi form được tạo
+            calculateDownPayment();
+            const dateSourceEl = document.querySelector(`[name="${dateSourcePlaceholderName}"]`);
+            if(dateSourceEl && dateSourceEl.value){
+                const dateTextEl = document.querySelector(`[name="${dateTextPlaceholderName}"]`);
+                if(dateTextEl) dateTextEl.value = convertDateToText(dateSourceEl.value);
+            }
         }
         
         function handleFormInput(event) {
