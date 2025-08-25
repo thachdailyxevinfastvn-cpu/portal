@@ -40,7 +40,7 @@
                      <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                 </div>
                 <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 S.A. 001-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 </button>
                 <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -61,20 +61,44 @@
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
         <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
             <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Công Cụ Tạo Văn Bản Tự Động</h1>
+            
             <div class="mb-6">
                 <label for="group-selector" class="block text-sm font-medium text-gray-700 mb-1">1. Chọn Nhóm Văn Bản</label>
                 <select id="group-selector" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="">-- Vui lòng chọn --</option>
                 </select>
             </div>
-            <div id="form-container" class="space-y-4"></div>
+
+            <div id="workflow-choice-container" class="hidden space-y-4 border-t pt-4">
+                 <label class="block text-sm font-medium text-gray-700 mb-1">2. Chọn phương thức nhập liệu</label>
+                 <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="manual-entry-btn" class="w-full bg-white text-blue-600 border border-blue-600 font-bold py-3 px-4 rounded-lg hover:bg-blue-50">
+                        <i class="fa-solid fa-keyboard mr-2"></i> Nhập dữ liệu thủ công
+                    </button>
+                    <button id="existing-data-btn" class="w-full bg-white text-green-600 border border-green-600 font-bold py-3 px-4 rounded-lg hover:bg-green-50">
+                        <i class="fa-solid fa-database mr-2"></i> Nhập liệu từ Kho Xe
+                    </button>
+                 </div>
+            </div>
+
+            <div id="customer-selection-container" class="hidden space-y-4 border-t pt-4">
+                 <label for="customer-selector" class="block text-sm font-medium text-gray-700 mb-1">2.1. Chọn khách hàng từ Kho xe</label>
+                <select id="customer-selector" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">-- Vui lòng chọn khách hàng --</option>
+                </select>
+            </div>
+
+            <div id="form-container" class="hidden space-y-4"></div>
+
             <div id="loader" class="hidden">
                 <div class="plane-container">
                     <div class="paper-plane"><i class="fa-regular fa-paper-plane"></i></div>
                     <p id="loading-text" class="loading-text"></p>
                 </div>
             </div>
+            
             <button id="submit-btn" disabled class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center h-12 disabled:bg-gray-400 disabled:cursor-not-allowed">Tạo Văn Bản</button>
+            
             <div id="result-container" class="hidden mt-6">
                 <h3 class="font-bold text-green-800 border-b pb-2 mb-2">Thành công! Các văn bản đã được tạo:</h3>
                 <div id="result-links" class="mt-2 space-y-2"></div>
@@ -122,6 +146,11 @@
         }
 
         const groupSelector = document.getElementById('group-selector');
+        const workflowChoiceContainer = document.getElementById('workflow-choice-container');
+        const manualEntryBtn = document.getElementById('manual-entry-btn');
+        const existingDataBtn = document.getElementById('existing-data-btn');
+        const customerSelectionContainer = document.getElementById('customer-selection-container');
+        const customerSelector = document.getElementById('customer-selector');
         const formContainer = document.getElementById('form-container');
         const submitBtn = document.getElementById('submit-btn');
         const loader = document.getElementById('loader');
@@ -150,12 +179,15 @@
             fetchGroups();
             fetchHistory();
             groupSelector.addEventListener('change', handleGroupSelection);
+            manualEntryBtn.addEventListener('click', handleManualEntry);
+            existingDataBtn.addEventListener('click', handleExistingDataEntry);
+            customerSelector.addEventListener('change', handleCustomerSelection);
             submitBtn.addEventListener('click', handleSubmit);
             formContainer.addEventListener('input', handleFormInput);
         }
 
         async function fetchGroups() {
-            startLoadingAnimation();
+            startLoadingAnimation('Đang tải danh sách nhóm văn bản...');
             const result = await handleApiRequest_GET({ action: 'getGroups' });
             stopLoadingAnimation();
             if (result && result.status === 'success') {
@@ -167,19 +199,66 @@
                 });
             } else if (result) { showError(result.message); }
         }
-
-        async function handleGroupSelection() {
+        
+        function handleGroupSelection() {
             const selectedGroup = groupSelector.value;
-            clearAll();
+            clearAll(false);
             if (selectedGroup) {
-                startLoadingAnimation();
-                const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: selectedGroup });
+                workflowChoiceContainer.style.display = 'block';
+            }
+        }
+
+        async function handleManualEntry() {
+            startLoadingAnimation('Đang tải form nhập liệu...');
+            const result = await handleApiRequest_GET({ action: 'getPlaceholders', group: groupSelector.value });
+            stopLoadingAnimation();
+            if (result && result.status === 'success') {
+                customerNameKey = result.data.customerNameKey; 
+                createForm(result.data.placeholders);
+            } else if (result) { showError(result.message); }
+        }
+
+        async function handleExistingDataEntry() {
+            startLoadingAnimation('Đang tải danh sách khách hàng...');
+            const result = await handleApiRequest_GET({ action: 'getCustomerList' });
+            stopLoadingAnimation();
+            if (result && result.status === 'success') {
+                workflowChoiceContainer.style.display = 'none';
+                customerSelectionContainer.style.display = 'block';
+                while (customerSelector.options.length > 1) { customerSelector.remove(1); }
+                result.data.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name; option.textContent = name;
+                    customerSelector.appendChild(option);
+                });
+            } else if (result) { showError(result.message); }
+        }
+
+        async function handleCustomerSelection() {
+            const selectedCustomer = customerSelector.value;
+            if (!selectedCustomer) {
+                formContainer.style.display = 'none';
+                submitBtn.disabled = true;
+                return;
+            }
+            startLoadingAnimation('Đang lấy dữ liệu và tạo form...');
+            try {
+                const [placeholderResult, customerDataResult] = await Promise.all([
+                    handleApiRequest_GET({ action: 'getPlaceholders', group: groupSelector.value }),
+                    handleApiRequest_GET({ action: 'getCustomerDataFromKhoXe', customerName: selectedCustomer })
+                ]);
+                
+                if (placeholderResult && placeholderResult.status === 'success' && customerDataResult && customerDataResult.status === 'success') {
+                    customerNameKey = placeholderResult.data.customerNameKey; 
+                    createForm(placeholderResult.data.placeholders, customerDataResult.data);
+                } else {
+                    showError(placeholderResult?.message || customerDataResult?.message || 'Lỗi không xác định.');
+                }
+            } catch (e) {
+                showError(`Lỗi khi lấy dữ liệu: ${e.message}`);
+            } finally {
                 stopLoadingAnimation();
-                if (result && result.status === 'success') {
-                    customerNameKey = result.data.customerNameKey; 
-                    createForm(result.data.placeholders);
-                } else if (result) { showError(result.message); }
-            } else { submitBtn.disabled = true; }
+            }
         }
         
         async function fetchHistory() {
@@ -207,8 +286,12 @@
             });
             historyContainer.innerHTML = historyHtml;
         }
+        
+        function createForm(placeholders, prefillData = {}) {
+            workflowChoiceContainer.style.display = 'none';
+            customerSelectionContainer.style.display = 'none';
+            formContainer.style.display = 'block';
 
-        function createForm(placeholders) {
             if (placeholders.length === 0) {
                 formContainer.innerHTML = '<p class="text-center text-gray-500">Nhóm này không có trường nào cần điền.</p>';
                 submitBtn.disabled = true;
@@ -233,30 +316,53 @@
             const year = today.getFullYear();
             const todayFormatted = `${day}/${month}/${year}`;
 
-            let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">2. Điền thông tin</h4>';
+            let formHtml = '<h4 class="text-sm font-medium text-gray-700 mb-1 border-t pt-4">3. Điền & xác nhận thông tin</h4>';
             placeholders.forEach(p => {
                 const pLabelLower = p.label.toLowerCase();
                 const pNameUpper = p.name.toUpperCase().replace(/<|>/g, '');
 
                 if (hiddenLabels.includes(pLabelLower)) return;
+                
+                // --- LOGIC NÂNG CẤP ---
+                // Chuẩn hóa key từ sheet Kho Xe để so sánh với placeholder name
+                // Ví dụ: header "Tên KH" -> "<<TEN_KH>>"
+                const normalizedPrefillKey = `<<${p.label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s/g, '_')}>>`;
+                const prefilledValue = (prefillData && (prefillData[p.name] || prefillData[normalizedPrefillKey])) || '';
+                const isReadonly = prefilledValue !== '';
+                // --- KẾT THÚC LOGIC NÂNG CẤP ---
 
                 formHtml += '<div>';
                 formHtml += `<label for="${p.name}" class="block text-sm font-medium text-gray-700">${p.label}</label>`;
 
+                const commonClasses = "mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg";
+                const readonlyClasses = "bg-gray-100 cursor-not-allowed";
+                const editableClasses = "focus:ring-2 focus:ring-blue-500";
+                const finalClasses = `${commonClasses} ${isReadonly ? readonlyClasses : editableClasses}`;
+
                 if (pNameUpper === 'TODAY') {
-                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${todayFormatted}" readonly class="${commonClasses} ${readonlyClasses}">`;
                 }
                 else if (dropdownLabels.some(l => pLabelLower.includes(l))) {
-                    formHtml += `<select id="${p.name}" name="${p.name}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"><option>Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội</option><option>BỘ CÔNG AN</option></select>`;
+                    formHtml += `<select id="${p.name}" name="${p.name}" class="${finalClasses}" ${isReadonly ? 'disabled' : ''}>`;
+                    // Note: Logic to pre-select the correct option would be needed here if data comes from Kho Xe.
+                    // For simplicity, we'll just show the options.
+                    const option1 = "Cục trưởng Cục Cảnh sát Quản lý hành chính về trật tự xã hội";
+                    const option2 = "BỘ CÔNG AN";
+                    formHtml += `<option ${prefilledValue === option1 ? 'selected' : ''}>${option1}</option>`;
+                    formHtml += `<option ${prefilledValue === option2 ? 'selected' : ''}>${option2}</option>`;
+                    formHtml += `</select>`;
                 } 
                 else if (pLabelLower === dateTextLabel || pLabelLower === downPaymentLabel) {
-                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động" readonly class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">`;
+                    formHtml += `<input type="text" id="${p.name}" name="${p.name}" placeholder="Tự động" readonly class="${commonClasses} ${readonlyClasses}">`;
                 }
                 else if (pLabelLower === dateSourceLabel || otherDateLabels.includes(pLabelLower)) {
-                     formHtml += `<input type="date" id="${p.name}" name="${p.name}" required class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
+                     formHtml += `<input type="date" id="${p.name}" name="${p.name}" value="${prefilledValue}" class="${finalClasses}" ${isReadonly ? 'readonly' : 'required'}>`;
                 }
                 else {
-                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" required placeholder="${p.label}" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">`;
+                     formHtml += `<input type="text" id="${p.name}" name="${p.name}" value="${prefilledValue}" 
+                                placeholder="${isReadonly ? '' : p.label}" 
+                                class="${finalClasses}" 
+                                ${isReadonly ? 'readonly' : 'required'}>`;
                 }
                 formHtml += '</div>';
             });
@@ -288,7 +394,6 @@
             }
         }
         
-        // SỬA LỖI TÍNH TOÁN CUỐI CÙNG TẠI ĐÂY
         function calculateDownPayment() {
             const priceEl = document.querySelector(`[name="${pricePlaceholderName}"]`);
             const loanEl = document.querySelector(`[name="${loanPlaceholderName}"]`);
@@ -309,11 +414,18 @@
             const inputs = formContainer.querySelectorAll('input, select');
             let isFormValid = true;
             inputs.forEach(input => {
-                if(input.required && !input.value) isFormValid = false;
+                // Chỉ kiểm tra 'required' với những input không bị 'readonly'
+                if(input.required && !input.readOnly && !input.value) {
+                    isFormValid = false;
+                    // Thêm hiệu ứng viền đỏ để báo lỗi
+                    input.classList.add('border-red-500'); 
+                } else {
+                    input.classList.remove('border-red-500');
+                }
                 placeholdersData[input.name] = input.value;
             });
 
-            if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường bắt buộc."); return; }
+            if(!isFormValid) { showError("Vui lòng điền đầy đủ tất cả các trường còn trống (viền đỏ)."); return; }
 
             const userDataString = sessionStorage.getItem('loggedInUser');
             const userData = userDataString ? JSON.parse(userDataString) : { fullName: 'Không xác định' };
@@ -330,19 +442,22 @@
             submitBtn.classList.add('button-loading');
 
             try {
+                // Sử dụng fetch với POST và mode 'no-cors' như ban đầu
                 const res = await fetch(TAO_VAN_BAN_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'no-cors', 
                     body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 
+                // Vì là no-cors, chúng ta không thể đọc response, nên dùng timeout để giả lập
                 setTimeout(() => {
                     stopLoadingAnimation();
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('button-loading');
                     fetchHistory(); 
                     resultContainer.style.display = 'block';
-                    resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi! Kết quả sẽ xuất hiện trong lịch sử bên dưới.</p>';
+                    resultLinks.innerHTML = '<p class="text-gray-700">✅ Yêu cầu đã được gửi! Kết quả sẽ sớm xuất hiện trong lịch sử bên dưới.</p>';
                 }, 4000);
 
             } catch (err) {
@@ -363,8 +478,17 @@
         }
         
         function showError(message) { errorContainer.textContent = 'Lỗi: ' + (message || 'Đã có lỗi xảy ra.'); errorContainer.style.display = 'block'; }
+        
         function clearResults() { resultContainer.style.display = 'none'; resultLinks.innerHTML = ''; errorContainer.style.display = 'none'; errorContainer.innerHTML = ''; }
-        function clearAll() {
+        
+        function clearAll(fullReset = true) {
+            if (fullReset) {
+                groupSelector.value = '';
+            }
+            workflowChoiceContainer.style.display = 'none';
+            customerSelectionContainer.style.display = 'none';
+            if (customerSelector) customerSelector.value = '';
+            formContainer.style.display = 'none';
             formContainer.innerHTML = '';
             submitBtn.disabled = true;
             dateTextPlaceholderName = ''; dateSourcePlaceholderName = '';
@@ -379,22 +503,27 @@
             return `ngày ${day} tháng ${month} năm ${year}`;
         }
 
-        function startLoadingAnimation() {
+        function startLoadingAnimation(message = '') {
             loader.style.display = 'block';
             let i = 0;
-            loadingText.textContent = loadingMessages[i];
-            messageInterval = setInterval(() => {
-                i = (i + 1) % loadingMessages.length;
-                loadingText.textContent = loadingMessages[i];
-            }, 2000);
+            const currentMessage = message || loadingMessages[i];
+            loadingText.textContent = currentMessage;
+            
+            if (!message && !messageInterval) {
+                 messageInterval = setInterval(() => {
+                    i = (i + 1) % loadingMessages.length;
+                    loadingText.textContent = loadingMessages[i];
+                }, 2000);
+            }
         }
 
         function stopLoadingAnimation() {
             loader.style.display = 'none';
-            if (messageInterval) clearInterval(messageInterval);
+            if (messageInterval) {
+                clearInterval(messageInterval);
+                messageInterval = null;
+            }
         }
-
-        initializePage();
     </script>
 </body>
 </html>
