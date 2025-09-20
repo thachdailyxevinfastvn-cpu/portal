@@ -150,7 +150,21 @@
                         <div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div>
                     </div>
                 </details>
-                
+
+                <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Giá công bố</label><span class="data-view" data-view-field="giá_công_bố"></span><input type="text" class="data-input" data-field="giá_công_bố"></div>
+                        <div class="form-group"><label>Giá XHĐ</label><span class="data-view" data-view-field="giá_xhđ"></span><input type="text" class="data-input" data-field="giá_xhđ"></div>
+                        <div class="form-group"><label>Ra lộc</label><span class="data-view" data-view-field="ra_lộc"></span><input type="text" class="data-input" data-field="ra_lộc"></div>
+                        <div class="form-group"><label>Giá chốt</label><span class="data-view" data-view-field="giá_chốt"></span><input type="text" class="data-input" data-field="giá_chốt"></div>
+                        <div class="form-group"><label>Lợi nhuận</label><span class="data-view" data-view-field="lợi_nhuận"></span><input type="text" class="data-input" data-field="lợi_nhuận"></div>
+                        <div class="form-group">
+                            <label>Công nợ</label>
+                            <span class="data-view font-bold text-red-600" id="calculated-cong-no"></span>
+                            </div>
+                    </div>
+                </details>
                 <details class="bg-gray-50 rounded-lg">
                     <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary>
                     <div class="p-4 border-t data-grid">
@@ -230,9 +244,8 @@
         function formatDate(isoString) {
             if (!isoString) return '';
             try {
-                // Handle both ISO strings with 'T' and simple 'yyyy-mm-dd' strings
                 const date = new Date(isoString);
-                if (isNaN(date.getTime())) return isoString; // Return original if invalid
+                if (isNaN(date.getTime())) return isoString;
                 return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
             } catch (e) { return isoString; }
         }
@@ -266,6 +279,15 @@
             document.getElementById('cancel-edit-btn').style.display = isEditMode ? 'inline-block' : 'none';
             document.getElementById('submit-update-btn').style.display = isEditMode ? 'inline-block' : 'none';
         }
+        
+        function calculateCongNo(rowData) {
+            const giaChot = parseFloat(rowData.giá_chốt) || 0;
+            const tt1 = parseFloat(rowData.tt1) || 0;
+            const tt2 = parseFloat(rowData.tt2) || 0;
+            const tt3 = parseFloat(rowData.tt3) || 0;
+            const giaiNgan = parseFloat(rowData.giải_ngân) || 0;
+            return giaChot - (tt1 + tt2 + tt3 + giaiNgan);
+        }
 
         function openDetailModal(rowIndex) {
             const rowData = allData.hopDong.find(row => row.rowIndex === rowIndex);
@@ -275,18 +297,16 @@
             }
             document.getElementById('edit-row-index').value = rowIndex;
             
-            // Populate both view spans and input fields
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                 const fieldName = input.dataset.field;
                 const viewElement = document.querySelector(`[data-view-field="${fieldName}"]`);
-                
                 let value = rowData[fieldName] || '';
                 let displayValue = value;
 
                 if (input.type === 'date') {
                     if (value) value = new Date(value).toISOString().split('T')[0];
                     displayValue = formatDate(value);
-                } else if (['tt1', 'tt2', 'tt3', 'giải_ngân', 'giá_chốt'].includes(fieldName)) {
+                } else if (['tt1', 'tt2', 'tt3', 'giải_ngân', 'giá_chốt', 'giá_công_bố', 'giá_xhđ', 'ra_lộc', 'lợi_nhuận'].includes(fieldName)) {
                     displayValue = formatCurrency(value);
                 }
 
@@ -295,8 +315,13 @@
                     viewElement.textContent = displayValue;
                 }
             });
+            
+            // Calculate and display Công nợ
+            const congNo = calculateCongNo(rowData);
+            document.getElementById('calculated-cong-no').textContent = formatCurrency(congNo);
 
-            setModalMode('view'); // Always open in view mode first
+
+            setModalMode('view');
             openModal();
         }
 
@@ -323,7 +348,6 @@
                 
                 showToast('Cập nhật thành công!', true);
                 closeModal();
-                // Refetch data to show updated info
                 fetchData(); 
             } catch (error) {
                 showToast(`Lỗi cập nhật: ${error.message}`, false);
@@ -356,7 +380,6 @@
                 setModalMode('view');
             });
 
-            // NEW: Event delegation for clickable rows
             tabContentsWrapper.addEventListener('click', (event) => {
                 const row = event.target.closest('.clickable-row');
                 if (row) {
@@ -479,12 +502,19 @@
             };
             container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'ngày_tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
         }
+        
+        // === START: CẬP NHẬT RENDERDONTONTAB ===
         function renderDonTonTab() {
-            const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
-            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
-            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'tt1', 'ghi_chú'];
+            const data = filteredData
+                .filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ)
+                .map(hd => ({ ...hd, công_nợ: calculateCongNo(hd) })); // Thêm công nợ vào data
+            
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'CÔNG NỢ', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'công_nợ', 'ghi_chú'];
             renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys);
         }
+        // === END: CẬP NHẬT RENDERDONTONTAB ===
+
         function renderKyTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => {
