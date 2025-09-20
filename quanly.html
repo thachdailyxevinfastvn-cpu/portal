@@ -3,339 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Hợp Đồng - Portal VF</title>
+    <title>Dashboard Quản Lý - Portal VF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
-        .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        @keyframes spin { to { transform: rotate(360deg); } }
         .loader { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
         .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
         .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; border-radius: 4px; }
         .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
         body.modal-is-open { overflow: hidden; }
-        details > summary { list-style: none; cursor: pointer; }
-        .button-loading { cursor: not-allowed; opacity: 0.8; }
+        /* Tab Styles */
+        .tab-link { transition: all 0.2s ease-in-out; }
+        .tab-active { border-color: #2563eb; color: #2563eb; background-color: #dbeafe; }
+        .tab-content { display: none; }
+        .tab-content-active { display: block; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
         <header class="bg-white shadow-md sticky top-0 z-50">
-             <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
-                <div class="hidden md:flex items-center space-x-2">
-                    <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
-                    <a href="quanly.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Quản lý Hợp Đồng</a>
-                </div>
                 <div class="flex items-center">
                     <div id="user-profile" class="flex items-center space-x-3">
                          <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                          <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                     </div>
-                    <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    </button>
                 </div>
             </nav>
         </header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-6">Quản Lý Hợp Đồng Kinh Doanh</h1>
-            
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
                 <div class="loader"></div>
                 <p class="mt-4 text-lg font-medium text-gray-600">Đang tải dữ liệu...</p>
             </div>
 
             <div id="content-wrapper" class="hidden">
+                <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Báo Cáo & Quản Lý</h1>
+                
                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
-                        <input type="text" id="search-input" placeholder="Tìm theo Tên KH, SĐT, Số HĐ, Số Khung..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
+                            <input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
+                            <input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem Báo Cáo</button>
                     </div>
                 </div>
-
-                <div id="table-container" class="bg-white rounded-lg shadow-md overflow-auto table-container">
-                    <table id="data-table" class="w-full text-sm text-left text-gray-600">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10">
-                            <tr>
-                                <th class="px-6 py-3">Ngày Ký</th>
-                                <th class="px-6 py-3">Số HĐ</th>
-                                <th class="px-6 py-3">Tên Khách Hàng</th>
-                                <th class="px-6 py-3">Loại Xe</th>
-                                <th class="px-6 py-3">Số Khung</th>
-                                <th class="px-6 py-3">TVBH</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                
+                <div class="mb-4 border-b border-gray-200">
+                    <nav id="tabs-container" class="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
+                        <a href="#" data-tab="dashboard" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Dashboard</a>
+                        <a href="#" data-tab="chitieuky" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chỉ Tiêu Ký</a>
+                        <a href="#" data-tab="chitieuxuat" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chỉ Tiêu Xuất</a>
+                        <a href="#" data-tab="donton" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Đơn Tồn</a>
+                        <a href="#" data-tab="ky" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">HĐ Đã Ký</a>
+                        <a href="#" data-tab="xuat" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">HĐ Đã Xuất</a>
+                        <a href="#" data-tab="congno" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Công Nợ</a>
+                        <a href="#" data-tab="theodoicoc" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Theo Dõi COC</a>
+                        <a href="#" data-tab="dagiao" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Đã Giao Xe</a>
+                    </nav>
                 </div>
-                <div id="no-results" class="hidden text-center py-16"><p>Không tìm thấy dữ liệu.</p></div>
+
+                <div id="tabs-content">
+                    <div id="tab-dashboard" class="tab-content p-4"><p>Khu vực dashboard đang được xây dựng.</p></div>
+                    <div id="tab-chitieuky" class="tab-content table-container"></div>
+                    <div id="tab-chitieuxuat" class="tab-content table-container"></div>
+                    <div id="tab-donton" class="tab-content table-container"></div>
+                    <div id="tab-ky" class="tab-content table-container"></div>
+                    <div id="tab-xuat" class="tab-content table-container"></div>
+                    <div id="tab-congno" class="tab-content table-container"></div>
+                    <div id="tab-theodoicoc" class="tab-content table-container"></div>
+                    <div id="tab-dagiao" class="tab-content table-container"></div>
+                </div>
             </div>
         </main>
     </div>
 
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden">
-        <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50"></div>
-        <div class="modal-content bg-white rounded-lg shadow-xl m-4 sm:mx-auto sm:w-full sm:max-w-6xl transform scale-95 relative">
-            <div class="px-6 py-4 border-b flex justify-between items-center">
-                <h3 class="text-lg font-medium text-gray-900">Chi Tiết Hợp Đồng</h3>
-                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
-            </div>
-            <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4">
-                <input type="hidden" id="edit-row-index">
-
-                <details class="bg-gray-50 rounded-lg" open>
-                    <summary class="p-3 font-semibold"><span>Thông tin Khách hàng</span></summary>
-                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div class="md:col-span-2"><label class="block font-medium">Tên KH</label><input type="text" data-field="tên_kh" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">SĐT</label><input type="text" data-field="sđt" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Email</label><input type="email" data-field="email" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div class="md:col-span-4"><label class="block font-medium">Địa chỉ</label><input type="text" data-field="địa_chỉ" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                    </div>
-                </details>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <details class="bg-gray-50 rounded-lg">
-                        <summary class="p-3 font-semibold"><span>Thông tin Hợp đồng</span></summary>
-                        <div class="p-4 border-t grid grid-cols-2 gap-4 text-sm">
-                            <div><label class="block font-medium">Số HĐ</label><input type="text" data-field="shđ" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label class="block font-medium">Ngày ký</label><input type="date" data-field="ngày_ký" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        </div>
-                    </details>
-                    <details class="bg-gray-50 rounded-lg">
-                         <summary class="p-3 font-semibold"><span>Thanh toán</span></summary>
-                         <div class="p-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                             <div><label class="block font-medium">Hình thức</label><input type="text" data-field="hình_thức_thanh_toán" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             <div><label class="block font-medium">Ngân hàng</label><input type="text" data-field="ngân_hàng" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             <div class="md:col-span-3 grid grid-cols-4 gap-2">
-                                 <div><label>TT1</label><input type="text" data-field="tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày TT1</label><input type="date" data-field="ngày_tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Giải ngân</label><input type="text" data-field="giải_ngân" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày GN</label><input type="date" data-field="ngày_gn" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>TT2</label><input type="text" data-field="tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày TT2</label><input type="date" data-field="ngày_tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>TT3</label><input type="text" data-field="tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày TT3</label><input type="date" data-field="ngày_tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             </div>
-                         </div>
-                    </details>
-                </div>
-                
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold"><span>Thông tin Xe</span></summary>
-                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div><label class="block font-medium">Loại xe</label><input type="text" data-field="loại_xe" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Phiên bản</label><input type="text" data-field="phiên_bản" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Ngoại thất</label><input type="text" data-field="ngoại_thất" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Nội thất TV</label><input type="text" data-field="nội_thất_tv" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Số khung</label><input type="text" data-field="số_khung" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Số máy</label><input type="text" data-field="số_máy" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Mã nội thất</label><input type="text" data-field="mã_nội_thất" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">PO</label><input type="text" data-field="po" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Kho DMS</label><input type="text" data-field="kho_dms" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Kho vật lý</label><input type="text" data-field="kho_vật_lý" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                    </div>
-                </details>
-                
-                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <details class="bg-gray-50 rounded-lg">
-                        <summary class="p-3 font-semibold"><span>Vận hành</span></summary>
-                        <div class="p-4 border-t grid grid-cols-2 gap-4 text-sm">
-                            <div><label>Ngày đề nghị cọc</label><input type="date" data-field="ngày_đề_nghị_cọc" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label>Ngày có CoC</label><input type="date" data-field="ngày_có_coc" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label>Ngày đăng ký xe</label><input type="date" data-field="ngày_đăng_ký_xe" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label>Ngày giao xe</label><input type="date" data-field="ngày_giao_xe" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        </div>
-                    </details>
-                    <details class="bg-gray-50 rounded-lg">
-                        <summary class="p-3 font-semibold"><span>Chính sách & Hoa hồng</span></summary>
-                        <div class="p-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div><label>HH Sale</label><input type="text" data-field="hoa_hồng_sale" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label>HH GĐKD</label><input type="text" data-field="hh_gđkd" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label>HH TPKD</label><input type="text" data-field="hh_tpkd" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div class="col-span-2 md:col-span-4"><label>CS Nội bộ</label><textarea data-field="cs_nội_bộ" rows="1" class="w-full mt-1 border-gray-300 rounded-md"></textarea></div>
-                            <div class="col-span-2 md:col-span-4"><label>CTKM</label><textarea data-field="ctkm" rows="1" class="w-full mt-1 border-gray-300 rounded-md"></textarea></div>
-                        </div>
-                    </details>
-                </div>
-            </div>
-            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-                <button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
-                <button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center justify-center">Lưu thay đổi</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0"></div>
-
     <script src="config.js"></script>
     <script>
+        // === BIẾN TOÀN CỤC & DOM ELEMENTS ===
         const loadingState = document.getElementById('loading-state');
         const contentWrapper = document.getElementById('content-wrapper');
-        const searchInput = document.getElementById('search-input');
-        const dataTableBody = document.querySelector('#data-table tbody');
-        const noResults = document.getElementById('no-results');
-        const detailModal = document.getElementById('detail-modal');
-
-        let allData = [];
-        let displayedData = [];
-
-        const openModal = () => { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); };
-        const closeModal = () => { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); };
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const filterBtn = document.getElementById('filter-btn');
         
-        const showToast = (message, isSuccess = true) => {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
-        };
-        
-        const setButtonLoading = (button, isLoading, defaultHtml) => {
-             if (isLoading) {
-                button.disabled = true;
-                button.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Đang xử lý...</span>`;
-            } else {
-                button.disabled = false;
-                button.innerHTML = defaultHtml;
-            }
-        };
+        let allData = { contracts: [], employees: [], carTypes: [] };
 
+        // === KHỞI TẠO TRANG ===
         document.addEventListener('DOMContentLoaded', () => {
-            const userDataString = sessionStorage.getItem('loggedInUser');
-            if (!userDataString) { window.location.href = 'index.html'; return; }
-            const userData = JSON.parse(userDataString);
-            document.getElementById('user-fullname').textContent = userData.fullName;
-            document.getElementById('user-avatar').src = userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.fullName.replace(/\s/g, '+')}`;
+            if (!sessionStorage.getItem('loggedInUser')) { window.location.href = 'index.html'; return; }
             if (typeof QUAN_LY_APPS_SCRIPT_URL === 'undefined') { showError('Lỗi cấu hình: QUAN_LY_APPS_SCRIPT_URL not found.'); return; }
-            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
-            searchInput.addEventListener('input', applyFiltersAndRender);
-            detailModal.querySelector('#close-modal-btn').addEventListener('click', closeModal);
-            detailModal.querySelector('#close-modal-footer-btn').addEventListener('click', closeModal);
-            detailModal.querySelector('#submit-update-btn').addEventListener('click', handleUpdateData);
-            fetchData();
-        });
+            
+            // Set ngày mặc định là ngày hiện tại
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.value = today;
+            endDateInput.value = today;
 
+            filterBtn.addEventListener('click', renderAllTabs);
+            setupTabs();
+            fetchInitialData();
+        });
+        
         function showError(message) {
             loadingState.innerHTML = `<p class="text-red-500 font-bold">${message}</p>`;
         }
-
-        // HÀM LẤY DỮ LIỆU ĐÃ SỬA LỖI CORS
-        function fetchData() {
+        
+        // === LẤY DỮ LIỆU ===
+        function fetchInitialData() {
             try {
-                window.handleDataResponse = (result) => {
+                window.handleDashboardResponse = (result) => {
                     if (result.status === 'ERROR') { throw new Error(result.message); }
-                    allData = result.data.sort((a, b) => {
-                        const dateA = a.ngày_ký ? new Date(a.ngày_ký) : 0;
-                        const dateB = b.ngày_ký ? new Date(b.ngày_ký) : 0;
-                        return dateB - dateA;
-                    });
-                    initializeApp();
+                    allData = result.data;
+                    loadingState.style.display = 'none';
+                    contentWrapper.classList.remove('hidden');
+                    renderAllTabs(); // Render lần đầu với ngày mặc định
                 };
                 const script = document.createElement('script');
-                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getManagementData&callback=handleDataResponse`;
-                script.onerror = () => { throw new Error('Không thể tải script từ Google. Vui lòng kiểm tra lại URL hoặc kết nối mạng.'); };
-                script.onload = () => { document.body.removeChild(script); delete window.handleDataResponse; };
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse`;
+                script.onerror = () => { throw new Error('Không thể tải script từ Google.'); };
+                script.onload = () => { delete window.handleDashboardResponse; document.body.removeChild(script); };
                 document.body.appendChild(script);
             } catch (error) {
                 showError(`Lỗi tải dữ liệu: ${error.message}`);
             }
         }
-        
-        function initializeApp() {
-            loadingState.style.display = 'none';
-            contentWrapper.classList.remove('hidden');
-            applyFiltersAndRender();
-        }
-        
-        function applyFiltersAndRender() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            displayedData = (searchTerm === '') ? allData : allData.filter(row => 
-                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-            );
-            renderTable();
-        }
 
-        function renderTable() {
-            dataTableBody.innerHTML = '';
-            if (displayedData.length > 0) {
-                displayedData.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.className = 'bg-white border-b clickable-row';
-                    tr.dataset.rowIndex = row.rowIndex;
-                    const formattedDate = row.ngày_ký ? new Date(row.ngày_ký).toLocaleDateString('vi-VN') : '';
-                    tr.innerHTML = `
-                        <td class="px-6 py-4">${formattedDate}</td>
-                        <td class="px-6 py-4 font-medium">${row.shđ || ''}</td>
-                        <td class="px-6 py-4">${row.tên_kh || ''}</td>
-                        <td class="px-6 py-4">${row.loại_xe || ''}</td>
-                        <td class="px-6 py-4">${row.số_khung || ''}</td>
-                        <td class="px-6 py-4">${row.tvbh || ''}</td>
-                    `;
-                    tr.addEventListener('click', () => openDetailModal(row.rowIndex));
-                    dataTableBody.appendChild(tr);
+        // === LOGIC TABS ===
+        function setupTabs() {
+            const tabLinks = document.querySelectorAll('.tab-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Mặc định active tab đầu tiên
+            tabLinks[0].classList.add('tab-active');
+            tabContents[0].classList.add('tab-content-active');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = link.dataset.tab;
+
+                    tabLinks.forEach(l => l.classList.remove('tab-active'));
+                    link.classList.add('tab-active');
+
+                    tabContents.forEach(content => {
+                        content.classList.remove('tab-content-active');
+                        if (content.id === `tab-${tabId}`) {
+                            content.classList.add('tab-content-active');
+                        }
+                    });
                 });
-                noResults.style.display = 'none';
-            } else {
-                noResults.style.display = 'block';
-            }
-        }
-        
-        function openDetailModal(rowIndex) {
-            const rowData = allData.find(row => row.rowIndex === rowIndex);
-            if (!rowData) { showToast('Không tìm thấy dữ liệu.', false); return; }
-            document.getElementById('edit-row-index').value = rowIndex;
-            document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
-                const fieldName = input.dataset.field;
-                let value = rowData[fieldName] || '';
-                if (input.type === 'date' && value) {
-                    value = value.split('T')[0];
-                }
-                input.value = value;
             });
-            openModal();
         }
 
-        async function handleUpdateData() {
-            const submitBtn = document.getElementById('submit-update-btn');
-            const originalBtnHtml = submitBtn.innerHTML;
-            setButtonLoading(submitBtn, true, originalBtnHtml);
+        // === CÁC HÀM RENDER ===
+        function renderAllTabs() {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            if (!startDate || !endDate) {
+                alert("Vui lòng chọn đủ ngày bắt đầu và kết thúc.");
+                return;
+            }
 
-            const payloadData = {
-                rowIndex: parseInt(document.getElementById('edit-row-index').value),
-                updatedData: {},
-                userInfo: JSON.parse(sessionStorage.getItem('loggedInUser'))
+            renderChiTieuTables(startDate, endDate);
+            renderDonTonTable();
+            renderFilteredTable('ky', 'tt1', startDate, endDate);
+            renderFilteredTable('xuat', 'ngày_xhđ', startDate, endDate);
+            renderCongNoTable(startDate, endDate);
+            renderTheoDoiCocTable(startDate, endDate);
+            renderFilteredTable('dagiao', 'ngày_giao_xe', startDate, endDate);
+        }
+
+        // --- Render Bảng chỉ tiêu (Phức tạp nhất) ---
+        function renderChiTieuTables(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            endDate.setHours(23, 59, 59, 999);
+
+            const filteredContracts = allData.contracts.filter(c => {
+                const contractDateKy = c.tt1 ? new Date(c.ngày_tt1 || c.ngày_ký) : null;
+                const contractDateXuat = c.ngày_xhđ ? new Date(c.ngày_xhđ) : null;
+                return (contractDateKy && contractDateKy >= startDate && contractDateKy <= endDate) || 
+                       (contractDateXuat && contractDateXuat >= startDate && contractDateXuat <= endDate);
+            });
+
+            // Hàm tính toán chung
+            const calculateTotals = (fieldToCheck) => {
+                return allData.employees.map(emp => {
+                    const carTotals = allData.carTypes.reduce((acc, carType) => {
+                        const count = filteredContracts.filter(c => {
+                            const contractDate = new Date(c[fieldToCheck === 'tt1' ? 'ngày_tt1' : 'ngày_xhđ']);
+                            return c.tvbh === emp.ten_nv && 
+                                   c.loại_xe === carType && 
+                                   c[fieldToCheck] &&
+                                   contractDate >= startDate && contractDate <= endDate;
+                        }).length;
+                        acc[carType] = count;
+                        return acc;
+                    }, {});
+                    const total = Object.values(carTotals).reduce((sum, count) => sum + count, 0);
+                    return { ...emp, carTotals, total };
+                });
+            };
+            
+            const kyData = calculateTotals('tt1');
+            const xuatData = calculateTotals('ngày_xhđ');
+
+            // Hàm tạo HTML bảng
+            const createTableHTML = (title, data) => {
+                let html = `<h2 class="text-xl font-bold p-4">${title}</h2><table class="w-full text-sm">`;
+                html += `<thead class="bg-gray-100 text-xs uppercase"><tr>
+                         <th class="px-4 py-2 text-left">Tên NV</th>
+                         <th class="px-4 py-2 text-left">Team</th>`;
+                allData.carTypes.forEach(car => html += `<th class="px-4 py-2">${car}</th>`);
+                html += `<th class="px-4 py-2 bg-blue-100">Tổng</th></tr></thead><tbody>`;
+
+                data.forEach(row => {
+                    html += `<tr class="border-b">
+                             <td class="px-4 py-2 font-medium">${row.ten_nv}</td>
+                             <td class="px-4 py-2">${row.team}</td>`;
+                    allData.carTypes.forEach(car => html += `<td class="px-4 py-2 text-center">${row.carTotals[car] || 0}</td>`);
+                    html += `<td class="px-4 py-2 text-center font-bold bg-blue-50">${row.total}</td></tr>`;
+                });
+                html += `</tbody></table>`;
+                return html;
             };
 
-            document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
-                payloadData.updatedData[input.dataset.field] = input.value;
-            });
-            
-            try {
-                const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({ action: 'updateManagementData', data: payloadData })
-                });
-
-                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
-                const result = await response.json();
-                if (result.status === 'ERROR') throw new Error(result.message);
-
-                showToast(result.message, true);
-                closeModal();
-                fetchData(); 
-            } catch (error) {
-                showToast(`Lỗi cập nhật: ${error.message}`, false);
-            } finally {
-                setButtonLoading(submitBtn, false, originalBtnHtml);
-            }
+            document.getElementById('tab-chitieuky').innerHTML = createTableHTML('Bảng Chỉ Tiêu Ký', kyData);
+            document.getElementById('tab-chitieuxuat').innerHTML = createTableHTML('Bảng Chỉ Tiêu Xuất', xuatData);
         }
+        
+        // --- Render Đơn tồn (Không cần ngày) ---
+        function renderDonTonTable() {
+            const filtered = allData.contracts.filter(c => c.ngày_tt1 && !c.ngày_xhđ);
+            document.getElementById('tab-donton').innerHTML = createGenericTable(filtered);
+        }
+
+        // --- Render Công nợ ---
+        function renderCongNoTable(start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            endDate.setHours(23, 59, 59, 999);
+            
+            const filtered = allData.contracts.filter(c => {
+                const cocDate = c.ngày_có_coc ? new Date(c.ngày_có_coc) : null;
+                if (!cocDate || cocDate < startDate || cocDate > endDate) return false;
+
+                const giaChot = parseFloat(c.giá_chốt || 0);
+                const tt1 = parseFloat(c.tt1 || 0);
+                const tt2 = parseFloat(c.tt2 || 0);
+                const tt3 = parseFloat(c.tt3 || 0);
+                const giaiNgan = parseFloat(c.giải_ngân || 0);
+                
+                return giaChot - (tt1 + tt2 + tt3 + giaiNgan) !== 0;
+            });
+            document.getElementById('tab-congno').innerHTML = createGenericTable(filtered);
+        }
+        
+        // --- Render Theo dõi COC ---
+        function renderTheoDoiCocTable(start, end) {
+             const startDate = new Date(start);
+             const endDate = new Date(end);
+             endDate.setHours(23, 59, 59, 999);
+             
+             const filtered = allData.contracts.filter(c => {
+                 const deNghiDate = c.ngày_đề_nghị_coc ? new Date(c.ngày_đề_nghị_coc) : null;
+                 return deNghiDate && deNghiDate >= startDate && deNghiDate <= endDate && !c.ngày_có_coc;
+             });
+             document.getElementById('tab-theodoicoc').innerHTML = createGenericTable(filtered);
+        }
+
+        // --- Hàm render chung cho các tab đơn giản ---
+        function renderFilteredTable(tabId, dateField, start, end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            endDate.setHours(23, 59, 59, 999);
+            
+            const filtered = allData.contracts.filter(c => {
+                const contractDate = c[dateField] ? new Date(c[dateField]) : null;
+                return contractDate && contractDate >= startDate && contractDate <= endDate;
+            });
+            document.getElementById(`tab-${tabId}`).innerHTML = createGenericTable(filtered);
+        }
+
+        // === HÀM TRỢ GIÚP TẠO BẢNG HTML ===
+        function createGenericTable(data) {
+             if (!data || data.length === 0) return '<p class="p-4 text-center text-gray-500">Không có dữ liệu phù hợp.</p>';
+            let html = '<table class="w-full text-sm"><thead><tr class="bg-gray-100 text-xs uppercase">';
+            // Lấy header từ file HTML (hoặc có thể định nghĩa cứng ở đây)
+            html += `<th class="px-4 py-2 text-left">Ngày Ký</th>
+                     <th class="px-4 py-2 text-left">Số HĐ</th>
+                     <th class="px-4 py-2 text-left">Tên KH</th>
+                     <th class="px-4 py-2 text-left">Loại Xe</th>
+                     <th class="px-4 py-2 text-left">Số Khung</th>
+                     <th class="px-4 py-2 text-left">TVBH</th>
+                     <th class="px-4 py-2 text-left">Ngày Giao Xe</th>
+                     </tr></thead><tbody>`;
+            data.forEach(row => {
+                 html += `<tr class="border-b clickable-row" data-row-index="${row.rowIndex}">
+                     <td class="px-4 py-2">${row.ngày_ký ? new Date(row.ngày_ký).toLocaleDateString('vi-VN') : ''}</td>
+                     <td class="px-4 py-2 font-medium">${row.shđ || ''}</td>
+                     <td class="px-4 py-2">${row.tên_kh || ''}</td>
+                     <td class="px-4 py-2">${row.loại_xe || ''}</td>
+                     <td class="px-4 py-2">${row.số_khung || ''}</td>
+                     <td class="px-4 py-2">${row.tvbh || ''}</td>
+                     <td class="px-4 py-2">${row.ngày_giao_xe ? new Date(row.ngày_giao_xe).toLocaleDateString('vi-VN') : ''}</td>
+                 </tr>`;
+            });
+            html += `</tbody></table>`;
+            return html;
+        }
+
     </script>
 </body>
 </html>
