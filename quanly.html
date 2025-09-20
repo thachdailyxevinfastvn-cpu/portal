@@ -18,7 +18,6 @@
         .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
         body.modal-is-open { overflow: hidden; }
         details > summary { list-style: none; cursor: pointer; }
-        details > summary::-webkit-details-marker { display: none; }
         .button-loading { cursor: not-allowed; opacity: 0.8; }
     </style>
 </head>
@@ -213,15 +212,12 @@
             const userData = JSON.parse(userDataString);
             document.getElementById('user-fullname').textContent = userData.fullName;
             document.getElementById('user-avatar').src = userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.fullName.replace(/\s/g, '+')}`;
-
             if (typeof QUAN_LY_APPS_SCRIPT_URL === 'undefined') { showError('Lỗi cấu hình: QUAN_LY_APPS_SCRIPT_URL not found.'); return; }
-
             document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
             searchInput.addEventListener('input', applyFiltersAndRender);
             detailModal.querySelector('#close-modal-btn').addEventListener('click', closeModal);
             detailModal.querySelector('#close-modal-footer-btn').addEventListener('click', closeModal);
             detailModal.querySelector('#submit-update-btn').addEventListener('click', handleUpdateData);
-
             fetchData();
         });
 
@@ -229,11 +225,16 @@
             loadingState.innerHTML = `<p class="text-red-500 font-bold">${message}</p>`;
         }
 
+        // HÀM LẤY DỮ LIỆU ĐÃ SỬA LỖI CORS
         function fetchData() {
             try {
                 window.handleDataResponse = (result) => {
                     if (result.status === 'ERROR') { throw new Error(result.message); }
-                    allData = result.data.sort((a, b) => new Date(b.ngày_ký) - new Date(a.ngày_ký)); // Sắp xếp theo ngày ký mới nhất
+                    allData = result.data.sort((a, b) => {
+                        const dateA = a.ngày_ký ? new Date(a.ngày_ký) : 0;
+                        const dateB = b.ngày_ký ? new Date(b.ngày_ký) : 0;
+                        return dateB - dateA;
+                    });
                     initializeApp();
                 };
                 const script = document.createElement('script');
@@ -254,13 +255,9 @@
         
         function applyFiltersAndRender() {
             const searchTerm = searchInput.value.toLowerCase().trim();
-            if (searchTerm === '') {
-                displayedData = allData;
-            } else {
-                displayedData = allData.filter(row => 
-                    Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-                );
-            }
+            displayedData = (searchTerm === '') ? allData : allData.filter(row => 
+                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
+            );
             renderTable();
         }
 
