@@ -55,41 +55,38 @@
         .dashboard-table th.sorted-desc::after { content: "\f0dd"; color: #1d4ed8; }
 
         /* === START: SỬA LỖI STICKY COLUMN Z-INDEX === */
-        /* Thiết lập chung cho tiêu đề (thead) luôn nằm trên thân table (tbody) khi cuộn dọc */
-        .dashboard-table thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10; 
-        }
+/* Thiết lập chung cho tiêu đề (thead) luôn nằm trên thân table (tbody) khi cuộn dọc */
+.dashboard-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #e5e7eb; /* SỬA LỖI: Đảm bảo TẤT CẢ tiêu đề có màu nền */
+}
 
-        /* Thiết lập vị trí và chiều rộng cho các cột được đóng băng */
-        .sticky-col-1 { position: sticky; left: 0px; min-width: 50px; }
-        .sticky-col-2 { position: sticky; left: 50px; min-width: 150px; } /* left = width của cột 1 */
-        .sticky-col-3 { position: sticky; left: 200px; min-width: 100px; } /* left = width của cột 1 + 2 */
-        
-        /* Thiết lập z-index giảm dần cho các cột tiêu đề để không bị chồng lên nhau */
-        .dashboard-table thead .sticky-col-1 { z-index: 13; } /* Ưu tiên cao nhất */
-        .dashboard-table thead .sticky-col-2 { z-index: 12; }
-        .dashboard-table thead .sticky-col-3 { z-index: 11; }
+/* Thiết lập vị trí và chiều rộng cho các cột được đóng băng */
+.sticky-col-1 { position: sticky; left: 0px; min-width: 50px; }
+.sticky-col-2 { position: sticky; left: 50px; min-width: 150px; } /* left = width của cột 1 */
+.sticky-col-3 { position: sticky; left: 200px; min-width: 100px; } /* left = width của cột 1 + 2 */
 
-        /* Các ô trong thân table cũng cần z-index nhưng thấp hơn tiêu đề */
-        .dashboard-table tbody .sticky-col-1,
-        .dashboard-table tbody .sticky-col-2,
-        .dashboard-table tbody .sticky-col-3 {
-            z-index: 5;
-        }
+/* Thiết lập z-index giảm dần cho các cột tiêu đề để không bị chồng lên nhau */
+.dashboard-table thead .sticky-col-1 { z-index: 13; } /* Ưu tiên cao nhất */
+.dashboard-table thead .sticky-col-2 { z-index: 12; }
+.dashboard-table thead .sticky-col-3 { z-index: 11; }
 
-        /* Đảm bảo các cột đóng băng có màu nền để không bị trong suốt */
-        .dashboard-table thead .sticky-col-1,
-        .dashboard-table thead .sticky-col-2,
-        .dashboard-table thead .sticky-col-3 { background-color: #e5e7eb; } /* Màu nền tiêu đề */
+/* Các ô trong thân table cũng cần z-index nhưng thấp hơn tiêu đề */
+.dashboard-table tbody .sticky-col-1,
+.dashboard-table tbody .sticky-col-2,
+.dashboard-table tbody .sticky-col-3 {
+    z-index: 5;
+}
 
-        .dashboard-table tbody .sticky-col-1,
-        .dashboard-table tbody .sticky-col-2,
-        .dashboard-table tbody .sticky-col-3 { background-color: #ffffff; } /* Màu nền của dòng */
+/* Đảm bảo các cột đóng băng trong thân table có màu nền */
+.dashboard-table tbody .sticky-col-1,
+.dashboard-table tbody .sticky-col-2,
+.dashboard-table tbody .sticky-col-3 { background-color: #ffffff; }
 
-        .dashboard-table tfoot .sticky-col-1 { z-index: 5; background-color: #dbeafe; } /* Màu nền chân table */
-        /* === END: SỬA LỖI STICKY COLUMN Z-INDEX === */
+.dashboard-table tfoot .sticky-col-1 { z-index: 5; background-color: #dbeafe; }
+/* === END: SỬA LỖI STICKY COLUMN Z-INDEX === */
 
     </style>
 </head>
