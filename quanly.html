@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Quản Lý - Portal VF</title>
-    <script src="https://cdntailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
@@ -23,55 +23,53 @@
         .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { margin-bottom: 0.25rem; font-weight: 500; color: #374151; }
-        .data-view {
+        .data-view, .data-input {
             padding: 0.5rem 0.75rem;
-            min-height: 38px;
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
             border-radius: 0.375rem;
-            word-wrap: break-word;
-        }
-        .data-input {
-            padding: 0.5rem 0.75rem;
             border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            width: 100%;
         }
-        .view-mode .data-input, .edit-mode .data-view { display: none; }
-        .view-mode .data-input, .edit-mode .data-view { visibility: hidden; }
+        .data-view { min-height: 38px; background-color: #f9fafb; word-wrap: break-word; }
+        .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
-        /* === NEW STYLES FOR DASHBOARD TABLE === */
+        /* === STYLES FOR UPGRADED DASHBOARD TABLE === */
         .dashboard-table {
             border-collapse: collapse;
-            font-size: 0.8rem; /* Smaller font for compactness */
+            font-size: 0.8rem;
         }
         .dashboard-table th, .dashboard-table td {
-            border: 1px solid #e5e7eb; /* Grid lines */
-            padding: 4px 8px; /* Reduced padding */
+            border: 1px solid #e5e7eb;
+            padding: 4px 8px;
+            white-space: nowrap;
         }
-        .dashboard-table th.sortable {
-            cursor: pointer;
-            position: relative;
-        }
-        .dashboard-table th.sortable:hover {
-            background-color: #eef2ff;
-        }
+        .dashboard-table th.sortable { cursor: pointer; position: relative; }
+        .dashboard-table th.sortable:hover { background-color: #eef2ff; }
         .dashboard-table th.sortable::after {
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            content: "\f0dc"; /* Default sort icon */
+            content: "\f0dc";
             position: absolute;
             right: 8px;
             color: #9ca3af;
         }
-        .dashboard-table th.sorted-asc::after {
-            content: "\f0de"; /* Sort up icon */
-            color: #1d4ed8;
-        }
-        .dashboard-table th.sorted-desc::after {
-            content: "\f0dd"; /* Sort down icon */
-            color: #1d4ed8;
-        }
+        .dashboard-table th.sorted-asc::after { content: "\f0de"; color: #1d4ed8; }
+        .dashboard-table th.sorted-desc::after { content: "\f0dd"; color: #1d4ed8; }
+
+        /* Sticky columns for freezing */
+        .dashboard-table th, .dashboard-table td { z-index: 1; }
+        .dashboard-table thead th { z-index: 2; }
+
+        .sticky-col-1 { position: sticky; left: 0px; min-width: 50px; }
+        .sticky-col-2 { position: sticky; left: 50px; min-width: 150px; } /* left = width of col 1 */
+        .sticky-col-3 { position: sticky; left: 200px; min-width: 100px; } /* left = width of col 1 + 2 */
+        
+        .dashboard-table thead .sticky-col-1,
+        .dashboard-table thead .sticky-col-2,
+        .dashboard-table thead .sticky-col-3 { background-color: #e5e7eb; }
+        .dashboard-table tbody .sticky-col-1,
+        .dashboard-table tbody .sticky-col-2,
+        .dashboard-table tbody .sticky-col-3 { background-color: #ffffff; }
+        .dashboard-table tfoot .sticky-col-1 { background-color: #dbeafe; }
+
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -136,92 +134,14 @@
             </div>
             <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4 text-sm">
                 <input type="hidden" id="edit-row-index">
-                <details class="bg-gray-50 rounded-lg" open>
-                    <summary class="p-3 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div>
-                        <div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg" open>
-                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div>
-                        <div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div>
-                        <div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div>
-                        <div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div>
-                        <div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Hình thức TT</label><span class="data-view" data-view-field="hình_thức_thanh_toán"></span><input type="text" class="data-input" data-field="hình_thức_thanh_toán"></div>
-                        <div class="form-group"><label>Ngân hàng</label><span class="data-view" data-view-field="ngân_hàng"></span><input type="text" class="data-input" data-field="ngân_hàng"></div>
-                        <div class="form-group"><label>TT1 (Cọc)</label><span class="data-view" data-view-field="tt1"></span><input type="text" class="data-input" data-field="tt1"></div>
-                        <div class="form-group"><label>Ngày TT1</label><span class="data-view" data-view-field="ngày_tt1"></span><input type="date" class="data-input" data-field="ngày_tt1"></div>
-                        <div class="form-group"><label>TT2</label><span class="data-view" data-view-field="tt2"></span><input type="text" class="data-input" data-field="tt2"></div>
-                        <div class="form-group"><label>Ngày TT2</label><span class="data-view" data-view-field="ngày_tt2"></span><input type="date" class="data-input" data-field="ngày_tt2"></div>
-                        <div class="form-group"><label>TT3</label><span class="data-view" data-view-field="tt3"></span><input type="text" class="data-input" data-field="tt3"></div>
-                        <div class="form-group"><label>Ngày TT3</label><span class="data-view" data-view-field="ngày_tt3"></span><input type="date" class="data-input" data-field="ngày_tt3"></div>
-                        <div class="form-group"><label>Giải ngân</label><span class="data-view" data-view-field="giải_ngân"></span><input type="text" class="data-input" data-field="giải_ngân"></div>
-                        <div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Giá công bố</label><span class="data-view" data-view-field="giá_công_bố"></span><input type="text" class="data-input" data-field="giá_công_bố"></div>
-                        <div class="form-group"><label>Giá XHĐ</label><span class="data-view" data-view-field="giá_xhđ"></span><input type="text" class="data-input" data-field="giá_xhđ"></div>
-                        <div class="form-group"><label>Ra lộc</label><span class="data-view" data-view-field="ra_lộc"></span><input type="text" class="data-input" data-field="ra_lộc"></div>
-                        <div class="form-group"><label>Giá chốt</label><span class="data-view" data-view-field="giá_chốt"></span><input type="text" class="data-input" data-field="giá_chốt"></div>
-                        <div class="form-group"><label>Lợi nhuận</label><span class="data-view" data-view-field="lợi_nhuận"></span><input type="text" class="data-input" data-field="lợi_nhuận"></div>
-                        <div class="form-group">
-                            <label>Công nợ</label>
-                            <span class="data-view font-bold text-red-600" id="calculated-cong-no"></span>
-                        </div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                         <div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div>
-                        <div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div>
-                        <div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div>
-                        <div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div>
-                        <div class="form-group"><label>Ngoại thất</label><span class="data-view" data-view-field="ngoại_thất"></span><input type="text" class="data-input" data-field="ngoại_thất"></div>
-                        <div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div>
-                        <div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div>
-                        <div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div>
-                        <div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div>
-                        <div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div>
-                    </div>
-                </details>
-                <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div>
-                        <div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div>
-                        <div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div>
-                        <div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div>
-                        <div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div>
-                    </div>
-                </details>
-                 <details class="bg-gray-50 rounded-lg">
-                    <summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t data-grid">
-                        <div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div>
-                        <div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div>
-                        <div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div>
-                        <div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div>
-                    </div>
-                </details>
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div><div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div></div></details>
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div><div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div><div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div><div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div><div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Hình thức TT</label><span class="data-view" data-view-field="hình_thức_thanh_toán"></span><input type="text" class="data-input" data-field="hình_thức_thanh_toán"></div><div class="form-group"><label>Ngân hàng</label><span class="data-view" data-view-field="ngân_hàng"></span><input type="text" class="data-input" data-field="ngân_hàng"></div><div class="form-group"><label>TT1 (Cọc)</label><span class="data-view" data-view-field="tt1"></span><input type="text" class="data-input" data-field="tt1"></div><div class="form-group"><label>Ngày TT1</label><span class="data-view" data-view-field="ngày_tt1"></span><input type="date" class="data-input" data-field="ngày_tt1"></div><div class="form-group"><label>TT2</label><span class="data-view" data-view-field="tt2"></span><input type="text" class="data-input" data-field="tt2"></div><div class="form-group"><label>Ngày TT2</label><span class="data-view" data-view-field="ngày_tt2"></span><input type="date" class="data-input" data-field="ngày_tt2"></div><div class="form-group"><label>TT3</label><span class="data-view" data-view-field="tt3"></span><input type="text" class="data-input" data-field="tt3"></div><div class="form-group"><label>Ngày TT3</label><span class="data-view" data-view-field="ngày_tt3"></span><input type="date" class="data-input" data-field="ngày_tt3"></div><div class="form-group"><label>Giải ngân</label><span class="data-view" data-view-field="giải_ngân"></span><input type="text" class="data-input" data-field="giải_ngân"></div><div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Giá công bố</label><span class="data-view" data-view-field="giá_công_bố"></span><input type="text" class="data-input" data-field="giá_công_bố"></div><div class="form-group"><label>Giá XHĐ</label><span class="data-view" data-view-field="giá_xhđ"></span><input type="text" class="data-input" data-field="giá_xhđ"></div><div class="form-group"><label>Ra lộc</label><span class="data-view" data-view-field="ra_lộc"></span><input type="text" class="data-input" data-field="ra_lộc"></div><div class="form-group"><label>Giá chốt</label><span class="data-view" data-view-field="giá_chốt"></span><input type="text" class="data-input" data-field="giá_chốt"></div><div class="form-group"><label>Lợi nhuận</label><span class="data-view" data-view-field="lợi_nhuận"></span><input type="text" class="data-input" data-field="lợi_nhuận"></div><div class="form-group"><label>Công nợ</label><span class="data-view font-bold text-red-600" id="calculated-cong-no"></span></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div><div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div><div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div><div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div><div class="form-group"><label>Ngoại thất</label><span class="data-view" data-view-field="ngoại_thất"></span><input type="text" class="data-input" data-field="ngoại_thất"></div><div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div><div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div><div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div><div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div><div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div><div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div><div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div><div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div><div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
             </div>
             <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
                 <button id="edit-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Chỉnh sửa</button>
@@ -495,9 +415,9 @@
             }
             
             const buildPivotTable = (title, dateFieldKey, tableType) => {
-                const validStaff = allData.nhanSu.filter(nv =>
-                    (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc'
-                );
+                const validStaff = allData.nhanSu
+                    .filter(nv => (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc')
+                    .map((staff, index) => ({...staff, originalIndex: index})); // Add original index for STT sort
 
                 const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort((a, b) => {
                     const aIsVF = a.toUpperCase().startsWith('VF');
@@ -508,7 +428,7 @@
                 });
 
                 if (validStaff.length === 0 || carTypes.length === 0) {
-                     return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu nhân sự hoặc loại xe để hiển thị.</p></div>`;
+                     return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`;
                 }
 
                 const relevantContracts = filteredData.filter(hd => {
@@ -516,7 +436,7 @@
                     return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
                 });
                 
-                let processedData = validStaff.map((staff, index) => {
+                let processedData = validStaff.map(staff => {
                     const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv);
                     let rowTotal = 0;
                     const counts = {};
@@ -525,62 +445,62 @@
                         counts[car] = count;
                         rowTotal += count;
                     });
-                    return { staff, counts, total: rowTotal, stt: index + 1 };
+                    return { staff, counts, total: rowTotal };
                 });
 
                 const { key, direction } = dashboardSortState[tableType];
                 processedData.sort((a, b) => {
                     let valA, valB;
-                    if (key === 'stt') { valA = a.stt; valB = b.stt; }
+                    if (key === 'stt') { valA = a.staff.originalIndex; valB = b.staff.originalIndex; }
                     else if (key === 'tên_nv') { valA = a.staff.tên_nv; valB = b.staff.tên_nv; }
                     else if (key === 'team') { valA = a.staff.pkd || ''; valB = b.staff.pkd || ''; }
                     else if (key === 'total') { valA = a.total; valB = b.total; }
-                    else { valA = a.counts[key]; valB = b.counts[key]; }
+                    else { valA = a.counts[key] || 0; valB = b.counts[key] || 0; }
 
-                    const compare = (typeof valA === 'string') ? valA.localeCompare(valB) : (valA > valB ? 1 : -1);
+                    const compare = (typeof valA === 'string') ? valA.localeCompare(valB, 'vi') : (valA > valB ? 1 : (valA < valB ? -1 : 0));
                     return direction === 'asc' ? compare : -compare;
                 });
 
                 const getSortClass = (k) => key === k ? `sorted-${direction}` : '';
 
                 let headerHtml = `<tr>
-                    <th class="p-3 text-left sticky left-0 bg-gray-200 z-10 sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}">STT</th>
-                    <th class="p-3 text-left sticky left-[50px] bg-gray-200 z-10 sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}">TÊN NV</th>
-                    <th class="p-3 text-left sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}">TEAM</th>`;
-                carTypes.forEach(car => headerHtml += `<th class="p-3 sortable ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
-                headerHtml += `<th class="p-3 font-bold bg-gray-100 sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}">TỔNG</th></tr>`;
+                    <th class="sortable sticky-col-1 ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}">STT</th>
+                    <th class="sortable sticky-col-2 ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}">TÊN NV</th>
+                    <th class="sortable sticky-col-3 ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}">TEAM</th>`;
+                carTypes.forEach(car => headerHtml += `<th class="sortable ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
+                headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}">TỔNG</th></tr>`;
 
                 let bodyHtml = '';
-                const columnTotals = new Array(carTypes.length).fill(0);
+                const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
                 let grandTotal = 0;
                 
-                processedData.forEach(item => {
-                    bodyHtml += `<tr class="border-b">
-                        <td class="p-3 sticky left-0 bg-white z-10">${item.stt}</td>
-                        <td class="p-3 font-medium sticky left-[50px] bg-white z-10">${item.staff.tên_nv}</td>
-                        <td class="p-3">${item.staff.pkd || ''}</td>`;
+                processedData.forEach((item, index) => {
+                    bodyHtml += `<tr>
+                        <td class="sticky-col-1 text-center">${index + 1}</td>
+                        <td class="sticky-col-2 font-medium">${item.staff.tên_nv}</td>
+                        <td class="sticky-col-3">${item.staff.pkd || ''}</td>`;
                     
-                    carTypes.forEach((car, index) => {
+                    carTypes.forEach(car => {
                         const count = item.counts[car] || 0;
-                        bodyHtml += `<td class="p-3 text-center">${count > 0 ? count : ''}</td>`;
-                        columnTotals[index] += count;
+                        bodyHtml += `<td class="text-center">${count > 0 ? count : ''}</td>`;
+                        columnTotals[car] += count;
                     });
                     
-                    bodyHtml += `<td class="p-3 text-center font-bold bg-gray-50">${item.total}</td></tr>`;
+                    bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`;
                     grandTotal += item.total;
                 });
                 
-                let footerHtml = `<tr class="bg-blue-100 text-blue-800 font-extrabold"><td class="p-3 sticky left-0 bg-blue-100 z-10" colspan="3">TỔNG CỘNG</td>`;
-                columnTotals.forEach(total => footerHtml += `<td class="p-3 text-center">${total}</td>`);
-                footerHtml += `<td class="p-3 text-center">${grandTotal}</td></tr>`;
+                let footerHtml = `<tr><td class="sticky-col-1 font-extrabold" colspan="3">TỔNG CỘNG</td>`;
+                carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
+                footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
 
                 return `<div class="bg-white p-4 rounded-lg shadow-md">
                             <h3 class="text-xl font-bold mb-4">${title}</h3>
                             <div class="overflow-x-auto table-container" style="max-height: 600px;">
-                                <table class="w-full text-sm whitespace-nowrap dashboard-table">
-                                    <thead class="bg-gray-200 sticky top-0 z-20">${headerHtml}</thead>
-                                    <tbody>${bodyHtml}</tbody>
-                                    <tfoot>${footerHtml}</tfoot>
+                                <table class="w-full text-sm dashboard-table">
+                                    <thead class="bg-gray-200 sticky top-0">${headerHtml}</thead>
+                                    <tbody class="bg-white">${bodyHtml}</tbody>
+                                    <tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot>
                                 </table>
                             </div>
                         </div>`;
