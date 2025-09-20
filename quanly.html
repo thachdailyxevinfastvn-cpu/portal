@@ -21,12 +21,17 @@
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
-        <header class="bg-white shadow-md sticky top-0 z-50"></header>
+        <header class="bg-white shadow-md sticky top-0 z-50">
+            </header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Quản Lý Kinh Doanh</h1>
             
-            <div id="loading-state" class="flex flex-col items-center justify-center py-20"></div>
+            <div id="loading-state" class="flex flex-col items-center justify-center py-20">
+                <div class="loader" style="border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;"></div>
+                <p class="mt-4 text-lg">Đang tải dữ liệu...</p>
+                <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+            </div>
 
             <div id="content-wrapper" class="hidden">
                  <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,7 +95,7 @@
             'dagiao': { name: 'Đã giao', renderFunc: renderDaGiaoTab },
         };
         
-        const HEADER_ALIASES = { 'ngày_tt1': 'NGÀY CỌC', 'tt1': 'SỐ TIỀN CỌC', 'pkd': 'TEAM' };
+        const HEADER_ALIASES = { 'ngày_tt1': 'NGÀY CỌC', 'tt1': 'SỐ TIỀN CỌC', 'team': 'PKD' };
 
         const loadingState = document.getElementById('loading-state');
         const contentWrapper = document.getElementById('content-wrapper');
@@ -112,7 +117,6 @@
 
         // === KHỞI TẠO & LẤY DỮ LIỆU ===
         document.addEventListener('DOMContentLoaded', () => {
-            // ... (Xác thực user) ...
             fetchData();
             document.getElementById('filter-btn').addEventListener('click', () => renderActiveTab());
             searchInput.addEventListener('input', () => {
@@ -121,7 +125,22 @@
             });
         });
         
-        function fetchData() { /* ... Giữ nguyên ... */ }
+        function fetchData() {
+            try {
+                window.handleDashboardResponse = (result) => {
+                    if (result.status === 'ERROR') { throw new Error(result.message); }
+                    allData = result.data;
+                    initializeApp();
+                };
+                const script = document.createElement('script');
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse`;
+                script.onerror = () => console.error('Không thể tải script từ Google.');
+                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; };
+                document.body.appendChild(script);
+            } catch (error) {
+                console.error(error);
+            }
+        }
 
         function initializeApp() {
             loadingState.style.display = 'none';
@@ -135,8 +154,29 @@
         }
 
         // === LOGIC TABS, BỘ LỌC, TÌM KIẾM ===
-        function renderTabs() { /* ... Giữ nguyên ... */ }
-        function setActiveTab(tabKey) { /* ... Giữ nguyên ... */ }
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `
+                <button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">
+                    ${tabConfig[key].name}
+                </button>
+            `).join('');
+            tabsContainer.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+            });
+        }
+        
+        function setActiveTab(tabKey) {
+            activeTab = tabKey;
+            searchInput.value = ''; // Xóa tìm kiếm khi chuyển tab
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('tab-active', btn.dataset.tab === tabKey);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `${tabKey}-content`);
+            });
+            renderActiveTab();
+        }
         
         function renderActiveTab() {
             applySearchFilter();
@@ -167,8 +207,6 @@
             const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))];
 
             const buildPivotTable = (title, dateFieldKey) => {
-                // ... (Logic hàm này không thay đổi so với lần trước, chỉ cần đảm bảo nó dùng `filteredData` nếu cần)
-                // ... (Tôi đã tối ưu hóa lại logic để chính xác hơn)
                 let tableRowsHtml = '';
                 let grandTotal = 0;
 
@@ -248,8 +286,8 @@
                 const tt2 = parseFloat(hd.tt2) || 0;
                 const tt3 = parseFloat(hd.tt3) || 0;
                 const giaiNgan = parseFloat(hd.giải_ngân) || 0;
-                const congNo = giaChot - (tt1 + tt2 + tt3 + giaiNgan);
-                return { ...hd, công_nợ: congNo };
+                const daThanhToan = tt1 + tt2 + tt3 + giaiNgan;
+                return { ...hd, công_nợ: giaChot - daThanhToan, đã_thanh_toán: daThanhToan };
             }).filter(hd => {
                 const ngayCoc = hd.ngày_có_coc;
                 return ngayCoc && ngayCoc.split('T')[0] >= start && ngayCoc.split('T')[0] <= end && hd.công_nợ !== 0;
@@ -290,18 +328,16 @@
             
             tableHtml += `<tbody>${data.map((row, index) => {
                 const cells = keys.map(key => {
-                    let cellValue = '';
+                    let cellValue;
                     if (key === 'stt') {
                         cellValue = index + 1;
-                    } else if (key === 'đã_thanh_toán') {
-                        const tt = (parseFloat(row.tt1) || 0) + (parseFloat(row.tt2) || 0) + (parseFloat(row.tt3) || 0) + (parseFloat(row.giải_ngân) || 0);
-                        cellValue = formatCurrency(tt);
                     } else {
-                        cellValue = row[key];
-                        const headerAlias = HEADER_ALIASES[key] || '';
-                        if (headerAlias.includes('NGÀY') || key.includes('ngày')) {
+                        const originalKey = Object.keys(HEADER_ALIASES).find(k => HEADER_ALIASES[k] === key.toUpperCase()) || key;
+                        cellValue = row[originalKey];
+
+                        if (originalKey.includes('ngày') || HEADER_ALIASES[originalKey]?.includes('NGÀY')) {
                             cellValue = formatDate(cellValue);
-                        } else if (headerAlias.includes('SỐ TIỀN') || ['giá_chốt', 'công_nợ'].includes(key)) {
+                        } else if (['tt1', 'giá_chốt', 'công_nợ', 'đã_thanh_toán'].includes(originalKey)) {
                             cellValue = formatCurrency(cellValue);
                         }
                     }
