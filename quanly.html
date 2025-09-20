@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang Quản Lý - Portal VF</title>
+    <title>Quản Lý Hợp Đồng - Portal VF</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -16,8 +16,6 @@
         .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
         .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; border-radius: 4px; }
         .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
-        .modal-overlay { transition: opacity 0.3s ease-in-out; }
-        .modal-content { transition: transform 0.3s ease-in-out; }
         body.modal-is-open { overflow: hidden; }
         details > summary { list-style: none; cursor: pointer; }
         details > summary::-webkit-details-marker { display: none; }
@@ -28,17 +26,20 @@
 
     <div class="flex flex-col min-h-screen">
         <header class="bg-white shadow-md sticky top-0 z-50">
-            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+             <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
                 <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
                 <div class="hidden md:flex items-center space-x-2">
+                    <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
                     <a href="quanly.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">Quản lý Hợp Đồng</a>
-                    </div>
+                </div>
                 <div class="flex items-center">
                     <div id="user-profile" class="flex items-center space-x-3">
                          <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
                          <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
                     </div>
-                    <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">&Logout;</button>
+                    <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    </button>
                 </div>
             </nav>
         </header>
@@ -55,7 +56,7 @@
                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div>
-                        <input type="text" id="search-input" placeholder="Tìm theo Tên KH, SĐT, Số HĐ, Số VIN..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="search-input" placeholder="Tìm theo Tên KH, SĐT, Số HĐ, Số Khung..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
 
@@ -88,13 +89,6 @@
             </div>
             <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4">
                 <input type="hidden" id="edit-row-index">
-
-                <details class="bg-gray-50 rounded-lg" open>
-                    <summary class="p-3 font-semibold flex justify-between items-center"><span>Nhân viên phụ trách</span><i class="fas fa-chevron-down"></i></summary>
-                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div><label class="block font-medium">TVBH</label><input type="text" data-field="tvbh" class="w-full mt-1 border-gray-300 rounded-md bg-gray-100" readonly></div>
-                    </div>
-                </details>
 
                 <details class="bg-gray-50 rounded-lg" open>
                     <summary class="p-3 font-semibold"><span>Thông tin Khách hàng</span></summary>
@@ -149,7 +143,7 @@
                     </div>
                 </details>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <details class="bg-gray-50 rounded-lg">
                         <summary class="p-3 font-semibold"><span>Vận hành</span></summary>
                         <div class="p-4 border-t grid grid-cols-2 gap-4 text-sm">
@@ -204,13 +198,11 @@
         };
         
         const setButtonLoading = (button, isLoading, defaultHtml) => {
-            if (isLoading) {
+             if (isLoading) {
                 button.disabled = true;
-                button.classList.add('button-loading');
-                button.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"></svg><span>Đang xử lý...</span>`;
+                button.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Đang xử lý...</span>`;
             } else {
                 button.disabled = false;
-                button.classList.remove('button-loading');
                 button.innerHTML = defaultHtml;
             }
         };
@@ -220,7 +212,7 @@
             if (!userDataString) { window.location.href = 'index.html'; return; }
             const userData = JSON.parse(userDataString);
             document.getElementById('user-fullname').textContent = userData.fullName;
-            document.getElementById('user-avatar').src = userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.fullName}`;
+            document.getElementById('user-avatar').src = userData.imageUrl || `https://ui-avatars.com/api/?name=${userData.fullName.replace(/\s/g, '+')}`;
 
             if (typeof QUAN_LY_APPS_SCRIPT_URL === 'undefined') { showError('Lỗi cấu hình: QUAN_LY_APPS_SCRIPT_URL not found.'); return; }
 
@@ -234,23 +226,30 @@
         });
 
         function showError(message) {
-            loadingState.innerHTML = `<p class="text-red-500">${message}</p>`;
+            loadingState.innerHTML = `<p class="text-red-500 font-bold">${message}</p>`;
         }
 
-        async function fetchData() {
+        function fetchData() {
             try {
-                const response = await fetch(`${QUAN_LY_APPS_SCRIPT_URL}?action=getManagementData`);
-                if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
-                const result = await response.json();
-                if (result.status === 'ERROR') throw new Error(result.message);
-                
-                allData = result.data;
-                loadingState.style.display = 'none';
-                contentWrapper.classList.remove('hidden');
-                applyFiltersAndRender();
+                window.handleDataResponse = (result) => {
+                    if (result.status === 'ERROR') { throw new Error(result.message); }
+                    allData = result.data.sort((a, b) => new Date(b.ngày_ký) - new Date(a.ngày_ký)); // Sắp xếp theo ngày ký mới nhất
+                    initializeApp();
+                };
+                const script = document.createElement('script');
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getManagementData&callback=handleDataResponse`;
+                script.onerror = () => { throw new Error('Không thể tải script từ Google. Vui lòng kiểm tra lại URL hoặc kết nối mạng.'); };
+                script.onload = () => { document.body.removeChild(script); delete window.handleDataResponse; };
+                document.body.appendChild(script);
             } catch (error) {
                 showError(`Lỗi tải dữ liệu: ${error.message}`);
             }
+        }
+        
+        function initializeApp() {
+            loadingState.style.display = 'none';
+            contentWrapper.classList.remove('hidden');
+            applyFiltersAndRender();
         }
         
         function applyFiltersAndRender() {
@@ -272,9 +271,7 @@
                     const tr = document.createElement('tr');
                     tr.className = 'bg-white border-b clickable-row';
                     tr.dataset.rowIndex = row.rowIndex;
-
                     const formattedDate = row.ngày_ký ? new Date(row.ngày_ký).toLocaleDateString('vi-VN') : '';
-                    
                     tr.innerHTML = `
                         <td class="px-6 py-4">${formattedDate}</td>
                         <td class="px-6 py-4 font-medium">${row.shđ || ''}</td>
@@ -295,9 +292,7 @@
         function openDetailModal(rowIndex) {
             const rowData = allData.find(row => row.rowIndex === rowIndex);
             if (!rowData) { showToast('Không tìm thấy dữ liệu.', false); return; }
-            
             document.getElementById('edit-row-index').value = rowIndex;
-            
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                 const fieldName = input.dataset.field;
                 let value = rowData[fieldName] || '';
@@ -314,24 +309,24 @@
             const originalBtnHtml = submitBtn.innerHTML;
             setButtonLoading(submitBtn, true, originalBtnHtml);
 
-            const updatedData = {
+            const payloadData = {
                 rowIndex: parseInt(document.getElementById('edit-row-index').value),
                 updatedData: {},
                 userInfo: JSON.parse(sessionStorage.getItem('loggedInUser'))
             };
 
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
-                updatedData.updatedData[input.dataset.field] = input.value;
+                payloadData.updatedData[input.dataset.field] = input.value;
             });
             
             try {
                 const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ action: 'updateManagementData', data: updatedData })
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'updateManagementData', data: payloadData })
                 });
 
-                if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
+                if (!response.ok) throw new Error(`Lỗi mạng: ${response.statusText}`);
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
 
