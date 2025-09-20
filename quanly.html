@@ -16,13 +16,15 @@
         .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        body.modal-is-open { overflow: hidden; }
+        details > summary { list-style: none; cursor: pointer; }
+        .button-loading { cursor: not-allowed; opacity: 0.8; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
-        <header class="bg-white shadow-md sticky top-0 z-50">
-            </header>
+        <header class="bg-white shadow-md sticky top-0 z-50"></header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Quản Lý Kinh Doanh</h1>
@@ -38,15 +40,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                         <div>
                             <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
-                            <input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500">
+                            <input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm">
                         </div>
                         <div>
                             <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
-                            <input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500">
+                            <input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm">
                         </div>
-                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-filter mr-2"></i>Xem
-                        </button>
+                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem</button>
                     </div>
                      <div class="items-end flex">
                         <div class="w-full">
@@ -59,11 +59,7 @@
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <div class="border-b border-gray-200">
-                        <nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs"></nav>
-                    </div>
-                </div>
+                <div class="mb-6"><div class="border-b border-gray-200"><nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto"></nav></div></div>
 
                 <div id="tab-contents-wrapper">
                     <div id="dashboard-content" class="tab-content space-y-8"></div>
@@ -78,6 +74,63 @@
         </main>
     </div>
     
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="modal-overlay"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:mx-auto sm:w-full sm:max-w-6xl transform scale-95 relative transition-transform duration-300" id="modal-content">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Chi Tiết Hợp Đồng</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4">
+                <input type="hidden" id="edit-row-index">
+
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold">Thông tin Khách hàng</summary>
+                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <div class="md:col-span-2"><label class="block font-medium">Tên KH</label><input type="text" data-field="tên_kh" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                        <div><label class="block font-medium">SĐT</label><input type="text" data-field="sđt" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                        <div><label class="block font-medium">Email</label><input type="email" data-field="email" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                        <div class="md:col-span-4"><label class="block font-medium">Địa chỉ</label><input type="text" data-field="địa_chỉ" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                    </div>
+                </details>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thông tin Hợp đồng</summary>
+                        <div class="p-4 border-t grid grid-cols-2 gap-4 text-sm">
+                            <div><label class="block font-medium">Số HĐ</label><input type="text" data-field="shđ" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                            <div><label class="block font-medium">Ngày ký</label><input type="date" data-field="ngày_ký" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                        </div>
+                    </details>
+                    <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thanh toán</summary>
+                         <div class="p-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                             <div><label class="block font-medium">Hình thức</label><input type="text" data-field="hình_thức_thanh_toán" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                             <div><label class="block font-medium">Ngân hàng</label><input type="text" data-field="ngân_hàng" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                             <div class="md:col-span-3 grid grid-cols-4 gap-2">
+                                 <div><label>SỐ TIỀN CỌC</label><input type="text" data-field="tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>NGÀY CỌC</label><input type="date" data-field="ngày_tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>Giải ngân</label><input type="text" data-field="giải_ngân" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>Ngày GN</label><input type="date" data-field="ngày_gn" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>TT2</label><input type="text" data-field="tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>Ngày TT2</label><input type="date" data-field="ngày_tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>TT3</label><input type="text" data-field="tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                                 <div><label>Ngày TT3</label><input type="date" data-field="ngày_tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                             </div>
+                         </div>
+                    </details>
+                </div>
+                
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thông tin Xe</summary>
+                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        </div>
+                </details>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+                <button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0"></div>
+
     <script src="config.js"></script>
     <script>
         // === KHAI BÁO BIẾN & DOM ELEMENTS ===
@@ -102,17 +155,65 @@
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
         const searchInput = document.getElementById('search-input');
+        const detailModal = document.getElementById('detail-modal');
 
         // === UTILITY FUNCTIONS ===
         function formatDate(isoString) {
             if (!isoString || !String(isoString).includes('T')) return isoString || '';
             try { return new Date(isoString).toLocaleDateString('vi-VN'); } catch (e) { return isoString; }
         }
-
         function formatCurrency(value) {
             const number = Number(value);
             if (isNaN(number)) return value || '';
             return new Intl.NumberFormat('vi-VN').format(number);
+        }
+
+        // === MODAL LOGIC ===
+        function openModal() { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); }
+        function closeModal() { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); }
+        
+        function openDetailModal(rowIndex) {
+            const rowData = allData.hopDong.find(row => row.rowIndex === rowIndex);
+            if (!rowData) { 
+                alert('Không tìm thấy dữ liệu chi tiết.');
+                return;
+            }
+            document.getElementById('edit-row-index').value = rowIndex;
+            document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
+                const fieldName = input.dataset.field;
+                let value = rowData[fieldName] || '';
+                if (input.type === 'date' && value) {
+                    value = value.split('T')[0];
+                }
+                input.value = value;
+            });
+            openModal();
+        }
+
+        async function handleUpdateData() {
+            const submitBtn = document.getElementById('submit-update-btn');
+            // Logic button loading có thể thêm ở đây
+            const payloadData = {
+                rowIndex: parseInt(document.getElementById('edit-row-index').value),
+                updatedData: {},
+            };
+            document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
+                payloadData.updatedData[input.dataset.field] = input.value;
+            });
+            try {
+                const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'updateManagementData', data: payloadData })
+                });
+                const result = await response.json();
+                if (result.status === 'ERROR') throw new Error(result.message);
+                alert('Cập nhật thành công!');
+                closeModal();
+                fetchData();
+            } catch (error) {
+                alert(`Lỗi cập nhật: ${error.message}`);
+            }
         }
 
         // === KHỞI TẠO & LẤY DỮ LIỆU ===
@@ -123,6 +224,10 @@
                 applySearchFilter();
                 renderActiveTab();
             });
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('modal-overlay').addEventListener('click', closeModal);
+            document.getElementById('close-modal-footer-btn').addEventListener('click', closeModal);
+            document.getElementById('submit-update-btn').addEventListener('click', handleUpdateData);
         });
         
         function fetchData() {
@@ -156,25 +261,15 @@
         // === LOGIC TABS, BỘ LỌC, TÌM KIẾM ===
         function renderTabs() {
             const tabsContainer = document.getElementById('tabs-container');
-            tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `
-                <button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">
-                    ${tabConfig[key].name}
-                </button>
-            `).join('');
-            tabsContainer.querySelectorAll('.tab-button').forEach(btn => {
-                btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
-            });
+            tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `<button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">${tabConfig[key].name}</button>`).join('');
+            tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
         }
         
         function setActiveTab(tabKey) {
             activeTab = tabKey;
-            searchInput.value = ''; // Xóa tìm kiếm khi chuyển tab
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.toggle('tab-active', btn.dataset.tab === tabKey);
-            });
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.toggle('active', content.id === `${tabKey}-content`);
-            });
+            searchInput.value = '';
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.toggle('tab-active', btn.dataset.tab === tabKey));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.toggle('active', content.id === `${tabKey}-content`));
             renderActiveTab();
         }
         
@@ -186,15 +281,12 @@
 
         function applySearchFilter() {
             const searchTerm = searchInput.value.toLowerCase().trim();
-            filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row =>
-                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-            );
+            filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm)));
         }
 
         function getDateRange() { return { start: startDateInput.value, end: endDateInput.value }; }
 
         // === CÁC HÀM RENDER CHO TỪNG TAB ===
-
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
@@ -202,18 +294,14 @@
                 container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`;
                 return;
             }
-
             const validStaff = allData.nhanSu.filter(nv => nv.trạng_thái?.toLowerCase() === 'đang làm việc');
             const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))];
-
             const buildPivotTable = (title, dateFieldKey) => {
                 let tableRowsHtml = '';
                 let grandTotal = 0;
-
                 validStaff.forEach(staff => {
                     const staffContracts = filteredData.filter(hd => hd.tvbh === staff.tên_nv);
                     if (staffContracts.length === 0) return;
-
                     const relevantCarTypesForStaff = carTypes.filter(carType => 
                         staffContracts.some(hd => {
                             const dateValue = hd[dateFieldKey];
@@ -221,11 +309,9 @@
                         })
                     );
                     if (relevantCarTypesForStaff.length === 0) return;
-
                     let staffTotal = 0;
                     let isFirstRowForStaff = true;
                     let staffRowsHtmlChunk = '';
-
                     relevantCarTypesForStaff.forEach(carType => {
                          const count = staffContracts.filter(hd => {
                             const dateValue = hd[dateFieldKey];
@@ -233,70 +319,53 @@
                         }).length;
                         if (count > 0) {
                             staffTotal += count;
-                            staffRowsHtmlChunk += `
-                                <tr class="border-b">
-                                    ${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.pkd || ''}</td>` : ''}
-                                    <td class="p-3">${carType}</td>
-                                    <td class="p-3 text-center font-semibold">${count}</td>
-                                </tr>`;
+                            staffRowsHtmlChunk += `<tr class="border-b">${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.pkd || ''}</td>` : ''}<td class="p-3">${carType}</td><td class="p-3 text-center font-semibold">${count}</td></tr>`;
                             isFirstRowForStaff = false;
                         }
                     });
-                    
                     if(staffTotal > 0) {
                         grandTotal += staffTotal;
                         tableRowsHtml += staffRowsHtmlChunk;
                         tableRowsHtml += `<tr class="bg-gray-100 font-bold"><td colspan="3" class="p-3 text-right">Tổng ${staff.tên_nv}:</td><td class="p-3 text-center">${staffTotal}</td></tr>`;
                     }
                 });
-
                 return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm"><thead class="bg-gray-200"><tr class="text-left"><th class="p-3 w-1/4">TÊN NV</th><th class="p-3 w-1/4">TEAM</th><th class="p-3 w-1/4">LOẠI XE</th><th class="p-3 w-1/4 text-center">TỔNG</th></tr></thead><tbody>${tableRowsHtml.length > 0 ? tableRowsHtml : `<tr><td colspan="4" class="text-center p-4">Không có dữ liệu.</td></tr>`}<tr class="bg-blue-100 text-blue-800 font-extrabold text-base"><td colspan="3" class="p-3 text-right">TỔNG CỘNG:</td><td class="p-3 text-center">${grandTotal}</td></tr></tbody></table></div></div>`;
             };
             container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
         }
-        
         function renderDonTonTab() {
             const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
             const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
             const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'tt1', 'ghi_chú'];
             renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys);
         }
-
         function renderKyTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => hd.tt1 && hd.tt1.split('T')[0] >= start && hd.tt1.split('T')[0] <= end);
             const headers = ['STT', 'NGÀY CỌC', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ TIỀN CỌC'];
             const keys = ['stt', 'ngày_tt1', 'shđ', 'tên_kh', 'tvbh', 'loại_xe', 'tt1'];
-            renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng từ ${formatDate(start+'T00:00:00')} đến ${formatDate(end+'T00:00:00')}`, data, headers, keys);
+            renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys);
         }
-        
         function renderXuatTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ.split('T')[0] >= start && hd.ngày_xhđ.split('T')[0] <= end);
             const headers = ['STT', 'NGÀY XHĐ', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG'];
             const keys = ['stt', 'ngày_xhđ', 'shđ', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung'];
-            renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ từ ${formatDate(start+'T00:00:00')} đến ${formatDate(end+'T00:00:00')}`, data, headers, keys);
+            renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys);
         }
-        
         function renderCongNoTab() {
             const { start, end } = getDateRange();
             const data = filteredData.map(hd => {
-                const giaChot = parseFloat(hd.giá_chốt) || 0;
-                const tt1 = parseFloat(hd.tt1) || 0;
-                const tt2 = parseFloat(hd.tt2) || 0;
-                const tt3 = parseFloat(hd.tt3) || 0;
-                const giaiNgan = parseFloat(hd.giải_ngân) || 0;
-                const daThanhToan = tt1 + tt2 + tt3 + giaiNgan;
-                return { ...hd, công_nợ: giaChot - daThanhToan, đã_thanh_toán: daThanhToan };
+                const daThanhToan = (parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0);
+                return { ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - daThanhToan, đã_thanh_toán: daThanhToan };
             }).filter(hd => {
                 const ngayCoc = hd.ngày_có_coc;
                 return ngayCoc && ngayCoc.split('T')[0] >= start && ngayCoc.split('T')[0] <= end && hd.công_nợ !== 0;
             });
             const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'ĐÃ TT', 'CÔNG NỢ'];
             const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'đã_thanh_toán', 'công_nợ'];
-            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ từ ${formatDate(start+'T00:00:00')} đến ${formatDate(end+'T00:00:00')}`, data, headers, keys);
+            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ`, data, headers, keys);
         }
-
         function renderCocTab() {
              const { start, end } = getDateRange();
              const data = filteredData.filter(hd => 
@@ -304,15 +373,14 @@
             );
             const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ'];
             const keys = ['stt', 'ngày_đề_nghị_coc', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú'];
-            renderDataTable(document.getElementById('coc-content'), `Theo dõi COC từ ${formatDate(start+'T00:00:00')} đến ${formatDate(end+'T00:00:00')}`, data, headers, keys);
+            renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys);
         }
-
         function renderDaGiaoTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe.split('T')[0] >= start && hd.ngày_giao_xe.split('T')[0] <= end);
             const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG'];
             const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung'];
-            renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe từ ${formatDate(start+'T00:00:00')} đến ${formatDate(end+'T00:00:00')}`, data, headers, keys);
+            renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe`, data, headers, keys);
         }
 
         // === HÀM RENDER BẢNG CHUNG TỐI ƯU ===
@@ -322,22 +390,21 @@
                 container.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-md">Không có dữ liệu.</div>`;
                 return;
             }
-            
             let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map(h => `<th class="p-3">${h}</th>`).join('')}</tr></thead>`;
-            
             tableHtml += `<tbody>${data.map((row, index) => {
                 const cells = keys.map(key => {
                     let cellValue;
-                    if (key === 'stt') {
-                        cellValue = index + 1;
+                    if (key === 'stt') { cellValue = index + 1; } 
+                    else if (key === 'đã_thanh_toán') {
+                        const tt = (parseFloat(row.tt1) || 0) + (parseFloat(row.tt2) || 0) + (parseFloat(row.tt3) || 0) + (parseFloat(row.giải_ngân) || 0);
+                        cellValue = formatCurrency(tt);
                     } else {
                         const originalKey = Object.keys(HEADER_ALIASES).find(k => HEADER_ALIASES[k] === key.toUpperCase()) || key;
                         cellValue = row[originalKey];
-
                         if (originalKey.includes('ngày') || HEADER_ALIASES[originalKey]?.includes('NGÀY')) {
                             cellValue = formatDate(cellValue);
-                        } else if (['tt1', 'giá_chốt', 'công_nợ', 'đã_thanh_toán'].includes(originalKey)) {
+                        } else if (['tt1', 'giá_chốt', 'công_nợ'].includes(originalKey)) {
                             cellValue = formatCurrency(cellValue);
                         }
                     }
@@ -345,7 +412,6 @@
                 }).join('');
                 return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`;
             }).join('')}</tbody>`;
-
             tableHtml += `</table></div></div>`;
             container.innerHTML = tableHtml;
         }
