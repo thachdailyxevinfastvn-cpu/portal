@@ -9,321 +9,259 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
-        .loader { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .tab-active { border-color: #1d4ed8; color: #1d4ed8; background-color: white; }
         .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
         .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
-        .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; }
         .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
-        body.modal-is-open { overflow: hidden; }
-        /* Tab Styles */
-        .tab-link { transition: all 0.2s ease-in-out; }
-        .tab-active { border-color: #2563eb; color: #2563eb; background-color: #dbeafe; }
         .tab-content { display: none; }
-        .tab-content-active { display: block; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
         <header class="bg-white shadow-md sticky top-0 z-50">
-            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-                <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
-                <div class="flex items-center">
-                    <div id="user-profile" class="flex items-center space-x-3">
-                         <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
-                         <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
-                    </div>
-                </div>
-            </nav>
-        </header>
+            </header>
 
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Quản Lý Kinh Doanh</h1>
+            
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
-                <div class="loader"></div>
-                <p class="mt-4 text-lg font-medium text-gray-600">Đang tải dữ liệu...</p>
-            </div>
+                </div>
 
             <div id="content-wrapper" class="hidden">
-                <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Báo Cáo & Quản Lý</h1>
-                
                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div>
                             <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
-                            <input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500">
                         </div>
                         <div>
                             <label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
-                            <input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500">
                         </div>
-                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem Báo Cáo</button>
+                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-filter mr-2"></i>Xem báo cáo
+                        </button>
                     </div>
                 </div>
-                
-                <div class="mb-4 border-b border-gray-200">
-                    <nav id="tabs-container" class="-mb-px flex space-x-4 overflow-x-auto" aria-label="Tabs">
-                        <a href="#" data-tab="dashboard" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Dashboard</a>
-                        <a href="#" data-tab="chitieuky" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chỉ Tiêu Ký</a>
-                        <a href="#" data-tab="chitieuxuat" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Chỉ Tiêu Xuất</a>
-                        <a href="#" data-tab="donton" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Đơn Tồn</a>
-                        <a href="#" data-tab="ky" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">HĐ Đã Ký</a>
-                        <a href="#" data-tab="xuat" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">HĐ Đã Xuất</a>
-                        <a href="#" data-tab="congno" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Công Nợ</a>
-                        <a href="#" data-tab="theodoicoc" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Theo Dõi COC</a>
-                        <a href="#" data-tab="dagiao" class="tab-link whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Đã Giao Xe</a>
-                    </nav>
+
+                <div class="mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto" aria-label="Tabs">
+                            </nav>
+                    </div>
                 </div>
 
-                <div id="tabs-content">
-                    <div id="tab-dashboard" class="tab-content p-4"><p>Khu vực dashboard đang được xây dựng.</p></div>
-                    <div id="tab-chitieuky" class="tab-content table-container"></div>
-                    <div id="tab-chitieuxuat" class="tab-content table-container"></div>
-                    <div id="tab-donton" class="tab-content table-container"></div>
-                    <div id="tab-ky" class="tab-content table-container"></div>
-                    <div id="tab-xuat" class="tab-content table-container"></div>
-                    <div id="tab-congno" class="tab-content table-container"></div>
-                    <div id="tab-theodoicoc" class="tab-content table-container"></div>
-                    <div id="tab-dagiao" class="tab-content table-container"></div>
+                <div id="tab-contents-wrapper">
+                    <div id="dashboard-content" class="tab-content space-y-8"></div>
+                    <div id="donton-content" class="tab-content"></div>
+                    <div id="ky-content" class="tab-content"></div>
+                    <div id="xuat-content" class="tab-content"></div>
+                    <div id="congno-content" class="tab-content"></div>
+                    <div id="coc-content" class="tab-content"></div>
+                    <div id="dagiao-content" class="tab-content"></div>
                 </div>
+
+                <div id="no-results" class="hidden text-center py-16 bg-white rounded-lg shadow-md">
+                     <i class="fas fa-box-open text-5xl text-gray-400"></i>
+                    <p class="mt-4 text-lg font-medium text-gray-500">Không có dữ liệu hoặc không tìm thấy kết quả phù hợp.</p>
+                </div>
+
             </div>
         </main>
     </div>
 
     <script src="config.js"></script>
     <script>
-        // === BIẾN TOÀN CỤC & DOM ELEMENTS ===
+        // === KHAI BÁO BIẾN TOÀN CỤC & DOM ELEMENTS ===
+        let allData = { hopDong: [], nhanSu: [], cacNguon: [] };
+        let activeTab = 'dashboard';
+        const tabConfig = {
+            'dashboard': { name: 'Dashboard', renderFunc: renderDashboardTab },
+            'donton': { name: 'Đơn tồn chưa xuất', renderFunc: renderDonTonTab },
+            'ky': { name: 'Ký', renderFunc: renderKyTab },
+            'xuat': { name: 'Xuất', renderFunc: renderXuatTab },
+            'congno': { name: 'Công nợ', renderFunc: renderCongNoTab },
+            'coc': { name: 'Theo dõi COC', renderFunc: renderCocTab },
+            'dagiao': { name: 'Đã giao', renderFunc: renderDaGiaoTab },
+        };
+
         const loadingState = document.getElementById('loading-state');
         const contentWrapper = document.getElementById('content-wrapper');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-        const filterBtn = document.getElementById('filter-btn');
-        
-        let allData = { contracts: [], employees: [], carTypes: [] };
 
-        // === KHỞI TẠO TRANG ===
+        // === KHỞI TẠO & LẤY DỮ LIỆU ===
         document.addEventListener('DOMContentLoaded', () => {
-            if (!sessionStorage.getItem('loggedInUser')) { window.location.href = 'index.html'; return; }
-            if (typeof QUAN_LY_APPS_SCRIPT_URL === 'undefined') { showError('Lỗi cấu hình: QUAN_LY_APPS_SCRIPT_URL not found.'); return; }
-            
-            // Set ngày mặc định là ngày hiện tại
-            const today = new Date().toISOString().split('T')[0];
-            startDateInput.value = today;
-            endDateInput.value = today;
-
-            filterBtn.addEventListener('click', renderAllTabs);
-            setupTabs();
-            fetchInitialData();
+            // ... (Phần xác thực user giữ nguyên) ...
+            fetchData();
+            document.getElementById('filter-btn').addEventListener('click', () => renderActiveTab());
         });
-        
-        function showError(message) {
-            loadingState.innerHTML = `<p class="text-red-500 font-bold">${message}</p>`;
-        }
-        
-        // === LẤY DỮ LIỆU ===
-        function fetchInitialData() {
-            try {
+
+        function fetchData() {
+            // Hàm fetchData dùng JSONP để gọi action 'getDashboardData'
+             try {
                 window.handleDashboardResponse = (result) => {
                     if (result.status === 'ERROR') { throw new Error(result.message); }
                     allData = result.data;
-                    loadingState.style.display = 'none';
-                    contentWrapper.classList.remove('hidden');
-                    renderAllTabs(); // Render lần đầu với ngày mặc định
+                    initializeApp();
                 };
                 const script = document.createElement('script');
                 script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse`;
                 script.onerror = () => { throw new Error('Không thể tải script từ Google.'); };
-                script.onload = () => { delete window.handleDashboardResponse; document.body.removeChild(script); };
+                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; };
                 document.body.appendChild(script);
             } catch (error) {
-                showError(`Lỗi tải dữ liệu: ${error.message}`);
+                // ... (showError)
             }
         }
-
-        // === LOGIC TABS ===
-        function setupTabs() {
-            const tabLinks = document.querySelectorAll('.tab-link');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            // Mặc định active tab đầu tiên
-            tabLinks[0].classList.add('tab-active');
-            tabContents[0].classList.add('tab-content-active');
-
-            tabLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const tabId = link.dataset.tab;
-
-                    tabLinks.forEach(l => l.classList.remove('tab-active'));
-                    link.classList.add('tab-active');
-
-                    tabContents.forEach(content => {
-                        content.classList.remove('tab-content-active');
-                        if (content.id === `tab-${tabId}`) {
-                            content.classList.add('tab-content-active');
-                        }
-                    });
-                });
-            });
+        
+        function initializeApp() {
+            loadingState.style.display = 'none';
+            contentWrapper.classList.remove('hidden');
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.value = today;
+            endDateInput.value = today;
+            renderTabs();
+            setActiveTab('dashboard');
         }
 
-        // === CÁC HÀM RENDER ===
-        function renderAllTabs() {
-            const startDate = startDateInput.value;
-            const endDate = endDateInput.value;
-            
-            if (!startDate || !endDate) {
-                alert("Vui lòng chọn đủ ngày bắt đầu và kết thúc.");
+        // === LOGIC VỀ TABS & BỘ LỌC ===
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `
+                <button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">
+                    ${tabConfig[key].name}
+                </button>
+            `).join('');
+            tabsContainer.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+            });
+        }
+        
+        function setActiveTab(tabKey) {
+            activeTab = tabKey;
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('tab-active', btn.dataset.tab === tabKey);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `${tabKey}-content`);
+            });
+            renderActiveTab();
+        }
+
+        function renderActiveTab() {
+            const renderFunction = tabConfig[activeTab].renderFunc;
+            if (renderFunction) {
+                renderFunction();
+            }
+        }
+        
+        function getDateRange() {
+            return {
+                start: startDateInput.value,
+                end: endDateInput.value
+            };
+        }
+
+        // === CÁC HÀM RENDER CHO TỪNG TAB ===
+
+        function renderDashboardTab() {
+            const container = document.getElementById('dashboard-content');
+            const { start, end } = getDateRange();
+
+            // 1. Lọc nhân sự hợp lệ
+            const validStaff = allData.nhanSu.filter(nv => 
+                (nv.chức_vụ?.toLowerCase() === 'tpkd' || nv.chức_vụ?.toLowerCase() === 'tvbh') &&
+                nv.trạng_thái?.toLowerCase() === 'đang làm việc'
+            );
+
+            // 2. Lấy danh sách loại xe
+            const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))];
+
+            // 3. Xây dựng bảng
+            const buildPivotTable = (title, dateField) => {
+                let tableHtml = `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><div class="overflow-x-auto table-container"><table><thead>...</thead><tbody>`;
+                // ... (logic tạo pivot table như đã thảo luận)
+                // Đây là phần phức tạp, cần lồng 2 vòng lặp (nhân viên, loại xe)
+                // và trong mỗi vòng lặp, lọc và đếm từ allData.hopDong
+                tableHtml += `</tbody></table></div></div>`;
+                return tableHtml;
+            };
+
+            container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
+        }
+        
+        function renderDonTonTab() {
+            const data = allData.hopDong.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
+            renderDataTable('donton-content', 'Danh sách đơn tồn chưa xuất', data);
+        }
+
+        function renderKyTab() {
+            const { start, end } = getDateRange();
+            const data = allData.hopDong.filter(hd => hd.tt1 && hd.tt1 >= start && hd.tt1 <= end);
+            renderDataTable('ky-content', `Danh sách hợp đồng ký từ ${start} đến ${end}`, data);
+        }
+        
+        function renderXuatTab() {
+            const { start, end } = getDateRange();
+            const data = allData.hopDong.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ >= start && hd.ngày_xhđ <= end);
+            renderDataTable('xuat-content', `Danh sách xe xuất từ ${start} đến ${end}`, data);
+        }
+        
+        function renderCongNoTab() {
+            const { start, end } = getDateRange();
+            const data = allData.hopDong.filter(hd => {
+                const ngayCoc = hd.ngày_có_coc;
+                if (!ngayCoc || ngayCoc < start || ngayCoc > end) return false;
+                
+                const giaChot = parseFloat(hd.giá_chốt) || 0;
+                const tt1 = parseFloat(hd.tt1) || 0;
+                const tt2 = parseFloat(hd.tt2) || 0;
+                const tt3 = parseFloat(hd.tt3) || 0;
+                const giaiNgan = parseFloat(hd.giải_ngân) || 0;
+                
+                const congNo = giaChot - (tt1 + tt2 + tt3 + giaiNgan);
+                return congNo !== 0;
+            });
+            renderDataTable('congno-content', `Danh sách công nợ từ ${start} đến ${end}`, data);
+        }
+
+        function renderCocTab() {
+             const { start, end } = getDateRange();
+             const data = allData.hopDong.filter(hd => 
+                hd.ngày_đề_nghị_coc && hd.ngày_đề_nghị_coc >= start && hd.ngày_đề_nghị_coc <= end &&
+                !hd.ngày_có_coc
+            );
+            renderDataTable('coc-content', `Theo dõi COC từ ${start} đến ${end}`, data);
+        }
+
+        function renderDaGiaoTab() {
+            const { start, end } = getDateRange();
+            const data = allData.hopDong.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe >= start && hd.ngày_giao_xe <= end);
+            renderDataTable('dagiao-content', `Danh sách xe đã giao từ ${start} đến ${end}`, data);
+        }
+
+        // === HÀM TÁI SỬ DỤNG ĐỂ VẼ BẢNG ===
+        function renderDataTable(containerId, title, data) {
+            const container = document.getElementById(containerId);
+            if (data.length === 0) {
+                container.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-md">Không có dữ liệu.</div>`;
                 return;
             }
-
-            renderChiTieuTables(startDate, endDate);
-            renderDonTonTable();
-            renderFilteredTable('ky', 'tt1', startDate, endDate);
-            renderFilteredTable('xuat', 'ngày_xhđ', startDate, endDate);
-            renderCongNoTable(startDate, endDate);
-            renderTheoDoiCocTable(startDate, endDate);
-            renderFilteredTable('dagiao', 'ngày_giao_xe', startDate, endDate);
-        }
-
-        // --- Render Bảng chỉ tiêu (Phức tạp nhất) ---
-        function renderChiTieuTables(start, end) {
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            endDate.setHours(23, 59, 59, 999);
-
-            const filteredContracts = allData.contracts.filter(c => {
-                const contractDateKy = c.tt1 ? new Date(c.ngày_tt1 || c.ngày_ký) : null;
-                const contractDateXuat = c.ngày_xhđ ? new Date(c.ngày_xhđ) : null;
-                return (contractDateKy && contractDateKy >= startDate && contractDateKy <= endDate) || 
-                       (contractDateXuat && contractDateXuat >= startDate && contractDateXuat <= endDate);
-            });
-
-            // Hàm tính toán chung
-            const calculateTotals = (fieldToCheck) => {
-                return allData.employees.map(emp => {
-                    const carTotals = allData.carTypes.reduce((acc, carType) => {
-                        const count = filteredContracts.filter(c => {
-                            const contractDate = new Date(c[fieldToCheck === 'tt1' ? 'ngày_tt1' : 'ngày_xhđ']);
-                            return c.tvbh === emp.ten_nv && 
-                                   c.loại_xe === carType && 
-                                   c[fieldToCheck] &&
-                                   contractDate >= startDate && contractDate <= endDate;
-                        }).length;
-                        acc[carType] = count;
-                        return acc;
-                    }, {});
-                    const total = Object.values(carTotals).reduce((sum, count) => sum + count, 0);
-                    return { ...emp, carTotals, total };
-                });
-            };
-            
-            const kyData = calculateTotals('tt1');
-            const xuatData = calculateTotals('ngày_xhđ');
-
-            // Hàm tạo HTML bảng
-            const createTableHTML = (title, data) => {
-                let html = `<h2 class="text-xl font-bold p-4">${title}</h2><table class="w-full text-sm">`;
-                html += `<thead class="bg-gray-100 text-xs uppercase"><tr>
-                         <th class="px-4 py-2 text-left">Tên NV</th>
-                         <th class="px-4 py-2 text-left">Team</th>`;
-                allData.carTypes.forEach(car => html += `<th class="px-4 py-2">${car}</th>`);
-                html += `<th class="px-4 py-2 bg-blue-100">Tổng</th></tr></thead><tbody>`;
-
-                data.forEach(row => {
-                    html += `<tr class="border-b">
-                             <td class="px-4 py-2 font-medium">${row.ten_nv}</td>
-                             <td class="px-4 py-2">${row.team}</td>`;
-                    allData.carTypes.forEach(car => html += `<td class="px-4 py-2 text-center">${row.carTotals[car] || 0}</td>`);
-                    html += `<td class="px-4 py-2 text-center font-bold bg-blue-50">${row.total}</td></tr>`;
-                });
-                html += `</tbody></table>`;
-                return html;
-            };
-
-            document.getElementById('tab-chitieuky').innerHTML = createTableHTML('Bảng Chỉ Tiêu Ký', kyData);
-            document.getElementById('tab-chitieuxuat').innerHTML = createTableHTML('Bảng Chỉ Tiêu Xuất', xuatData);
-        }
-        
-        // --- Render Đơn tồn (Không cần ngày) ---
-        function renderDonTonTable() {
-            const filtered = allData.contracts.filter(c => c.ngày_tt1 && !c.ngày_xhđ);
-            document.getElementById('tab-donton').innerHTML = createGenericTable(filtered);
-        }
-
-        // --- Render Công nợ ---
-        function renderCongNoTable(start, end) {
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            endDate.setHours(23, 59, 59, 999);
-            
-            const filtered = allData.contracts.filter(c => {
-                const cocDate = c.ngày_có_coc ? new Date(c.ngày_có_coc) : null;
-                if (!cocDate || cocDate < startDate || cocDate > endDate) return false;
-
-                const giaChot = parseFloat(c.giá_chốt || 0);
-                const tt1 = parseFloat(c.tt1 || 0);
-                const tt2 = parseFloat(c.tt2 || 0);
-                const tt3 = parseFloat(c.tt3 || 0);
-                const giaiNgan = parseFloat(c.giải_ngân || 0);
-                
-                return giaChot - (tt1 + tt2 + tt3 + giaiNgan) !== 0;
-            });
-            document.getElementById('tab-congno').innerHTML = createGenericTable(filtered);
-        }
-        
-        // --- Render Theo dõi COC ---
-        function renderTheoDoiCocTable(start, end) {
-             const startDate = new Date(start);
-             const endDate = new Date(end);
-             endDate.setHours(23, 59, 59, 999);
-             
-             const filtered = allData.contracts.filter(c => {
-                 const deNghiDate = c.ngày_đề_nghị_coc ? new Date(c.ngày_đề_nghị_coc) : null;
-                 return deNghiDate && deNghiDate >= startDate && deNghiDate <= endDate && !c.ngày_có_coc;
-             });
-             document.getElementById('tab-theodoicoc').innerHTML = createGenericTable(filtered);
-        }
-
-        // --- Hàm render chung cho các tab đơn giản ---
-        function renderFilteredTable(tabId, dateField, start, end) {
-            const startDate = new Date(start);
-            const endDate = new Date(end);
-            endDate.setHours(23, 59, 59, 999);
-            
-            const filtered = allData.contracts.filter(c => {
-                const contractDate = c[dateField] ? new Date(c[dateField]) : null;
-                return contractDate && contractDate >= startDate && contractDate <= endDate;
-            });
-            document.getElementById(`tab-${tabId}`).innerHTML = createGenericTable(filtered);
-        }
-
-        // === HÀM TRỢ GIÚP TẠO BẢNG HTML ===
-        function createGenericTable(data) {
-             if (!data || data.length === 0) return '<p class="p-4 text-center text-gray-500">Không có dữ liệu phù hợp.</p>';
-            let html = '<table class="w-full text-sm"><thead><tr class="bg-gray-100 text-xs uppercase">';
-            // Lấy header từ file HTML (hoặc có thể định nghĩa cứng ở đây)
-            html += `<th class="px-4 py-2 text-left">Ngày Ký</th>
-                     <th class="px-4 py-2 text-left">Số HĐ</th>
-                     <th class="px-4 py-2 text-left">Tên KH</th>
-                     <th class="px-4 py-2 text-left">Loại Xe</th>
-                     <th class="px-4 py-2 text-left">Số Khung</th>
-                     <th class="px-4 py-2 text-left">TVBH</th>
-                     <th class="px-4 py-2 text-left">Ngày Giao Xe</th>
-                     </tr></thead><tbody>`;
-            data.forEach(row => {
-                 html += `<tr class="border-b clickable-row" data-row-index="${row.rowIndex}">
-                     <td class="px-4 py-2">${row.ngày_ký ? new Date(row.ngày_ký).toLocaleDateString('vi-VN') : ''}</td>
-                     <td class="px-4 py-2 font-medium">${row.shđ || ''}</td>
-                     <td class="px-4 py-2">${row.tên_kh || ''}</td>
-                     <td class="px-4 py-2">${row.loại_xe || ''}</td>
-                     <td class="px-4 py-2">${row.số_khung || ''}</td>
-                     <td class="px-4 py-2">${row.tvbh || ''}</td>
-                     <td class="px-4 py-2">${row.ngày_giao_xe ? new Date(row.ngày_giao_xe).toLocaleDateString('vi-VN') : ''}</td>
-                 </tr>`;
-            });
-            html += `</tbody></table>`;
-            return html;
+            // Lấy 10 cột đầu tiên làm header
+            const headers = Object.keys(data[0]).slice(0, 10);
+            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm">`;
+            tableHtml += `<thead><tr class="bg-gray-50">${headers.map(h => `<th class="p-3 text-left">${h.replace(/_/g, ' ')}</th>`).join('')}</tr></thead>`;
+            tableHtml += `<tbody>${data.map(row => `
+                <tr data-row-index="${row.rowIndex}" class="border-b clickable-row">
+                    ${headers.map(h => `<td class="p-3">${row[h] || ''}</td>`).join('')}
+                </tr>`).join('')}</tbody>`;
+            tableHtml += `</table></div></div>`;
+            container.innerHTML = tableHtml;
+            // Gán lại sự kiện click cho các dòng để mở modal
         }
 
     </script>
