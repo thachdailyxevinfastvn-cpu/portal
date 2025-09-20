@@ -150,7 +150,7 @@
                         <div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div>
                     </div>
                 </details>
-
+                
                 <details class="bg-gray-50 rounded-lg">
                     <summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary>
                     <div class="p-4 border-t data-grid">
@@ -162,9 +162,10 @@
                         <div class="form-group">
                             <label>Công nợ</label>
                             <span class="data-view font-bold text-red-600" id="calculated-cong-no"></span>
-                            </div>
+                        </div>
                     </div>
                 </details>
+                
                 <details class="bg-gray-50 rounded-lg">
                     <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary>
                     <div class="p-4 border-t data-grid">
@@ -224,7 +225,7 @@
             'donton': { name: 'Đơn tồn chưa xuất', renderFunc: renderDonTonTab },
             'ky': { name: 'Ký', renderFunc: renderKyTab },
             'xuat': { name: 'Xuất', renderFunc: renderXuatTab },
-            'congno': { name: 'Công nợ', renderFunc: renderCongNoTab },
+            'congno': { name: 'Công nợ COC', renderFunc: renderCongNoCocTab },
             'coc': { name: 'Theo dõi COC', renderFunc: renderCocTab },
             'dagiao': { name: 'Đã giao', renderFunc: renderDaGiaoTab },
         };
@@ -316,7 +317,6 @@
                 }
             });
             
-            // Calculate and display Công nợ
             const congNo = calculateCongNo(rowData);
             document.getElementById('calculated-cong-no').textContent = formatCurrency(congNo);
 
@@ -365,7 +365,6 @@
                 applySearchFilter();
                 renderActiveTab();
             });
-            // Modal event listeners
             document.getElementById('close-modal-btn').addEventListener('click', closeModal);
             document.getElementById('modal-overlay').addEventListener('click', closeModal);
             document.getElementById('close-modal-footer-btn').addEventListener('click', closeModal);
@@ -454,7 +453,8 @@
 
         function getDateRange() { return { start: startDateInput.value, end: endDateInput.value }; }
 
-        // === CÁC HÀM RENDER CHO TỪNG TAB (No change from original) ===
+        // === CÁC HÀM RENDER CHO TỪNG TAB (ĐÃ CẬP NHẬT) ===
+
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
@@ -462,58 +462,79 @@
                 container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`;
                 return;
             }
-            const validStaff = allData.nhanSu.filter(nv => nv.trạng_thái?.toLowerCase() === 'đang làm việc');
-            const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))];
+            
             const buildPivotTable = (title, dateFieldKey) => {
-                let tableRowsHtml = '';
-                let grandTotal = 0;
-                validStaff.forEach(staff => {
-                    const staffContracts = filteredData.filter(hd => hd.tvbh === staff.tên_nv);
-                    if (staffContracts.length === 0) return;
-                    
-                    const relevantData = staffContracts.filter(hd => {
-                        const dateValue = hd[dateFieldKey];
-                        return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
-                    });
-                    if (relevantData.length === 0) return;
+                // Lọc nhân sự hợp lệ
+                const validStaff = allData.nhanSu.filter(nv =>
+                    (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc'
+                );
 
-                    const relevantCarTypesForStaff = [...new Set(relevantData.map(hd => hd.loại_xe))];
+                // Lấy danh sách xe động
+                const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort();
+                if (validStaff.length === 0 || carTypes.length === 0) {
+                     return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu nhân sự hoặc loại xe để hiển thị.</p></div>`;
+                }
 
-                    let staffTotal = 0;
-                    let isFirstRowForStaff = true;
-                    let staffRowsHtmlChunk = '';
-                    
-                    relevantCarTypesForStaff.forEach(carType => {
-                         const count = relevantData.filter(hd => hd.loại_xe === carType).length;
-                        if (count > 0) {
-                            staffTotal += count;
-                            staffRowsHtmlChunk += `<tr class="border-b">${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.pkd || ''}</td>` : ''}<td class="p-3">${carType}</td><td class="p-3 text-center font-semibold">${count}</td></tr>`;
-                            isFirstRowForStaff = false;
-                        }
-                    });
-
-                    if(staffTotal > 0) {
-                        grandTotal += staffTotal;
-                        tableRowsHtml += staffRowsHtmlChunk;
-                        tableRowsHtml += `<tr class="bg-gray-100 font-bold"><td colspan="3" class="p-3 text-right">Tổng ${staff.tên_nv}:</td><td class="p-3 text-center">${staffTotal}</td></tr>`;
-                    }
+                // Lọc HĐ trong khoảng thời gian
+                const relevantContracts = filteredData.filter(hd => {
+                    const dateValue = hd[dateFieldKey];
+                    return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
                 });
-                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm"><thead class="bg-gray-200"><tr class="text-left"><th class="p-3 w-1/4">TÊN NV</th><th class="p-3 w-1/4">TEAM</th><th class="p-3 w-1/4">LOẠI XE</th><th class="p-3 w-1/4 text-center">TỔNG</th></tr></thead><tbody>${tableRowsHtml.length > 0 ? tableRowsHtml : `<tr><td colspan="4" class="text-center p-4">Không có dữ liệu.</td></tr>`}<tr class="bg-blue-100 text-blue-800 font-extrabold text-base"><td colspan="3" class="p-3 text-right">TỔNG CỘNG:</td><td class="p-3 text-center">${grandTotal}</td></tr></tbody></table></div></div>`;
+                
+                // Xây dựng Header
+                let headerHtml = `<tr><th class="p-3 text-left sticky left-0 bg-gray-200 z-10">TÊN NV</th><th class="p-3 text-left">TEAM</th>`;
+                carTypes.forEach(car => headerHtml += `<th class="p-3">${car}</th>`);
+                headerHtml += `<th class="p-3 font-bold bg-gray-100">TỔNG</th></tr>`;
+
+                // Xây dựng Body
+                let bodyHtml = '';
+                const columnTotals = new Array(carTypes.length).fill(0);
+                let grandTotal = 0;
+
+                validStaff.forEach(staff => {
+                    let rowTotal = 0;
+                    let rowHtml = `<tr class="border-b"><td class="p-3 font-medium sticky left-0 bg-white z-10">${staff.tên_nv}</td><td class="p-3">${staff.pkd || ''}</td>`;
+                    
+                    const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv);
+
+                    carTypes.forEach((car, index) => {
+                        const count = staffContracts.filter(hd => hd.loại_xe === car).length;
+                        rowHtml += `<td class="p-3 text-center">${count > 0 ? count : ''}</td>`;
+                        rowTotal += count;
+                        columnTotals[index] += count;
+                    });
+                    
+                    rowHtml += `<td class="p-3 text-center font-bold bg-gray-50">${rowTotal}</td></tr>`;
+                    bodyHtml += rowHtml;
+                    grandTotal += rowTotal;
+                });
+
+                // Xây dựng Footer (Tổng cộng)
+                let footerHtml = `<tr class="bg-blue-100 text-blue-800 font-extrabold text-base"><td class="p-3 sticky left-0 bg-blue-100 z-10">TỔNG CỘNG</td><td></td>`;
+                columnTotals.forEach(total => footerHtml += `<td class="p-3 text-center">${total}</td>`);
+                footerHtml += `<td class="p-3 text-center">${grandTotal}</td></tr>`;
+
+                return `<div class="bg-white p-4 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-4">${title}</h3>
+                            <div class="overflow-x-auto table-container" style="max-height: 600px;">
+                                <table class="w-full text-sm whitespace-nowrap">
+                                    <thead class="bg-gray-200 sticky top-0 z-20">${headerHtml}</thead>
+                                    <tbody>${bodyHtml}</tbody>
+                                    <tfoot>${footerHtml}</tfoot>
+                                </table>
+                            </div>
+                        </div>`;
             };
+
             container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'ngày_tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
         }
-        
-        // === START: CẬP NHẬT RENDERDONTONTAB ===
+
         function renderDonTonTab() {
-            const data = filteredData
-                .filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ)
-                .map(hd => ({ ...hd, công_nợ: calculateCongNo(hd) })); // Thêm công nợ vào data
-            
-            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'CÔNG NỢ', 'GHI CHÚ'];
-            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'công_nợ', 'ghi_chú'];
+            const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'tt1', 'ghi_chú'];
             renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys);
         }
-        // === END: CẬP NHẬT RENDERDONTONTAB ===
 
         function renderKyTab() {
             const { start, end } = getDateRange();
@@ -521,44 +542,55 @@
                 const ngayKy = hd.ngày_tt1;
                 return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end;
             });
-            const headers = ['STT', 'NGÀY CỌC', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ TIỀN CỌC'];
-            const keys = ['stt', 'ngày_tt1', 'shđ', 'tên_kh', 'tvbh', 'loại_xe', 'tt1'];
+            const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'GHI CHÚ'];
+            const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'ghi_chú'];
             renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys);
         }
+
         function renderXuatTab() {
             const { start, end } = getDateRange();
-            const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ.split('T')[0] >= start && hd.ngày_xhđ.split('T')[0] <= end);
-            const headers = ['STT', 'NGÀY XHĐ', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG'];
-            const keys = ['stt', 'ngày_xhđ', 'shđ', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung'];
+            const data = filteredData
+                .filter(hd => hd.ngày_xhđ && hd.ngày_xhđ.split('T')[0] >= start && hd.ngày_xhđ.split('T')[0] <= end)
+                .map(hd => ({ ...hd, công_nợ: calculateCongNo(hd) }));
+
+            const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ'];
+            const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú'];
             renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys);
         }
-        function renderCongNoTab() {
+
+        function renderCongNoCocTab() {
             const { start, end } = getDateRange();
-            const data = filteredData.map(hd => {
-                const daThanhToan = (parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0);
-                return { ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - daThanhToan, đã_thanh_toán: daThanhToan };
-            }).filter(hd => {
-                const ngayKy = hd.ngày_tt1;
-                return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end && hd.công_nợ !== 0;
-            });
-            const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'ĐÃ TT', 'CÔNG NỢ'];
-            const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'đã_thanh_toán', 'công_nợ'];
-            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ`, data, headers, keys);
+            const data = filteredData.map(hd => ({ ...hd, công_nợ: calculateCongNo(hd) }))
+                .filter(hd => {
+                    const ngayCoCoc = hd.ngày_có_coc; // Lọc theo ngày có COC
+                    return ngayCoCoc && ngayCoCoc.split('T')[0] >= start && ngayCoCoc.split('T')[0] <= end && hd.công_nợ !== 0;
+                });
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú'];
+            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys);
         }
+
         function renderCocTab() {
              const { start, end } = getDateRange();
-             const data = filteredData.filter(hd => 
-                hd.ngày_đề_nghị_coc && hd.ngày_đề_nghị_coc.split('T')[0] >= start && hd.ngày_đề_nghị_coc.split('T')[0] <= end && !hd.ngày_có_coc
-            );
-            const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ'];
-            const keys = ['stt', 'ngày_đề_nghị_coc', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú'];
+             const today = new Date();
+             const data = filteredData
+                .filter(hd => hd.ngày_đề_nghị_coc && !hd.ngày_có_coc)
+                .map(hd => {
+                    const deNghiDate = new Date(hd.ngày_đề_nghị_coc);
+                    const diffTime = Math.abs(today - deNghiDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return { ...hd, tới_hôm_nay: diffDays };
+                });
+
+            const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ'];
+            const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú'];
             renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys);
         }
         function renderDaGiaoTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe.split('T')[0] >= start && hd.ngày_giao_xe.split('T')[0] <= end);
-            const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG'];
-            const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung'];
+            const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG', 'GHI CHÚ'];
+            const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung', 'ghi_chú'];
             renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe`, data, headers, keys);
         }
 
@@ -566,7 +598,7 @@
         function renderDataTable(container, title, data, headers, keys) {
              if (!container) return;
              if (data.length === 0) {
-                container.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-md">Không có dữ liệu.</div>`;
+                container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (0)</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`;
                 return;
             }
             let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm">`;
@@ -580,11 +612,11 @@
                         cellValue = row[originalKey];
                         if (originalKey.includes('ngày') || HEADER_ALIASES[originalKey]?.includes('NGÀY')) {
                             cellValue = formatDate(cellValue);
-                        } else if (['tt1', 'giá_chốt', 'công_nợ', 'đã_thanh_toán'].includes(originalKey)) {
+                        } else if (['tt1', 'giá_chốt', 'công_nợ'].includes(originalKey)) {
                             cellValue = formatCurrency(cellValue);
                         }
                     }
-                    return `<td class="p-3">${cellValue || ''}</td>`;
+                    return `<td class="p-3">${cellValue ?? ''}</td>`;
                 }).join('');
                 return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`;
             }).join('')}</tbody>`;
