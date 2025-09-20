@@ -31,7 +31,7 @@
                 </div>
 
             <div id="content-wrapper" class="hidden">
-                <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                         <div>
                             <label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
@@ -65,7 +65,12 @@
                 <div id="tab-contents-wrapper">
                     <div id="dashboard-content" class="tab-content space-y-8"></div>
                     <div id="donton-content" class="tab-content"></div>
-                    </div>
+                    <div id="ky-content" class="tab-content"></div>
+                    <div id="xuat-content" class="tab-content"></div>
+                    <div id="congno-content" class="tab-content"></div>
+                    <div id="coc-content" class="tab-content"></div>
+                    <div id="dagiao-content" class="tab-content"></div>
+                </div>
             </div>
         </main>
     </div>
@@ -74,19 +79,32 @@
     <script>
         // === KHAI BÁO BIẾN & DOM ELEMENTS ===
         let allData = { hopDong: [], nhanSu: [], cacNguon: [] };
-        let filteredData = []; // Dữ liệu đã được lọc bởi thanh tìm kiếm
+        let filteredData = [];
         let activeTab = 'dashboard';
-        const tabConfig = { /* ... giữ nguyên ... */ };
-        // ... các DOM elements khác ...
-        const searchInput = document.getElementById('search-input');
 
+        // [SỬA LỖI] ĐỊNH NGHĨA ĐẦY ĐỦ CHO TABCONFIG
+        const tabConfig = {
+            'dashboard': { name: 'Dashboard', renderFunc: renderDashboardTab },
+            'donton': { name: 'Đơn tồn chưa xuất', renderFunc: renderDonTonTab },
+            'ky': { name: 'Ký', renderFunc: () => genericRenderWrapper('ky-content', 'Ký', hd => hd.tt1) },
+            'xuat': { name: 'Xuất', renderFunc: () => genericRenderWrapper('xuat-content', 'Xuất', hd => hd.ngày_xhđ) },
+            'congno': { name: 'Công nợ', renderFunc: renderCongNoTab },
+            'coc': { name: 'Theo dõi COC', renderFunc: renderCocTab },
+            'dagiao': { name: 'Đã giao', renderFunc: () => genericRenderWrapper('dagiao-content', 'Đã giao', hd => hd.ngày_giao_xe) },
+        };
+
+        // [SỬA LỖI] KHAI BÁO ĐẦY ĐỦ CÁC DOM ELEMENTS
+        const loadingState = document.getElementById('loading-state');
+        const contentWrapper = document.getElementById('content-wrapper');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const searchInput = document.getElementById('search-input');
 
         // === UTILITY FUNCTION ===
         function formatDate(isoString) {
             if (!isoString || !String(isoString).includes('T')) return isoString || '';
             try {
-                const date = new Date(isoString);
-                return date.toLocaleDateString('vi-VN');
+                return new Date(isoString).toLocaleDateString('vi-VN');
             } catch (e) {
                 return isoString;
             }
@@ -102,17 +120,62 @@
             });
         });
         
+        // [SỬA LỖI] BỔ SUNG HÀM FETCHDATA HOÀN CHỈNH
         function fetchData() {
-            // ... (Hàm fetchData không đổi) ...
+             try {
+                window.handleDashboardResponse = (result) => {
+                    if (result.status === 'ERROR') { throw new Error(result.message); }
+                    allData = result.data;
+                    initializeApp();
+                };
+                const script = document.createElement('script');
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse`;
+                script.onerror = () => { console.error('Không thể tải script từ Google.'); };
+                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; };
+                document.body.appendChild(script);
+            } catch (error) {
+                console.error(error);
+            }
         }
 
+        // [SỬA LỖI] BỔ SUNG HÀM INITIALIZEAPP HOÀN CHỈNH
         function initializeApp() {
-             // ... (Hàm initializeApp không đổi) ...
+            loadingState.style.display = 'none';
+            contentWrapper.classList.remove('hidden');
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+            endDateInput.value = today.toISOString().split('T')[0];
+            startDateInput.value = firstDayOfMonth;
+            renderTabs();
+            setActiveTab('dashboard');
         }
 
         // === LOGIC TABS, BỘ LỌC, TÌM KIẾM ===
-        function renderTabs() { /* ... không đổi ... */ }
-        function setActiveTab(tabKey) { /* ... không đổi ... */ }
+        
+        // [SỬA LỖI] BỔ SUNG HÀM RENDERTABS HOÀN CHỈNH
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `
+                <button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">
+                    ${tabConfig[key].name}
+                </button>
+            `).join('');
+            tabsContainer.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => setActiveTab(btn.dataset.tab));
+            });
+        }
+        
+        // [SỬA LỖI] BỔ SUNG HÀM SETACTIVETAB HOÀN CHỈNH
+        function setActiveTab(tabKey) {
+            activeTab = tabKey;
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('tab-active', btn.dataset.tab === tabKey);
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.toggle('active', content.id === `${tabKey}-content`);
+            });
+            renderActiveTab();
+        }
         
         function renderActiveTab() {
             applySearchFilter();
@@ -122,22 +185,28 @@
 
         function applySearchFilter() {
             const searchTerm = searchInput.value.toLowerCase().trim();
-            if (searchTerm === '') {
-                filteredData = allData.hopDong;
-            } else {
-                filteredData = allData.hopDong.filter(row =>
-                    Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-                );
-            }
+            filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row =>
+                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
+            );
         }
 
-        function getDateRange() { /* ... không đổi ... */ }
+        // [SỬA LỖI] BỔ SUNG HÀM GETDATERANGE HOÀN CHỈNH
+        function getDateRange() {
+            return {
+                start: startDateInput.value,
+                end: endDateInput.value
+            };
+        }
 
-        // === CÁC HÀM RENDER CHO TỪNG TAB (ĐÃ CẬP NHẬT) ===
+        // === CÁC HÀM RENDER CHO TỪNG TAB ===
 
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
+            if (!start || !end) {
+                container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`;
+                return;
+            }
 
             const validStaff = allData.nhanSu.filter(nv =>
                 (nv.chức_vụ?.toLowerCase() === 'tpkd' || nv.chức_vụ?.toLowerCase() === 'tvbh') &&
@@ -152,21 +221,29 @@
                 validStaff.forEach(staff => {
                     let staffTotal = 0;
                     let staffRowsHtml = '';
-                    let isFirstRowForStaff = true;
-
-                    carTypes.forEach(carType => {
-                        const count = allData.hopDong.filter(hd => {
+                    
+                    const staffContracts = filteredData.filter(hd => hd.tvbh === staff.tên_nv);
+                    const relevantCarTypesForStaff = carTypes.filter(carType => 
+                        staffContracts.some(hd => {
                             const dateValue = hd[dateFieldKey];
-                            return hd.tvbh === staff.tên_nv &&
-                                   hd.loại_xe === carType &&
-                                   dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
+                            return hd.loại_xe === carType && dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
+                        })
+                    );
+
+                    if (relevantCarTypesForStaff.length === 0) return;
+
+                    let isFirstRowForStaff = true;
+                    relevantCarTypesForStaff.forEach(carType => {
+                         const count = staffContracts.filter(hd => {
+                            const dateValue = hd[dateFieldKey];
+                            return hd.loại_xe === carType && dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
                         }).length;
 
                         if (count > 0) {
                             staffTotal += count;
                             staffRowsHtml += `
                                 <tr class="border-b">
-                                    ${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${carTypes.filter(ct => allData.hopDong.some(hd => hd.tvbh === staff.tên_nv && hd.loại_xe === ct && hd[dateFieldKey] && hd[dateFieldKey].split('T')[0] >= start && hd[dateFieldKey].split('T')[0] <= end)).length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${carTypes.filter(ct => allData.hopDong.some(hd => hd.tvbh === staff.tên_nv && hd.loại_xe === ct && hd[dateFieldKey] && hd[dateFieldKey].split('T')[0] >= start && hd[dateFieldKey].split('T')[0] <= end)).length}">${staff.team || ''}</td>` : ''}
+                                    ${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.team || ''}</td>` : ''}
                                     <td class="p-3">${carType}</td>
                                     <td class="p-3 text-center font-semibold">${count}</td>
                                 </tr>
@@ -189,14 +266,12 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-gray-200">
                                     <tr class="text-left">
-                                        <th class="p-3 w-1/4">TÊN NV</th>
-                                        <th class="p-3 w-1/4">TEAM</th>
-                                        <th class="p-3 w-1/4">LOẠI XE</th>
-                                        <th class="p-3 w-1/4 text-center">TỔNG</th>
+                                        <th class="p-3 w-1/4">TÊN NV</th><th class="p-3 w-1/4">TEAM</th>
+                                        <th class="p-3 w-1/4">LOẠI XE</th><th class="p-3 w-1/4 text-center">TỔNG</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${tableRowsHtml}
+                                    ${tableRowsHtml.length > 0 ? tableRowsHtml : `<tr><td colspan="4" class="text-center p-4">Không có dữ liệu trong khoảng thời gian đã chọn.</td></tr>`}
                                     <tr class="bg-blue-100 text-blue-800 font-extrabold text-base">
                                         <td colspan="3" class="p-3 text-right">TỔNG CỘNG:</td>
                                         <td class="p-3 text-center">${grandTotal}</td>
@@ -206,45 +281,68 @@
                         </div>
                     </div>`;
             };
-
             container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
         }
         
         function renderDonTonTab() {
             const container = document.getElementById('donton-content');
             const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
+            renderDataTable(container, 'Danh sách đơn tồn chưa xuất', data, 
+                ['STT', 'TÊN KH', 'TVBH', 'TEAM', 'NGÀY KÝ', 'NGÀY CỌC', 'GHI CHÚ'],
+                { 'tên_kh': 'tên_kh', 'tvbh': 'tvbh', 'team': 'team', 'ngày_ký': 'ngày_ký', 'tt1': 'ngày_cọc', 'ghi_chú': 'ghi_chú' }
+            );
+        }
 
-            if (data.length === 0) {
+        // ... Các hàm render khác ...
+        function genericRenderWrapper(containerId, title, dateFieldFunc) {
+            const container = document.getElementById(containerId);
+            const { start, end } = getDateRange();
+            if (!start || !end) {
+                container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`;
+                return;
+            }
+            const data = filteredData.filter(hd => {
+                const dateValue = dateFieldFunc(hd);
+                return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
+            });
+            renderDataTable(container, `Danh sách ${title.toLowerCase()}`, data, ['STT', 'NGÀY KÝ', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG']);
+        }
+        
+        function renderCongNoTab() { /* ... Logic sẽ được thêm vào ... */ }
+        function renderCocTab() { /* ... Logic sẽ được thêm vào ... */ }
+
+        // HÀM RENDER BẢNG CHUNG
+        function renderDataTable(container, title, data, headers, mapping) {
+             if (!container) return;
+             if (data.length === 0) {
                 container.innerHTML = `<div class="text-center p-8 bg-white rounded-lg shadow-md">Không có dữ liệu.</div>`;
                 return;
             }
 
-            const tableHtml = `
+            const headerKeys = headers.map(h => h.toLowerCase().replace(/\s+/g, '_'));
+            const dataKeys = mapping ? headers.map(h => Object.keys(mapping).find(key => mapping[key] === h.toLowerCase().replace(/\s+/g, '_'))) : headerKeys;
+            
+            let tableHtml = `
                 <div class="bg-white rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold p-4 border-b">Danh sách đơn tồn chưa xuất (${data.length})</h3>
+                    <h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3>
                     <div class="overflow-x-auto table-container">
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50 text-left">
-                                <tr>
-                                    <th class="p-3">STT</th>
-                                    <th class="p-3">TÊN KH</th>
-                                    <th class="p-3">TVBH</th>
-                                    <th class="p-3">TEAM</th>
-                                    <th class="p-3">NGÀY KÝ</th>
-                                    <th class="p-3">NGÀY CỌC</th>
-                                    <th class="p-3">GHI CHÚ</th>
-                                </tr>
+                                <tr>${headers.map(h => `<th class="p-3">${h}</th>`).join('')}</tr>
                             </thead>
                             <tbody>
                                 ${data.map((row, index) => `
                                     <tr data-row-index="${row.rowIndex}" class="border-b clickable-row">
-                                        <td class="p-3">${index + 1}</td>
-                                        <td class="p-3">${row.tên_kh || ''}</td>
-                                        <td class="p-3">${row.tvbh || ''}</td>
-                                        <td class="p-3">${row.team || ''}</td>
-                                        <td class="p-3">${formatDate(row.ngày_ký)}</td>
-                                        <td class="p-3">${formatDate(row.tt1)}</td>
-                                        <td class="p-3">${row.ghi_chú || ''}</td>
+                                        ${headers.map((h, i) => {
+                                            let cellValue = '';
+                                            if (h === 'STT') {
+                                                cellValue = index + 1;
+                                            } else {
+                                                const key = mapping ? Object.keys(mapping).find(k => mapping[k] === h.toLowerCase().replace(/\s/g, '_')) : h.toLowerCase().replace(/\s/g, '_');
+                                                cellValue = formatDate(row[key]);
+                                            }
+                                            return `<td class="p-3">${cellValue}</td>`;
+                                        }).join('')}
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -253,8 +351,6 @@
                 </div>`;
             container.innerHTML = tableHtml;
         }
-
-        // ... Các hàm render khác có thể được cập nhật tương tự ...
 
     </script>
 </body>
