@@ -376,9 +376,15 @@
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-            // Định dạng sang YYYY-MM-DD và gán vào input
-            startDateInput.value = firstDayOfMonth.toISOString().split('T')[0];
-            endDateInput.value = lastDayOfMonth.toISOString().split('T')[0];
+            // CORRECTED: Định dạng sang YYYY-MM-DD và gán vào input, tránh lỗi timezone
+            const formatDateToYyyyMmDd = (date) => {
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            startDateInput.value = formatDateToYyyyMmDd(firstDayOfMonth);
+            endDateInput.value = formatDateToYyyyMmDd(lastDayOfMonth);
             
             renderTabs();
             setActiveTab('dashboard');
@@ -520,7 +526,7 @@
                         </div>`;
             };
 
-            container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ', 'xuat');
+            container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
 
         function renderDonTonTab() {
