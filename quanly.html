@@ -35,29 +35,38 @@
         .dashboard-table {
             border-collapse: collapse;
             font-size: 0.8rem;
+            table-layout: fixed; /* Cân bằng các cột */
+            width: 100%;
         }
         .dashboard-table th, .dashboard-table td {
             border: 1px solid #e5e7eb;
             padding: 4px 8px;
-            white-space: nowrap;
+            /* white-space: nowrap; - Bỏ nowrap để cho phép xuống hàng */
         }
         .dashboard-table th.sortable { cursor: pointer; position: relative; }
         .dashboard-table th.sortable:hover { background-color: #eef2ff; }
         .dashboard-table th.sortable::after {
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            content: ""; /* MODIFIED: Removed the sort icon */
+            content: "";
             position: absolute;
             right: 8px;
             color: #9ca3af;
         }
-        .dashboard-table th.sorted-asc::after { content: ""; color: #1d4ed8; } /* MODIFIED: Removed asc icon */
-        .dashboard-table th.sorted-desc::after { content: ""; color: #1d4ed8; } /* MODIFIED: Removed desc icon */
+        .dashboard-table th.sorted-asc::after { content: ""; color: #1d4ed8; }
+        .dashboard-table th.sorted-desc::after { content: ""; color: #1d4ed8; }
         .dashboard-table thead th {
             position: sticky;
             top: 0;
             background-color: #e5e7eb;
             z-index: 10;
+        }
+        /* Style cho cột tên xe */
+        .dashboard-table .car-type-header {
+            white-space: normal; /* Cho phép text xuống hàng */
+            word-break: break-word; /* Tự động ngắt từ */
+            vertical-align: middle;
+            text-align: center;
         }
     </style>
 </head>
@@ -178,9 +187,14 @@
         function formatDate(isoString) {
             if (!isoString) return '';
             try {
+                // Input có thể là 'YYYY-MM-DD' hoặc ISO string đầy đủ
                 const date = new Date(isoString);
-                if (isNaN(date.getTime())) return isoString;
-                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                // Thêm kiểm tra múi giờ để tránh sai lệch ngày
+                const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+                const correctedDate = new Date(date.getTime() + userTimezoneOffset);
+
+                if (isNaN(correctedDate.getTime())) return isoString;
+                return correctedDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
             } catch (e) { return isoString; }
         }
         function formatCurrency(value) {
@@ -358,9 +372,14 @@
             loadingState.style.display = 'none';
             contentWrapper.classList.remove('hidden');
             const today = new Date();
-            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-            endDateInput.value = today.toISOString().split('T')[0];
-            startDateInput.value = firstDayOfMonth;
+            // Lấy ngày đầu tiên và cuối cùng của tháng hiện tại
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            // Định dạng sang YYYY-MM-DD và gán vào input
+            startDateInput.value = firstDayOfMonth.toISOString().split('T')[0];
+            endDateInput.value = lastDayOfMonth.toISOString().split('T')[0];
+            
             renderTabs();
             setActiveTab('dashboard');
         }
@@ -419,6 +438,11 @@
                 if (validStaff.length === 0 || carTypes.length === 0) {
                      return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`;
                 }
+                
+                // Tạo tiêu đề động với ngày tháng
+                const formattedStartDate = formatDate(start);
+                const formattedEndDate = formatDate(end);
+                const dynamicTitle = `${title} Từ ngày ${formattedStartDate} đến ${formattedEndDate}`;
 
                 const relevantContracts = filteredData.filter(hd => {
                     const dateValue = hd[dateFieldKey];
@@ -453,11 +477,12 @@
                 const getSortClass = (k) => key === k ? `sorted-${direction}` : '';
 
                 let headerHtml = `<tr>
-                    <th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}">STT</th>
-                    <th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}">TÊN NV</th>
-                    <th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}">TEAM</th>`;
-                carTypes.forEach(car => headerHtml += `<th class="sortable ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
-                headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}">TỔNG</th></tr>`;
+                    <th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th>
+                    <th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th>
+                    <th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
+                // Thêm class 'car-type-header' cho cột xe
+                carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
+                headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
 
                 let bodyHtml = '';
                 const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
@@ -484,7 +509,7 @@
                 footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
 
                 return `<div class="bg-white p-4 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">${title}</h3>
+                            <h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3>
                             <div class="overflow-x-auto table-container" style="max-height: 600px;">
                                 <table class="w-full text-sm dashboard-table">
                                     <thead>${headerHtml}</thead>
