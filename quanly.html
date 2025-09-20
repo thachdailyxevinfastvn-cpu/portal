@@ -18,7 +18,32 @@
         .tab-content.active { display: block; }
         body.modal-is-open { overflow: hidden; }
         details > summary { list-style: none; cursor: pointer; }
+        details > summary::-webkit-details-marker { display: none; }
         .button-loading { cursor: not-allowed; opacity: 0.8; }
+
+        /* === NEW STYLES FOR VIEW/EDIT MODE === */
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { margin-bottom: 0.25rem; font-weight: 500; color: #374151; }
+        .data-view {
+            padding: 0.5rem 0.75rem;
+            min-height: 38px; /* Match input height */
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            word-wrap: break-word;
+        }
+        .data-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            width: 100%;
+        }
+        /* Hide inputs in view mode, hide spans in edit mode */
+        .view-mode .data-input { display: none; }
+        .edit-mode .data-view { display: none; }
+        .view-mode .data-input { visibility: hidden; }
+        .edit-mode .data-view { visibility: hidden; }
     </style>
 </head>
 <body class="antialiased text-gray-800">
@@ -30,7 +55,7 @@
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Quản Lý Kinh Doanh</h1>
             
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
-                <div class="loader" style="border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;"></div>
+                <div class="loader" style="border: 4px solid #e5e7eb; border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;"></div>
                 <p class="mt-4 text-lg">Đang tải dữ liệu...</p>
                 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
             </div>
@@ -81,55 +106,97 @@
                 <h3 class="text-lg font-medium text-gray-900">Chi Tiết Hợp Đồng</h3>
                 <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
             </div>
-            <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4">
+            <div id="modal-form-container" class="p-6 max-h-[80vh] overflow-y-auto space-y-4 text-sm">
                 <input type="hidden" id="edit-row-index">
 
-                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold">Thông tin Khách hàng</summary>
-                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        <div class="md:col-span-2"><label class="block font-medium">Tên KH</label><input type="text" data-field="tên_kh" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">SĐT</label><input type="text" data-field="sđt" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div><label class="block font-medium">Email</label><input type="email" data-field="email" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        <div class="md:col-span-4"><label class="block font-medium">Địa chỉ</label><input type="text" data-field="địa_chỉ" class="w-full mt-1 border-gray-300 rounded-md"></div>
+                <details class="bg-gray-50 rounded-lg" open>
+                    <summary class="p-3 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div>
+                        <div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div>
+                    </div>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg" open>
+                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div>
+                        <div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div>
+                        <div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div>
+                    </div>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div>
+                        <div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div>
+                    </div>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Hình thức TT</label><span class="data-view" data-view-field="hình_thức_thanh_toán"></span><input type="text" class="data-input" data-field="hình_thức_thanh_toán"></div>
+                        <div class="form-group"><label>Ngân hàng</label><span class="data-view" data-view-field="ngân_hàng"></span><input type="text" class="data-input" data-field="ngân_hàng"></div>
+                        <div class="form-group"><label>TT1 (Cọc)</label><span class="data-view" data-view-field="tt1"></span><input type="text" class="data-input" data-field="tt1"></div>
+                        <div class="form-group"><label>Ngày TT1</label><span class="data-view" data-view-field="ngày_tt1"></span><input type="date" class="data-input" data-field="ngày_tt1"></div>
+                        <div class="form-group"><label>TT2</label><span class="data-view" data-view-field="tt2"></span><input type="text" class="data-input" data-field="tt2"></div>
+                        <div class="form-group"><label>Ngày TT2</label><span class="data-view" data-view-field="ngày_tt2"></span><input type="date" class="data-input" data-field="ngày_tt2"></div>
+                        <div class="form-group"><label>TT3</label><span class="data-view" data-view-field="tt3"></span><input type="text" class="data-input" data-field="tt3"></div>
+                        <div class="form-group"><label>Ngày TT3</label><span class="data-view" data-view-field="ngày_tt3"></span><input type="date" class="data-input" data-field="ngày_tt3"></div>
+                        <div class="form-group"><label>Giải ngân</label><span class="data-view" data-view-field="giải_ngân"></span><input type="text" class="data-input" data-field="giải_ngân"></div>
+                        <div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div>
                     </div>
                 </details>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thông tin Hợp đồng</summary>
-                        <div class="p-4 border-t grid grid-cols-2 gap-4 text-sm">
-                            <div><label class="block font-medium">Số HĐ</label><input type="text" data-field="shđ" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                            <div><label class="block font-medium">Ngày ký</label><input type="date" data-field="ngày_ký" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                        </div>
-                    </details>
-                    <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thanh toán</summary>
-                         <div class="p-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                             <div><label class="block font-medium">Hình thức</label><input type="text" data-field="hình_thức_thanh_toán" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             <div><label class="block font-medium">Ngân hàng</label><input type="text" data-field="ngân_hàng" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             <div class="md:col-span-3 grid grid-cols-4 gap-2">
-                                 <div><label>SỐ TIỀN CỌC</label><input type="text" data-field="tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>NGÀY CỌC</label><input type="date" data-field="ngày_tt1" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Giải ngân</label><input type="text" data-field="giải_ngân" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày GN</label><input type="date" data-field="ngày_gn" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>TT2</label><input type="text" data-field="tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày TT2</label><input type="date" data-field="ngày_tt2" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>TT3</label><input type="text" data-field="tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                                 <div><label>Ngày TT3</label><input type="date" data-field="ngày_tt3" class="w-full mt-1 border-gray-300 rounded-md"></div>
-                             </div>
-                         </div>
-                    </details>
-                </div>
-                
-                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold">Thông tin Xe</summary>
-                    <div class="p-4 border-t grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                        </div>
+                <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                         <div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div>
+                        <div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div>
+                        <div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div>
+                        <div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div>
+                        <div class="form-group"><label>Ngoại thất</label><span class="data-view" data-view-field="ngoại_thất"></span><input type="text" class="data-input" data-field="ngoại_thất"></div>
+                        <div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div>
+                        <div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div>
+                        <div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div>
+                        <div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div>
+                        <div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div>
+                    </div>
+                </details>
+
+                <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div>
+                        <div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div>
+                        <div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div>
+                        <div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div>
+                        <div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div>
+                    </div>
+                </details>
+
+                 <details class="bg-gray-50 rounded-lg">
+                    <summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t data-grid">
+                        <div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div>
+                        <div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div>
+                        <div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div>
+                        <div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div>
+                    </div>
                 </details>
             </div>
             <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-                <button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
-                <button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700">Lưu thay đổi</button>
+                <button id="edit-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Chỉnh sửa</button>
+                <button id="cancel-edit-btn" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-600 hidden">Hủy bỏ</button>
+                <button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 hidden">Lưu thay đổi</button>
+                <button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Đóng</button>
             </div>
         </div>
     </div>
-    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0"></div>
+    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300"></div>
 
     <script src="config.js"></script>
     <script>
@@ -156,43 +223,88 @@
         const endDateInput = document.getElementById('end-date');
         const searchInput = document.getElementById('search-input');
         const detailModal = document.getElementById('detail-modal');
+        const modalContent = document.getElementById('modal-content');
+        const tabContentsWrapper = document.getElementById('tab-contents-wrapper');
 
         // === UTILITY FUNCTIONS ===
         function formatDate(isoString) {
-            if (!isoString || !String(isoString).includes('T')) return isoString || '';
-            try { return new Date(isoString).toLocaleDateString('vi-VN'); } catch (e) { return isoString; }
+            if (!isoString) return '';
+            try {
+                // Handle both ISO strings with 'T' and simple 'yyyy-mm-dd' strings
+                const date = new Date(isoString);
+                if (isNaN(date.getTime())) return isoString; // Return original if invalid
+                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            } catch (e) { return isoString; }
         }
         function formatCurrency(value) {
             const number = Number(value);
-            if (isNaN(number)) return value || '';
+            if (isNaN(number) || value === null || value === '') return '';
             return new Intl.NumberFormat('vi-VN').format(number);
         }
+        
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
+        };
+
 
         // === MODAL LOGIC ===
         function openModal() { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); }
         function closeModal() { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); }
         
+        function setModalMode(mode) { // 'view' or 'edit'
+            const isEditMode = mode === 'edit';
+            modalContent.classList.toggle('view-mode', !isEditMode);
+            modalContent.classList.toggle('edit-mode', isEditMode);
+
+            document.getElementById('edit-btn').style.display = isEditMode ? 'none' : 'inline-block';
+            document.getElementById('close-modal-footer-btn').style.display = isEditMode ? 'none' : 'inline-block';
+            
+            document.getElementById('cancel-edit-btn').style.display = isEditMode ? 'inline-block' : 'none';
+            document.getElementById('submit-update-btn').style.display = isEditMode ? 'inline-block' : 'none';
+        }
+
         function openDetailModal(rowIndex) {
             const rowData = allData.hopDong.find(row => row.rowIndex === rowIndex);
             if (!rowData) { 
-                alert('Không tìm thấy dữ liệu chi tiết.');
+                showToast('Không tìm thấy dữ liệu chi tiết.', false);
                 return;
             }
             document.getElementById('edit-row-index').value = rowIndex;
+            
+            // Populate both view spans and input fields
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                 const fieldName = input.dataset.field;
+                const viewElement = document.querySelector(`[data-view-field="${fieldName}"]`);
+                
                 let value = rowData[fieldName] || '';
-                if (input.type === 'date' && value) {
-                    value = value.split('T')[0];
+                let displayValue = value;
+
+                if (input.type === 'date') {
+                    if (value) value = new Date(value).toISOString().split('T')[0];
+                    displayValue = formatDate(value);
+                } else if (['tt1', 'tt2', 'tt3', 'giải_ngân', 'giá_chốt'].includes(fieldName)) {
+                    displayValue = formatCurrency(value);
                 }
+
                 input.value = value;
+                if (viewElement) {
+                    viewElement.textContent = displayValue;
+                }
             });
+
+            setModalMode('view'); // Always open in view mode first
             openModal();
         }
 
         async function handleUpdateData() {
             const submitBtn = document.getElementById('submit-update-btn');
-            // Logic button loading có thể thêm ở đây
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
+            
             const payloadData = {
                 rowIndex: parseInt(document.getElementById('edit-row-index').value),
                 updatedData: {},
@@ -208,11 +320,16 @@
                 });
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
-                alert('Cập nhật thành công!');
+                
+                showToast('Cập nhật thành công!', true);
                 closeModal();
-                fetchData();
+                // Refetch data to show updated info
+                fetchData(); 
             } catch (error) {
-                alert(`Lỗi cập nhật: ${error.message}`);
+                showToast(`Lỗi cập nhật: ${error.message}`, false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Lưu thay đổi';
             }
         }
 
@@ -224,13 +341,36 @@
                 applySearchFilter();
                 renderActiveTab();
             });
+            // Modal event listeners
             document.getElementById('close-modal-btn').addEventListener('click', closeModal);
             document.getElementById('modal-overlay').addEventListener('click', closeModal);
             document.getElementById('close-modal-footer-btn').addEventListener('click', closeModal);
             document.getElementById('submit-update-btn').addEventListener('click', handleUpdateData);
+
+            document.getElementById('edit-btn').addEventListener('click', () => {
+                if (confirm('Bạn có chắc chắn muốn chỉnh sửa hợp đồng này không?')) {
+                    setModalMode('edit');
+                }
+            });
+            document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+                setModalMode('view');
+            });
+
+            // NEW: Event delegation for clickable rows
+            tabContentsWrapper.addEventListener('click', (event) => {
+                const row = event.target.closest('.clickable-row');
+                if (row) {
+                    const rowIndex = parseInt(row.dataset.rowIndex);
+                    if (rowIndex) {
+                        openDetailModal(rowIndex);
+                    }
+                }
+            });
         });
         
         function fetchData() {
+            loadingState.style.display = 'flex';
+            contentWrapper.classList.add('hidden');
             try {
                 window.handleDashboardResponse = (result) => {
                     if (result.status === 'ERROR') { throw new Error(result.message); }
@@ -238,12 +378,17 @@
                     initializeApp();
                 };
                 const script = document.createElement('script');
-                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse`;
-                script.onerror = () => console.error('Không thể tải script từ Google.');
-                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; };
+                const cacheBuster = new Date().getTime();
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse&v=${cacheBuster}`;
+                script.onerror = () => { alert('Không thể tải dữ liệu từ Google Apps Script.'); };
+                script.onload = () => { 
+                    document.body.removeChild(script); 
+                    delete window.handleDashboardResponse; 
+                };
                 document.body.appendChild(script);
             } catch (error) {
                 console.error(error);
+                alert(`Đã xảy ra lỗi: ${error.message}`);
             }
         }
 
@@ -286,7 +431,7 @@
 
         function getDateRange() { return { start: startDateInput.value, end: endDateInput.value }; }
 
-        // === CÁC HÀM RENDER CHO TỪNG TAB ===
+        // === CÁC HÀM RENDER CHO TỪNG TAB (No change from original) ===
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
@@ -302,27 +447,28 @@
                 validStaff.forEach(staff => {
                     const staffContracts = filteredData.filter(hd => hd.tvbh === staff.tên_nv);
                     if (staffContracts.length === 0) return;
-                    const relevantCarTypesForStaff = carTypes.filter(carType => 
-                        staffContracts.some(hd => {
-                            const dateValue = hd[dateFieldKey];
-                            return hd.loại_xe === carType && dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
-                        })
-                    );
-                    if (relevantCarTypesForStaff.length === 0) return;
+                    
+                    const relevantData = staffContracts.filter(hd => {
+                        const dateValue = hd[dateFieldKey];
+                        return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
+                    });
+                    if (relevantData.length === 0) return;
+
+                    const relevantCarTypesForStaff = [...new Set(relevantData.map(hd => hd.loại_xe))];
+
                     let staffTotal = 0;
                     let isFirstRowForStaff = true;
                     let staffRowsHtmlChunk = '';
+                    
                     relevantCarTypesForStaff.forEach(carType => {
-                         const count = staffContracts.filter(hd => {
-                            const dateValue = hd[dateFieldKey];
-                            return hd.loại_xe === carType && dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end;
-                        }).length;
+                         const count = relevantData.filter(hd => hd.loại_xe === carType).length;
                         if (count > 0) {
                             staffTotal += count;
                             staffRowsHtmlChunk += `<tr class="border-b">${isFirstRowForStaff ? `<td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.tên_nv}</td><td class="p-3 align-top" rowspan="${relevantCarTypesForStaff.length}">${staff.pkd || ''}</td>` : ''}<td class="p-3">${carType}</td><td class="p-3 text-center font-semibold">${count}</td></tr>`;
                             isFirstRowForStaff = false;
                         }
                     });
+
                     if(staffTotal > 0) {
                         grandTotal += staffTotal;
                         tableRowsHtml += staffRowsHtmlChunk;
@@ -331,7 +477,7 @@
                 });
                 return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm"><thead class="bg-gray-200"><tr class="text-left"><th class="p-3 w-1/4">TÊN NV</th><th class="p-3 w-1/4">TEAM</th><th class="p-3 w-1/4">LOẠI XE</th><th class="p-3 w-1/4 text-center">TỔNG</th></tr></thead><tbody>${tableRowsHtml.length > 0 ? tableRowsHtml : `<tr><td colspan="4" class="text-center p-4">Không có dữ liệu.</td></tr>`}<tr class="bg-blue-100 text-blue-800 font-extrabold text-base"><td colspan="3" class="p-3 text-right">TỔNG CỘNG:</td><td class="p-3 text-center">${grandTotal}</td></tr></tbody></table></div></div>`;
             };
-            container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
+            container.innerHTML = buildPivotTable('Bảng chỉ tiêu ký', 'ngày_tt1') + buildPivotTable('Bảng chỉ tiêu xuất', 'ngày_xhđ');
         }
         function renderDonTonTab() {
             const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
@@ -341,7 +487,10 @@
         }
         function renderKyTab() {
             const { start, end } = getDateRange();
-            const data = filteredData.filter(hd => hd.tt1 && hd.tt1.split('T')[0] >= start && hd.tt1.split('T')[0] <= end);
+            const data = filteredData.filter(hd => {
+                const ngayKy = hd.ngày_tt1;
+                return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end;
+            });
             const headers = ['STT', 'NGÀY CỌC', 'SỐ HĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ TIỀN CỌC'];
             const keys = ['stt', 'ngày_tt1', 'shđ', 'tên_kh', 'tvbh', 'loại_xe', 'tt1'];
             renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys);
@@ -359,8 +508,8 @@
                 const daThanhToan = (parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0);
                 return { ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - daThanhToan, đã_thanh_toán: daThanhToan };
             }).filter(hd => {
-                const ngayCoc = hd.ngày_có_coc;
-                return ngayCoc && ngayCoc.split('T')[0] >= start && ngayCoc.split('T')[0] <= end && hd.công_nợ !== 0;
+                const ngayKy = hd.ngày_tt1;
+                return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end && hd.công_nợ !== 0;
             });
             const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'ĐÃ TT', 'CÔNG NỢ'];
             const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'đã_thanh_toán', 'công_nợ'];
@@ -396,15 +545,12 @@
                 const cells = keys.map(key => {
                     let cellValue;
                     if (key === 'stt') { cellValue = index + 1; } 
-                    else if (key === 'đã_thanh_toán') {
-                        const tt = (parseFloat(row.tt1) || 0) + (parseFloat(row.tt2) || 0) + (parseFloat(row.tt3) || 0) + (parseFloat(row.giải_ngân) || 0);
-                        cellValue = formatCurrency(tt);
-                    } else {
+                    else {
                         const originalKey = Object.keys(HEADER_ALIASES).find(k => HEADER_ALIASES[k] === key.toUpperCase()) || key;
                         cellValue = row[originalKey];
                         if (originalKey.includes('ngày') || HEADER_ALIASES[originalKey]?.includes('NGÀY')) {
                             cellValue = formatDate(cellValue);
-                        } else if (['tt1', 'giá_chốt', 'công_nợ'].includes(originalKey)) {
+                        } else if (['tt1', 'giá_chốt', 'công_nợ', 'đã_thanh_toán'].includes(originalKey)) {
                             cellValue = formatCurrency(cellValue);
                         }
                     }
