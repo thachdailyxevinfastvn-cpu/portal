@@ -31,7 +31,7 @@
         .data-view { min-height: 38px; background-color: #f9fafb; word-wrap: break-word; }
         .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
-        .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; table-layout: fixed; /* Quan trọng cho việc resize */ }
+        .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; }
         .dashboard-table th, .dashboard-table td,
         .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; word-wrap: break-word; }
         .sortable { cursor: pointer; position: relative; }
@@ -59,15 +59,15 @@
         }
 
         /* === CSS CHO TÍNH NĂNG RESIZE CỘT === */
-        .resizable {
+        th.resizable {
             position: relative;
-            overflow: visible; /* Cho phép handle tràn ra ngoài một chút */
+            overflow: visible;
         }
         .resize-handle {
             position: absolute;
             top: 0;
-            right: -3px; /* Đặt handle chồng lên đường viền */
-            width: 6px; /* Tăng vùng có thể click */
+            right: -3px;
+            width: 6px;
             height: 100%;
             cursor: col-resize;
             z-index: 20;
@@ -414,6 +414,20 @@
 
         // === HÀM MỚI CHO TÍNH NĂNG RESIZE CỘT ===
         function makeTablesResizable(container) {
+            const table = container.querySelector('table');
+            if (!table) return;
+
+            // Step 1: Capture auto-calculated widths
+            table.style.tableLayout = 'auto';
+            const headers = Array.from(table.querySelectorAll('thead th'));
+            const columnWidths = headers.map(th => th.offsetWidth);
+
+            // Step 2: Switch to fixed layout and apply captured widths
+            table.style.tableLayout = 'fixed';
+            headers.forEach((th, i) => {
+                th.style.width = `${columnWidths[i]}px`;
+            });
+
             const handles = container.querySelectorAll('.resize-handle');
             handles.forEach(handle => {
                 let th, startX, startWidth;
@@ -444,3 +458,4 @@
     </script>
 </body>
 </html>
+}
