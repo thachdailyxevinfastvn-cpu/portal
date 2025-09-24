@@ -31,40 +31,39 @@
         .data-view { min-height: 38px; background-color: #f9fafb; word-wrap: break-word; }
         .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
-        /* === STYLES FOR UPGRADED DASHBOARD TABLE === */
-        .dashboard-table {
+        /* === STYLES FOR UPGRADED TABLES (Dashboard & Data) === */
+        .dashboard-table, .data-table {
             border-collapse: collapse;
             font-size: 0.8rem;
-            table-layout: fixed; /* Cân bằng các cột */
             width: 100%;
         }
-        .dashboard-table th, .dashboard-table td {
+        .dashboard-table th, .dashboard-table td,
+        .data-table th, .data-table td {
             border: 1px solid #e5e7eb;
             padding: 4px 8px;
-            /* white-space: nowrap; - Bỏ nowrap để cho phép xuống hàng */
         }
-        .dashboard-table th.sortable { cursor: pointer; position: relative; }
-        .dashboard-table th.sortable:hover { background-color: #eef2ff; }
-        .dashboard-table th.sortable::after {
+        .sortable { cursor: pointer; position: relative; }
+        .sortable:hover { background-color: #eef2ff; }
+        .sortable::after {
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            content: "";
+            content: "\f0dc"; /* sort icon */
             position: absolute;
             right: 8px;
             color: #9ca3af;
         }
-        .dashboard-table th.sorted-asc::after { content: ""; color: #1d4ed8; }
-        .dashboard-table th.sorted-desc::after { content: ""; color: #1d4ed8; }
-        .dashboard-table thead th {
+        .sortable.sorted-asc::after { content: "\f0de"; color: #1d4ed8; } /* sort-up */
+        .sortable.sorted-desc::after { content: "\f0dd"; color: #1d4ed8; } /* sort-down */
+        
+        .dashboard-table thead th, .data-table thead th {
             position: sticky;
             top: 0;
             background-color: #e5e7eb;
             z-index: 10;
         }
-        /* Style cho cột tên xe */
         .dashboard-table .car-type-header {
-            white-space: normal; /* Cho phép text xuống hàng */
-            word-break: break-word; /* Tự động ngắt từ */
+            white-space: normal;
+            word-break: break-word;
             vertical-align: middle;
             text-align: center;
         }
@@ -118,6 +117,7 @@
                     <div id="congno-content" class="tab-content"></div>
                     <div id="coc-content" class="tab-content"></div>
                     <div id="dagiao-content" class="tab-content"></div>
+                    <div id="hoancoc-content" class="tab-content"></div>
                 </div>
             </div>
         </main>
@@ -134,12 +134,25 @@
                 <input type="hidden" id="edit-row-index">
                 <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div><div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div></div></details>
                 <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div><div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div><div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div><div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div></div></details>
-                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div><div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div><div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div><div class="form-group"><label>Ngày hoàn cọc</label><span class="data-view" data-view-field="ngày_hoàn_cọc"></span><input type="date" class="data-input" data-field="ngày_hoàn_cọc"></div></div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Hình thức TT</label><span class="data-view" data-view-field="hình_thức_thanh_toán"></span><input type="text" class="data-input" data-field="hình_thức_thanh_toán"></div><div class="form-group"><label>Ngân hàng</label><span class="data-view" data-view-field="ngân_hàng"></span><input type="text" class="data-input" data-field="ngân_hàng"></div><div class="form-group"><label>TT1 (Cọc)</label><span class="data-view" data-view-field="tt1"></span><input type="text" class="data-input" data-field="tt1"></div><div class="form-group"><label>Ngày TT1</label><span class="data-view" data-view-field="ngày_tt1"></span><input type="date" class="data-input" data-field="ngày_tt1"></div><div class="form-group"><label>TT2</label><span class="data-view" data-view-field="tt2"></span><input type="text" class="data-input" data-field="tt2"></div><div class="form-group"><label>Ngày TT2</label><span class="data-view" data-view-field="ngày_tt2"></span><input type="date" class="data-input" data-field="ngày_tt2"></div><div class="form-group"><label>TT3</label><span class="data-view" data-view-field="tt3"></span><input type="text" class="data-input" data-field="tt3"></div><div class="form-group"><label>Ngày TT3</label><span class="data-view" data-view-field="ngày_tt3"></span><input type="date" class="data-input" data-field="ngày_tt3"></div><div class="form-group"><label>Giải ngân</label><span class="data-view" data-view-field="giải_ngân"></span><input type="text" class="data-input" data-field="giải_ngân"></div><div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div></div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Giá công bố</label><span class="data-view" data-view-field="giá_công_bố"></span><input type="text" class="data-input" data-field="giá_công_bố"></div><div class="form-group"><label>Giá XHĐ</label><span class="data-view" data-view-field="giá_xhđ"></span><input type="text" class="data-input" data-field="giá_xhđ"></div><div class="form-group"><label>Ra lộc</label><span class="data-view" data-view-field="ra_lộc"></span><input type="text" class="data-input" data-field="ra_lộc"></div><div class="form-group"><label>Giá chốt</label><span class="data-view" data-view-field="giá_chốt"></span><input type="text" class="data-input" data-field="giá_chốt"></div><div class="form-group"><label>Lợi nhuận</label><span class="data-view" data-view-field="lợi_nhuận"></span><input type="text" class="data-input" data-field="lợi_nhuận"></div><div class="form-group"><label>Công nợ</label><span class="data-view" data-view-field="công_nợ" id="calculated-cong-no"></span></div></div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div><div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div><div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div><div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div><div class="form-group"><label>Ngoại thất</label><span class="data-view" data-view-field="ngoại_thất"></span><input type="text" class="data-input" data-field="ngoại_thất"></div><div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div><div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div><div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div><div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div><div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div></div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div><div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div><div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div><div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div><div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div></div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
+                <details class="bg-gray-50 rounded-lg" open>
+                    <summary class="p-3 font-semibold flex justify-between items-center">Lịch sử Ghi chú <i class="fas fa-chevron-down"></i></summary>
+                    <div class="p-4 border-t space-y-3">
+                        <div class="form-group edit-mode">
+                            <label for="modal-new-note">Thêm ghi chú mới</label>
+                            <textarea id="modal-new-note" rows="3" class="w-full border-gray-300 rounded-md data-input" placeholder="Nhập ghi chú mới..."></textarea>
+                        </div>
+                        <div class="form-group">
+                             <label>Lịch sử</label>
+                             <div id="modal-notes-timeline" data-view-field="ghi_chú" class="data-view p-2 bg-white border rounded-md max-h-40 overflow-y-auto" style="white-space: pre-wrap;"></div>
+                        </div>
+                    </div>
+                </details>
             </div>
             <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
                 <button id="edit-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Chỉnh sửa</button>
@@ -157,10 +170,7 @@
         let allData = { hopDong: [], nhanSu: [], cacNguon: [] };
         let filteredData = [];
         let activeTab = 'dashboard';
-        let dashboardSortState = { 
-            ky: { key: 'stt', direction: 'asc' }, 
-            xuat: { key: 'stt', direction: 'asc' } 
-        };
+        let sortStates = {}; // Nâng cấp: Quản lý trạng thái sort cho tất cả các bảng
 
         const tabConfig = {
             'dashboard': { name: 'Dashboard', renderFunc: renderDashboardTab },
@@ -170,6 +180,7 @@
             'congno': { name: 'Công nợ COC', renderFunc: renderCongNoCocTab },
             'coc': { name: 'Theo dõi COC', renderFunc: renderCocTab },
             'dagiao': { name: 'Đã giao', renderFunc: renderDaGiaoTab },
+            'hoancoc': { name: 'Hoàn cọc', renderFunc: renderHoanCocTab }, // Thêm tab Hoàn cọc
         };
         
         const HEADER_ALIASES = { 'ngày_tt1': 'NGÀY CỌC', 'tt1': 'SỐ TIỀN CỌC', 'team': 'PKD' };
@@ -187,9 +198,7 @@
         function formatDate(isoString) {
             if (!isoString) return '';
             try {
-                // Input có thể là 'YYYY-MM-DD' hoặc ISO string đầy đủ
                 const date = new Date(isoString);
-                // Thêm kiểm tra múi giờ để tránh sai lệch ngày
                 const userTimezoneOffset = date.getTimezoneOffset() * 60000;
                 const correctedDate = new Date(date.getTime() + userTimezoneOffset);
 
@@ -255,11 +264,13 @@
                     displayValue = formatCurrency(value);
                 }
                 input.value = value;
-                if (viewElement) {
-                    viewElement.textContent = displayValue;
-                }
+                if (viewElement) viewElement.textContent = displayValue;
             });
             
+            // THÊM MỚI: Xử lý Ghi chú
+            document.getElementById('modal-notes-timeline').textContent = rowData.ghi_chú || 'Chưa có ghi chú.';
+            document.getElementById('modal-new-note').value = '';
+
             const congNo = calculateCongNo(rowData);
             document.getElementById('calculated-cong-no').textContent = formatCurrency(congNo);
             setModalMode('view');
@@ -271,13 +282,22 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
             
-            const payloadData = {
-                rowIndex: parseInt(document.getElementById('edit-row-index').value),
-                updatedData: {},
-            };
+            const rowIndex = parseInt(document.getElementById('edit-row-index').value);
+            const payloadData = { rowIndex: rowIndex, updatedData: {} };
+
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                 payloadData.updatedData[input.dataset.field] = input.value;
             });
+
+            // THÊM MỚI: Logic xử lý ghi chú mới
+            const newNote = document.getElementById('modal-new-note').value.trim();
+            if (newNote) {
+                const originalRow = allData.hopDong.find(row => row.rowIndex === rowIndex);
+                const oldNotes = originalRow.ghi_chú || '';
+                const timestamp = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                payloadData.updatedData['ghi_chú'] = `[${timestamp}] ${newNote}\n--------------------\n${oldNotes}`;
+            }
+
             try {
                 const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -317,21 +337,25 @@
                 }
             });
             document.getElementById('cancel-edit-btn').addEventListener('click', () => {
-                setModalMode('view');
+                setModalMode('view'); // Chỉ quay lại xem, không load lại data
+                const rowIndex = parseInt(document.getElementById('edit-row-index').value);
+                openDetailModal(rowIndex); // Re-populate to discard changes
             });
 
-            tabContentsWrapper.addEventListener('click', (event) => {
+            // THAY ĐỔI: Tách sự kiện click (sắp xếp) và dblclick (mở modal)
+            tabContentsWrapper.addEventListener('dblclick', (event) => {
                 const row = event.target.closest('.clickable-row');
                 if (row) {
                     const rowIndex = parseInt(row.dataset.rowIndex);
                     if (rowIndex) openDetailModal(rowIndex);
-                    return; 
                 }
+            });
+            tabContentsWrapper.addEventListener('click', (event) => {
                 const sortableHeader = event.target.closest('.sortable');
                 if (sortableHeader) {
                     const key = sortableHeader.dataset.sortKey;
                     const tableType = sortableHeader.dataset.tableType;
-                    const currentSort = dashboardSortState[tableType];
+                    const currentSort = sortStates[tableType];
 
                     if (currentSort.key === key) {
                         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
@@ -339,7 +363,7 @@
                         currentSort.key = key;
                         currentSort.direction = 'asc';
                     }
-                    renderDashboardTab();
+                    renderActiveTab();
                 }
             });
         });
@@ -372,11 +396,9 @@
             loadingState.style.display = 'none';
             contentWrapper.classList.remove('hidden');
             const today = new Date();
-            // Lấy ngày đầu tiên và cuối cùng của tháng hiện tại
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-            // CORRECTED: Định dạng sang YYYY-MM-DD và gán vào input, tránh lỗi timezone
             const formatDateToYyyyMmDd = (date) => {
                 const year = date.getFullYear();
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -386,6 +408,10 @@
             startDateInput.value = formatDateToYyyyMmDd(firstDayOfMonth);
             endDateInput.value = formatDateToYyyyMmDd(lastDayOfMonth);
             
+            // Khởi tạo trạng thái sort cho dashboard
+            sortStates['ky'] = { key: 'stt', direction: 'asc' };
+            sortStates['xuat'] = { key: 'stt', direction: 'asc' };
+
             renderTabs();
             setActiveTab('dashboard');
         }
@@ -445,7 +471,6 @@
                      return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`;
                 }
                 
-                // Tạo tiêu đề động với ngày tháng
                 const formattedStartDate = formatDate(start);
                 const formattedEndDate = formatDate(end);
                 const dynamicTitle = `${title} Từ ngày ${formattedStartDate} đến ${formattedEndDate}`;
@@ -467,7 +492,7 @@
                     return { staff, counts, total: rowTotal };
                 });
 
-                const { key, direction } = dashboardSortState[tableType];
+                const { key, direction } = sortStates[tableType];
                 processedData.sort((a, b) => {
                     let valA, valB;
                     if (key === 'stt') { valA = a.staff.originalIndex; valB = b.staff.originalIndex; }
@@ -480,13 +505,11 @@
                     return direction === 'asc' ? compare : -compare;
                 });
 
-                const getSortClass = (k) => key === k ? `sorted-${direction}` : '';
-
+                const getSortClass = (k) => (key === k ? `sorted-${direction}` : '');
                 let headerHtml = `<tr>
                     <th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th>
                     <th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th>
                     <th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
-                // Thêm class 'car-type-header' cho cột xe
                 carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
                 headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
 
@@ -495,17 +518,12 @@
                 let grandTotal = 0;
                 
                 processedData.forEach((item, index) => {
-                    bodyHtml += `<tr>
-                        <td class="text-center">${index + 1}</td>
-                        <td class="font-medium">${item.staff.tên_nv}</td>
-                        <td>${item.staff.pkd || ''}</td>`;
-                    
+                    bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`;
                     carTypes.forEach(car => {
                         const count = item.counts[car] || 0;
                         bodyHtml += `<td class="text-center">${count > 0 ? count : ''}</td>`;
                         columnTotals[car] += count;
                     });
-                    
                     bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`;
                     grandTotal += item.total;
                 });
@@ -514,26 +532,18 @@
                 carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
                 footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
 
-                return `<div class="bg-white p-4 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3>
-                            <div class="overflow-x-auto table-container" style="max-height: 600px;">
-                                <table class="w-full text-sm dashboard-table">
-                                    <thead>${headerHtml}</thead>
-                                    <tbody class="bg-white">${bodyHtml}</tbody>
-                                    <tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot>
-                                </table>
-                            </div>
-                        </div>`;
+                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
             };
 
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
 
+        // THAY ĐỔI: Cập nhật hàm renderDonTonTab
         function renderDonTonTab() {
             const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ);
-            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'NGÀY KÝ', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
-            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'ngày_ký', 'ngày_tt1', 'tt1', 'ghi_chú'];
-            renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys);
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'tt1', 'ghi_chú'];
+            renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys, 'donton');
         }
 
         function renderKyTab() {
@@ -544,7 +554,7 @@
             });
             const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'GHI CHÚ'];
             const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'ghi_chú'];
-            renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys);
+            renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky');
         }
 
         function renderXuatTab() {
@@ -555,7 +565,7 @@
 
             const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ'];
             const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú'];
-            renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys);
+            renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys, 'xuat');
         }
 
         function renderCongNoCocTab() {
@@ -567,7 +577,7 @@
                 });
             const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ'];
             const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú'];
-            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys);
+            renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys, 'congno');
         }
 
         function renderCocTab() {
@@ -585,42 +595,73 @@
 
             const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ'];
             const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú'];
-            renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys);
+            renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys, 'coc');
         }
         function renderDaGiaoTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe.split('T')[0] >= start && hd.ngày_giao_xe.split('T')[0] <= end);
             const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG', 'GHI CHÚ'];
             const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung', 'ghi_chú'];
-            renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe`, data, headers, keys);
+            renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe`, data, headers, keys, 'dagiao');
+        }
+        
+        // THÊM MỚI: Hàm render tab Hoàn cọc
+        function renderHoanCocTab() {
+            const { start, end } = getDateRange();
+            const data = filteredData.filter(hd => hd.ngày_hoàn_cọc && hd.ngày_hoàn_cọc.split('T')[0] >= start && hd.ngày_hoàn_cọc.split('T')[0] <= end);
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY HOÀN CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_hoàn_cọc', 'tt1', 'ghi_chú'];
+            renderDataTable(document.getElementById('hoancoc-content'), `Danh sách hoàn cọc`, data, headers, keys, 'hoancoc');
         }
 
-        // === HÀM RENDER BẢNG CHUNG TỐI ƯU ===
-        function renderDataTable(container, title, data, headers, keys) {
+        // === HÀM RENDER BẢNG CHUNG TỐI ƯU (CÓ CHỨC NĂNG SORT) ===
+        function renderDataTable(container, title, data, headers, keys, tabKey) {
              if (!container) return;
              if (data.length === 0) {
                 container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (0)</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`;
                 return;
             }
-            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm">`;
-            tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map(h => `<th class="p-3">${h}</th>`).join('')}</tr></thead>`;
+
+            if (!sortStates[tabKey]) sortStates[tabKey] = { key: keys[0], direction: 'asc' };
+            const { key: sortKey, direction: sortDir } = sortStates[tabKey];
+            
+            data.sort((a, b) => {
+                let valA = a[sortKey];
+                let valB = b[sortKey];
+
+                if (sortKey === 'stt') return 0; // Keep original order for STT
+                if (typeof valA === 'string' && valA.includes('/')) { // Date compare
+                    const dateA = valA.split('/').reverse().join('-');
+                    const dateB = valB.split('/').reverse().join('-');
+                    return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+                }
+                
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return sortDir === 'asc' ? valA - valB : valB - valA;
+                }
+                
+                const compare = String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true });
+                return sortDir === 'asc' ? compare : -compare;
+            });
+            
+            const getSortClass = (k) => (sortKey === k ? `sorted-${sortDir}` : '');
+            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
+            tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => `<th class="p-3 sortable ${getSortClass(keys[i])}" data-sort-key="${keys[i]}" data-table-type="${tabKey}">${h}</th>`).join('')}</tr></thead>`;
+            
             tableHtml += `<tbody>${data.map((row, index) => {
                 const cells = keys.map(key => {
                     let cellValue;
                     if (key === 'stt') { cellValue = index + 1; } 
                     else {
-                        const originalKey = Object.keys(HEADER_ALIASES).find(k => HEADER_ALIASES[k] === key.toUpperCase()) || key;
-                        cellValue = row[originalKey];
-                        if (originalKey.includes('ngày') || HEADER_ALIASES[originalKey]?.includes('NGÀY')) {
-                            cellValue = formatDate(cellValue);
-                        } else if (['tt1', 'giá_chốt', 'công_nợ'].includes(originalKey)) {
-                            cellValue = formatCurrency(cellValue);
-                        }
+                        cellValue = row[key];
+                        if (key.includes('ngày')) cellValue = formatDate(cellValue);
+                        else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) cellValue = formatCurrency(cellValue);
                     }
                     return `<td class="p-3">${cellValue ?? ''}</td>`;
                 }).join('');
                 return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`;
             }).join('')}</tbody>`;
+
             tableHtml += `</table></div></div>`;
             container.innerHTML = tableHtml;
         }
