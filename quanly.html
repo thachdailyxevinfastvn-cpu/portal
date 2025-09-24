@@ -33,7 +33,7 @@
 
         .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; }
         .dashboard-table th, .dashboard-table td,
-        .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; word-wrap: break-word; }
+        .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; }
         .sortable { cursor: pointer; position: relative; }
         .sortable:hover { background-color: #eef2ff; }
         .sortable.sorted-asc, .sortable.sorted-desc {
@@ -71,6 +71,14 @@
             height: 100%;
             cursor: col-resize;
             z-index: 20;
+        }
+        
+        /* === CSS CHO TÍNH NĂNG XEM NHANH (TOOLTIP) === */
+        .truncate-cell {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 0; /* Bắt buộc để text-overflow hoạt động trên table cell */
         }
     </style>
 </head>
@@ -355,9 +363,9 @@
                 const { key, direction } = sortStates[tableType];
                 processedData.sort((a, b) => { let valA, valB; if (key === 'stt') { valA = a.staff.originalIndex; valB = b.staff.originalIndex; } else if (key === 'tên_nv') { valA = a.staff.tên_nv; valB = b.staff.tên_nv; } else if (key === 'team') { valA = a.staff.pkd || ''; valB = b.staff.pkd || ''; } else if (key === 'total') { valA = a.total; valB = b.total; } else { valA = a.counts[key] || 0; valB = b.counts[key] || 0; } const compare = (typeof valA === 'string') ? valA.localeCompare(valB, 'vi') : (valA > valB ? 1 : (valA < valB ? -1 : 0)); return direction === 'asc' ? compare : -compare; });
                 const getSortClass = (k) => (key === k ? `sorted-${direction}` : '');
-                let headerHtml = `<tr><th class="resizable sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT<div class="resize-handle"></div></th><th class="resizable sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV<div class="resize-handle"></div></th><th class="resizable sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM<div class="resize-handle"></div></th>`;
-                carTypes.forEach(car => headerHtml += `<th class="resizable sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}<div class="resize-handle"></div></th>`);
-                headerHtml += `<th class="resizable sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG<div class="resize-handle"></div></th></tr>`;
+                let headerHtml = `<tr><th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th><th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th><th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
+                carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
+                headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
                 let bodyHtml = '';
                 const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
                 let grandTotal = 0;
@@ -365,10 +373,10 @@
                 let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
                 carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
                 footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
-                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
+                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table" style="table-layout: fixed; width: 100%;"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
-            makeTablesResizable(container);
+            // Bỏ resize cho bảng dashboard
         }
         function renderDonTonTab() { const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys, 'donton'); }
         function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky'); }
@@ -396,20 +404,26 @@
             const getSortClass = (k) => (sortKey === k ? `sorted-${sortDir}` : '');
             let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => `<th class="resizable p-3 sortable ${getSortClass(keys[i])}" data-sort-key="${keys[i]}" data-table-type="${tabKey}">${h}<div class="resize-handle"></div></th>`).join('')}</tr></thead>`;
-            tableHtml += `<tbody>${data.map((row, index) => { const cells = keys.map(key => {
-                 let cellValue;
-                 if (key === 'stt') { cellValue = index + 1; } 
-                 else { 
-                    cellValue = row[key]; 
-                    if (key.includes('ngày')) cellValue = formatDate(cellValue); 
-                    else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) cellValue = formatCurrency(cellValue);
-                    else if (key === 'ghi_chú') cellValue = (cellValue || '').split('--------------------')[0].trim();
-                 } 
-                 return `<td class="p-3">${cellValue ?? ''}</td>`; 
-            }).join(''); return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`; }).join('')}</tbody>`;
+            
+            tableHtml += `<tbody>${data.map((row, index) => { 
+                const cells = keys.map(key => {
+                    let cellValue;
+                    if (key === 'stt') { cellValue = index + 1; } 
+                    else { 
+                        cellValue = row[key]; 
+                        if (key.includes('ngày')) cellValue = formatDate(cellValue); 
+                        else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) cellValue = formatCurrency(cellValue);
+                        else if (key === 'ghi_chú') cellValue = (cellValue || '').split('--------------------')[0].trim();
+                    } 
+                    return `<td class="p-3">${cellValue ?? ''}</td>`; 
+                }).join(''); 
+                return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`; 
+            }).join('')}</tbody>`;
+
             tableHtml += `</table></div></div>`;
             container.innerHTML = tableHtml;
             makeTablesResizable(container);
+            addTooltipsToTruncatedCells(container); // Thêm hàm này
         }
 
         // === HÀM MỚI CHO TÍNH NĂNG RESIZE CỘT ===
@@ -417,12 +431,10 @@
             const table = container.querySelector('table');
             if (!table) return;
 
-            // Step 1: Capture auto-calculated widths
             table.style.tableLayout = 'auto';
             const headers = Array.from(table.querySelectorAll('thead th'));
             const columnWidths = headers.map(th => th.offsetWidth);
 
-            // Step 2: Switch to fixed layout and apply captured widths
             table.style.tableLayout = 'fixed';
             headers.forEach((th, i) => {
                 th.style.width = `${columnWidths[i]}px`;
@@ -433,6 +445,7 @@
                 let th, startX, startWidth;
 
                 const onMouseDown = (e) => {
+                    e.stopPropagation(); // Ngăn sự kiện click của sort
                     e.preventDefault();
                     th = handle.parentElement;
                     startX = e.pageX;
@@ -455,7 +468,16 @@
                 handle.addEventListener('mousedown', onMouseDown);
             });
         }
+        
+        // === HÀM MỚI CHO TÍNH NĂNG XEM NHANH (TOOLTIP) ===
+        function addTooltipsToTruncatedCells(container) {
+            const cells = container.querySelectorAll('.truncate-cell');
+            cells.forEach(cell => {
+                if (cell.scrollWidth > cell.clientWidth) {
+                    cell.title = cell.textContent;
+                }
+            });
+        }
     </script>
 </body>
 </html>
-}
