@@ -8,125 +8,93 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .tab-active { 
-            border-color: #4f46e5; 
-            color: #4f46e5; 
-            background-color: #eef2ff;
-            font-weight: 600; 
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
+        .tab-active { border-color: #1d4ed8; color: #1d4ed8; background-color: white; font-weight: 600; }
         .table-container::-webkit-scrollbar { width: 8px; height: 8px; }
         .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
-        .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; border-radius: 4px; }
-        .clickable-row:hover { background-color: #eef2ff; cursor: pointer; }
+        .table-container::-webkit-scrollbar-thumb { background: #a8b3c4; }
+        .clickable-row:hover { background-color: #eff6ff; cursor: pointer; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         body.modal-is-open { overflow: hidden; }
         details > summary { list-style: none; cursor: pointer; }
         details > summary::-webkit-details-marker { display: none; }
         .button-loading { cursor: not-allowed; opacity: 0.8; }
-        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { margin-bottom: 0.25rem; font-weight: 500; color: #374151; font-size: 0.8rem; }
+        .form-group label { margin-bottom: 0.25rem; font-weight: 500; color: #374151; }
         .data-view, .data-input {
             padding: 0.5rem 0.75rem;
-            border-radius: 0.5rem;
+            border-radius: 0.375rem;
             border: 1px solid #d1d5db;
-            transition: all 0.2s ease-in-out;
         }
-        .data-input:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-        .data-view { min-height: 42px; background-color: #f9fafb; word-wrap: break-word; display: flex; align-items: center; }
+        .data-view { min-height: 38px; background-color: #f9fafb; word-wrap: break-word; }
         .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
-        .dashboard-table, .data-table { border-collapse: separate; border-spacing: 0; font-size: 0.875rem; width: 100%; }
+        .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; }
         .dashboard-table th, .dashboard-table td,
-        .data-table th, .data-table td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
-        .dashboard-table th, .data-table th {
-            font-weight: 600;
-            background-color: #f9fafb;
-            text-align: left;
-        }
-        .data-table tbody tr:last-child td { border-bottom: none; }
-
+        .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; }
         .sortable { cursor: pointer; position: relative; }
         .sortable:hover { background-color: #eef2ff; }
         .sortable.sorted-asc, .sortable.sorted-desc {
-             color: #4f46e5;
-             background-color: #eef2ff;
+             color: #1d4ed8;
+             font-weight: 600;
         }
         .dashboard-table thead th, .data-table thead th {
             position: sticky;
             top: 0;
+            background-color: #e5e7eb;
             z-index: 10;
         }
-        
-        /* ĐIỀU CHỈNH CỘT GHI CHÚ */
-        .note-column {
-            max-width: 350px;
-            min-width: 200px;
-            white-space: normal;
-            word-break: break-word;
-        }
+        .dashboard-table .car-type-header { white-space: normal; word-break: break-word; vertical-align: middle; text-align: center; }
 
         #modal-content {
             display: flex;
             flex-direction: column;
             max-height: 90vh;
-            border-radius: 0.75rem;
         }
         #modal-form-container {
             flex-grow: 1;
             overflow-y: auto;
         }
-        .details-group summary {
-            transition: background-color 0.2s ease-in-out;
-        }
-        .details-group[open] > summary {
-            background-color: #eef2ff;
-            color: #4338ca;
-        }
     </style>
 </head>
-<body class="antialiased text-gray-900 bg-gray-50">
+<body class="antialiased text-gray-800">
 
     <div class="flex flex-col min-h-screen">
+        <header class="bg-white shadow-md sticky top-0 z-50"></header>
         <main class="flex-1 container mx-auto p-4 sm:p-6 lg:p-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-800 tracking-tight">Dashboard Quản Lý</h1>
-                <p class="text-gray-500 mt-1 sm:mt-0">Dữ liệu kinh doanh tổng hợp</p>
-            </div>
-
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Quản Lý Kinh Doanh</h1>
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
-                <svg class="animate-spin h-10 w-10 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                <p class="mt-4 text-lg font-medium text-gray-600">Đang tải dữ liệu, vui lòng chờ...</p>
+                <div class="loader" style="border: 4px solid #e5e7eb; border-left-color: #1d4ed8; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;"></div>
+                <p class="mt-4 text-lg">Đang tải dữ liệu...</p>
+                <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
             </div>
             <div id="content-wrapper" class="hidden">
-                 <div class="mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
-                        <div><label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label><input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></div>
-                        <div><label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label><input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></div>
-                        <button id="filter-btn" class="w-full bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"><i class="fas fa-filter"></i><span>Xem</span></button>
+                        <div><label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label><input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm"></div>
+                        <div><label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label><input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm"></div>
+                        <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem</button>
                     </div>
-                     <div class="items-end flex"><div class="w-full"><label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm thông minh</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div><input type="text" id="search-input" placeholder="Tìm tên khách hàng, TVBH, loại xe..." class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"></div></div></div>
+                     <div class="items-end flex"><div class="w-full"><label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm thông minh</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div><input type="text" id="search-input" placeholder="Nhập thông tin cần tìm..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg"></div></div></div>
                 </div>
-                <div class="mb-6"><div class="border-b border-gray-200"><nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto"></nav></div></div>
-                <div id="tab-contents-wrapper" class="bg-white rounded-xl shadow-sm border border-gray-200"><div id="dashboard-content" class="tab-content space-y-10 p-4 sm:p-6"></div><div id="donton-content" class="tab-content"></div><div id="ky-content" class="tab-content"></div><div id="xuat-content" class="tab-content"></div><div id="congno-content" class="tab-content"></div><div id="coc-content" class="tab-content"></div><div id="dagiao-content" class="tab-content"></div><div id="hoancoc-content" class="tab-content"></div></div>
+                <div class="mb-6"><div class="border-b border-gray-200"><nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto"></nav></div></div>
+                <div id="tab-contents-wrapper"><div id="dashboard-content" class="tab-content space-y-8"></div><div id="donton-content" class="tab-content"></div><div id="ky-content" class="tab-content"></div><div id="xuat-content" class="tab-content"></div><div id="congno-content" class="tab-content"></div><div id="coc-content" class="tab-content"></div><div id="dagiao-content" class="tab-content"></div><div id="hoancoc-content" class="tab-content"></div></div>
             </div>
         </main>
     </div>
     
-    <div id="detail-modal" class="fixed inset-0 z-50 hidden bg-gray-900 bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-6xl transform scale-95 transition-transform duration-300" id="modal-content">
-            <div class="px-6 py-4 border-b flex justify-between items-center flex-shrink-0"><h3 class="text-xl font-semibold text-gray-800">Chi Tiết Hợp Đồng</h3><button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button></div>
+    <div id="detail-modal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="modal-overlay"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:mx-auto sm:w-full sm:max-w-6xl transform scale-95 relative transition-transform duration-300" id="modal-content">
+            <div class="px-6 py-4 border-b flex justify-between items-center flex-shrink-0"><h3 class="text-lg font-medium text-gray-900">Chi Tiết Hợp Đồng</h3><button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button></div>
             <div id="modal-form-container" class="p-6 space-y-4 text-sm">
                 <input type="hidden" id="edit-row-index">
-                <details class="details-group bg-gray-50 rounded-lg" open><summary class="p-4 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div><div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg" open><summary class="p-4 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div><div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div><div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div><div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div><div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div><div class="form-group"><label>Ngày hoàn cọc</label><span class="data-view" data-view-field="ngày_hoàn_cọc"></span><input type="date" class="data-input" data-field="ngày_hoàn_cọc"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Nhân viên phụ trách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên TVBH</label><span class="data-view" data-view-field="tvbh"></span><input type="text" class="data-input" data-field="tvbh"></div><div class="form-group"><label>Team</label><span class="data-view" data-view-field="team"></span><input type="text" class="data-input" data-field="team"></div></div></details>
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Khách hàng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Tên KH</label><span class="data-view" data-view-field="tên_kh"></span><input type="text" class="data-input" data-field="tên_kh"></div><div class="form-group"><label>SĐT</label><span class="data-view" data-view-field="sđt"></span><input type="text" class="data-input" data-field="sđt"></div><div class="form-group"><label>Email</label><span class="data-view" data-view-field="email"></span><input type="email" class="data-input" data-field="email"></div><div class="form-group" style="grid-column: 1 / -1;"><label>Địa chỉ</label><span class="data-view" data-view-field="địa_chỉ"></span><input type="text" class="data-input" data-field="địa_chỉ"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Hợp đồng <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Số HĐ</label><span class="data-view" data-view-field="shđ"></span><input type="text" class="data-input" data-field="shđ"></div><div class="form-group"><label>Ngày ký</label><span class="data-view" data-view-field="ngày_ký"></span><input type="date" class="data-input" data-field="ngày_ký"></div><div class="form-group"><label>Ngày hoàn cọc</label><span class="data-view" data-view-field="ngày_hoàn_cọc"></span><input type="date" class="data-input" data-field="ngày_hoàn_cọc"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thanh toán <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
                     <div class="form-group"><label>Hình thức TT</label><span class="data-view" data-view-field="hình_thức_thanh_toán"></span><input type="text" class="data-input" data-field="hình_thức_thanh_toán"></div>
                     <div class="form-group"><label>Ngân hàng</label><span class="data-view" data-view-field="ngân_hàng"></span><input type="text" class="data-input" data-field="ngân_hàng"></div>
                     <div class="form-group"><label>TT1 (Cọc)</label><span class="data-view" data-view-field="tt1"></span><input type="text" class="data-input currency-input" data-field="tt1"></div>
@@ -139,7 +107,7 @@
                     <div class="form-group"><label>Ngày GN</label><span class="data-view" data-view-field="ngày_gn"></span><input type="date" class="data-input" data-field="ngày_gn"></div>
                     <div class="form-group" style="grid-column: 1 / -1;"><label>Đã thanh toán</label><span class="data-view calculated-da-thanh-toan font-bold text-blue-700"></span></div>
                 </div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Công nợ <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
                     <div class="form-group"><label>Giá công bố</label><span class="data-view" data-view-field="giá_công_bố"></span><input type="text" class="data-input currency-input" data-field="giá_công_bố"></div>
                     <div class="form-group"><label>Giá XHĐ</label><span class="data-view" data-view-field="giá_xhđ"></span><input type="text" class="data-input currency-input" data-field="giá_xhđ"></div>
                     <div class="form-group"><label>Ra lộc</label><span class="data-view" data-view-field="ra_lộc"></span><input type="text" class="data-input currency-input" data-field="ra_lộc"></div>
@@ -148,15 +116,15 @@
                     <div class="form-group"><label>Đã thanh toán</label><span class="data-view calculated-da-thanh-toan font-bold text-blue-700"></span></div>
                     <div class="form-group"><label>Công nợ</label><span class="data-view font-bold text-red-600" id="calculated-cong-no"></span></div>
                 </div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div><div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div><div class="form-group"><label>Mã ngoại thất</label><span class="data-view" data-view-field="mã_ngoại_thất"></span><input type="text" class="data-input" data-field="mã_ngoại_thất"></div><div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input" data-field="ngoại_thất_tv"></div><div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div><div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div><div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div><div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div><div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div><div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div><div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div><div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div><div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div><div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div><div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg"><summary class="p-4 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
-                <details class="details-group bg-gray-50 rounded-lg" open><summary class="p-4 font-semibold flex justify-between items-center">Lịch sử Ghi chú <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t space-y-3"><div class="form-group edit-mode"><label for="modal-new-note">Thêm ghi chú mới</label><textarea id="modal-new-note" rows="3" class="w-full border-gray-300 rounded-lg data-input" placeholder="Nhập ghi chú mới..."></textarea></div><div class="form-group"><label>Lịch sử</label><div id="modal-notes-timeline" class="p-2 bg-white border rounded-lg max-h-60 overflow-y-auto space-y-2"></div></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div><div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div><div class="form-group"><label>Mã ngoại thất</label><span class="data-view" data-view-field="mã_ngoại_thất"></span><input type="text" class="data-input" data-field="mã_ngoại_thất"></div><div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input" data-field="ngoại_thất_tv"></div><div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div><div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div><div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div><div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div><div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div><div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div><div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div><div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div><div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div><div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div><div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
+                <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Lịch sử Ghi chú <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t space-y-3"><div class="form-group edit-mode"><label for="modal-new-note">Thêm ghi chú mới</label><textarea id="modal-new-note" rows="3" class="w-full border-gray-300 rounded-md data-input" placeholder="Nhập ghi chú mới..."></textarea></div><div class="form-group"><label>Lịch sử</label><div id="modal-notes-timeline" class="p-2 bg-white border rounded-md max-h-60 overflow-y-auto space-y-2"></div></div></div></details>
             </div>
-            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t flex-shrink-0"><button id="edit-btn" class="bg-gray-700 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors">Chỉnh sửa</button><button id="cancel-edit-btn" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-600 hidden transition-colors">Hủy bỏ</button><button id="submit-update-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-indigo-700 hidden transition-colors">Lưu thay đổi</button><button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">Đóng</button></div>
+            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t flex-shrink-0"><button id="edit-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Chỉnh sửa</button><button id="cancel-edit-btn" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-600 hidden">Hủy bỏ</button><button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 hidden">Lưu thay đổi</button><button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Đóng</button></div>
         </div>
     </div>
-    <div id="toast" class="fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-2xl opacity-0 transition-all duration-300 text-base font-semibold"></div>
+    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300"></div>
 
     <script src="config.js"></script>
     <script>
@@ -177,19 +145,19 @@
 
         function formatDate(isoString) { if (!isoString) return ''; try { const date = new Date(isoString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; const correctedDate = new Date(date.getTime() + userTimezoneOffset); if (isNaN(correctedDate.getTime())) return isoString; return correctedDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return isoString; } }
         function formatCurrency(value) { const number = Number(value); if (isNaN(number) || value === null || value === '') return ''; return new Intl.NumberFormat('vi-VN').format(number); }
-        function showToast(message, isSuccess = true) { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `fixed bottom-5 right-5 text-white py-3 px-5 rounded-lg shadow-2xl transition-all duration-300 text-base font-semibold ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`; toast.classList.remove('opacity-0'); toast.classList.add('translate-y-4'); setTimeout(() => { toast.classList.remove('translate-y-4'); }, 100); setTimeout(() => { toast.classList.add('opacity-0'); }, 3000); };
+        function showToast(message, isSuccess = true) { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`; toast.classList.remove('opacity-0'); setTimeout(() => { toast.classList.add('opacity-0'); }, 3000); };
 
-        function openModal() { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); setTimeout(() => modalContent.classList.remove('scale-95'), 10); }
-        function closeModal() { modalContent.classList.add('scale-95'); setTimeout(() => { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); }, 200); }
+        function openModal() { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); }
+        function closeModal() { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); }
         
         function setModalMode(mode) {
             const isEditMode = mode === 'edit';
             modalContent.classList.toggle('view-mode', !isEditMode);
             modalContent.classList.toggle('edit-mode', isEditMode);
-            document.getElementById('edit-btn').style.display = isEditMode ? 'none' : 'inline-flex';
-            document.getElementById('close-modal-footer-btn').style.display = isEditMode ? 'none' : 'inline-flex';
-            document.getElementById('cancel-edit-btn').style.display = isEditMode ? 'inline-flex' : 'none';
-            document.getElementById('submit-update-btn').style.display = isEditMode ? 'inline-flex' : 'none';
+            document.getElementById('edit-btn').style.display = isEditMode ? 'none' : 'inline-block';
+            document.getElementById('close-modal-footer-btn').style.display = isEditMode ? 'none' : 'inline-block';
+            document.getElementById('cancel-edit-btn').style.display = isEditMode ? 'inline-block' : 'none';
+            document.getElementById('submit-update-btn').style.display = isEditMode ? 'inline-block' : 'none';
         }
         
         function updateCalculatedFields() {
@@ -199,8 +167,10 @@
             const tt3 = getNumericValue('tt3');
             const giaiNgan = getNumericValue('giải_ngân');
             const giaChot = getNumericValue('giá_chốt');
+            
             const daThanhToan = tt1 + tt2 + tt3 + giaiNgan;
             const congNo = giaChot - daThanhToan;
+            
             document.querySelectorAll('.calculated-da-thanh-toan').forEach(el => el.textContent = formatCurrency(daThanhToan));
             document.getElementById('calculated-cong-no').textContent = formatCurrency(congNo);
         }
@@ -209,29 +179,40 @@
             const rowData = allData.hopDong.find(row => row.rowIndex === rowIndex);
             if (!rowData) { showToast('Không tìm thấy dữ liệu chi tiết.', false); return; }
             document.getElementById('edit-row-index').value = rowIndex;
+            
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                 const fieldName = input.dataset.field;
                 const viewElement = document.querySelector(`[data-view-field="${fieldName}"]`);
                 let value = rowData[fieldName] || '';
                 let displayValue = value;
-                if (input.classList.contains('currency-input')) { displayValue = formatCurrency(value); input.value = displayValue; } 
-                else if (input.type === 'date') { if (value) value = new Date(value).toISOString().split('T')[0]; displayValue = formatDate(value); input.value = value; } 
-                else { input.value = value; }
+
+                if (input.classList.contains('currency-input')) {
+                    displayValue = formatCurrency(value);
+                    input.value = displayValue;
+                } else if (input.type === 'date') { 
+                    if (value) value = new Date(value).toISOString().split('T')[0]; 
+                    displayValue = formatDate(value);
+                    input.value = value;
+                } else {
+                    input.value = value;
+                }
                 if (viewElement) viewElement.textContent = displayValue;
             });
+            
             const notesTimeline = document.getElementById('modal-notes-timeline');
             notesTimeline.innerHTML = '';
             const fullNotes = rowData.ghi_chú || '';
             if (fullNotes.trim()) {
                 fullNotes.split('--------------------').filter(n => n.trim()).forEach(noteText => {
                     const noteElement = document.createElement('div');
-                    noteElement.className = 'p-3 bg-white rounded-md border text-gray-700 text-sm';
+                    noteElement.className = 'p-2 border-b last:border-b-0';
                     noteElement.style.whiteSpace = 'pre-wrap';
                     noteElement.textContent = noteText.trim();
                     notesTimeline.appendChild(noteElement);
                 });
-            } else { notesTimeline.innerHTML = '<p class="text-gray-500 italic">Chưa có ghi chú.</p>'; }
+            } else { notesTimeline.textContent = 'Chưa có ghi chú.'; }
             document.getElementById('modal-new-note').value = '';
+            
             updateCalculatedFields();
             setModalMode('view');
             openModal();
@@ -241,13 +222,18 @@
             const submitBtn = document.getElementById('submit-update-btn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
+            
             const rowIndex = parseInt(document.getElementById('edit-row-index').value);
             const payloadData = { rowIndex: rowIndex, updatedData: {} };
+
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                  let value = input.value;
-                 if (input.classList.contains('currency-input')) { value = value.replace(/\./g, ''); }
+                 if (input.classList.contains('currency-input')) {
+                    value = value.replace(/\./g, '');
+                 }
                  payloadData.updatedData[input.dataset.field] = value;
             });
+            
             const newNote = document.getElementById('modal-new-note').value.trim();
             if (newNote) {
                 const originalRow = allData.hopDong.find(row => row.rowIndex === rowIndex);
@@ -255,10 +241,12 @@
                 const timestamp = new Date().toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                 payloadData.updatedData['ghi_chú'] = `[${timestamp}] ${newNote}\n--------------------\n${oldNotes}`;
             }
+
             try {
                 const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'updateManagementData', data: payloadData }) });
                 const result = await response.json();
                 if (result.status === 'ERROR') throw new Error(result.message);
+                
                 showToast('Cập nhật thành công!', true);
                 closeModal();
                 fetchData(); 
@@ -280,38 +268,59 @@
             document.getElementById('submit-update-btn').addEventListener('click', handleUpdateData);
             document.getElementById('edit-btn').addEventListener('click', () => { if (confirm('Bạn có chắc chắn muốn chỉnh sửa hợp đồng này không?')) { setModalMode('edit'); } });
             document.getElementById('cancel-edit-btn').addEventListener('click', () => { setModalMode('view'); const rowIndex = parseInt(document.getElementById('edit-row-index').value); openDetailModal(rowIndex); });
-            document.querySelectorAll('.currency-input').forEach(input => { input.addEventListener('input', (e) => { let value = e.target.value.replace(/\D/g, ''); e.target.value = value ? formatCurrency(value) : ''; updateCalculatedFields(); }); });
+
+            const currencyInputs = document.querySelectorAll('.currency-input');
+            currencyInputs.forEach(input => {
+                input.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    e.target.value = value ? formatCurrency(value) : '';
+                    updateCalculatedFields();
+                });
+            });
+
             tabContentsWrapper.addEventListener('dblclick', (event) => { const row = event.target.closest('.clickable-row'); if (row) { const rowIndex = parseInt(row.dataset.rowIndex); if (rowIndex) openDetailModal(rowIndex); } });
             tabContentsWrapper.addEventListener('click', (event) => {
                 const sortableHeader = event.target.closest('.sortable');
                 if (sortableHeader) {
-                    const key = sortableHeader.dataset.sortKey; const tableType = sortableHeader.dataset.tableType; const currentSort = sortStates[tableType] || { key: 'stt', direction: 'asc' };
+                    const key = sortableHeader.dataset.sortKey;
+                    const tableType = sortableHeader.dataset.tableType;
+                    const currentSort = sortStates[tableType] || { key: 'stt', direction: 'asc' };
                     if (currentSort.key === key) { currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'; } else { currentSort.key = key; currentSort.direction = 'asc'; }
-                    sortStates[tableType] = currentSort; renderActiveTab();
+                    sortStates[tableType] = currentSort;
+                    renderActiveTab();
                 }
             });
         });
         
         function fetchData() {
-            loadingState.style.display = 'flex'; contentWrapper.classList.add('hidden');
+            loadingState.style.display = 'flex';
+            contentWrapper.classList.add('hidden');
             try {
                 window.handleDashboardResponse = (result) => { if (result.status === 'ERROR') { throw new Error(result.message); } allData = result.data; initializeApp(); };
-                const script = document.createElement('script'); script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse&v=${new Date().getTime()}`;
+                const script = document.createElement('script');
+                script.src = `${QUAN_LY_APPS_SCRIPT_URL}?action=getDashboardData&callback=handleDashboardResponse&v=${new Date().getTime()}`;
                 script.onerror = () => { alert('Không thể tải dữ liệu từ Google Apps Script.'); };
-                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; }; document.body.appendChild(script);
+                script.onload = () => { document.body.removeChild(script); delete window.handleDashboardResponse; };
+                document.body.appendChild(script);
             } catch (error) { console.error(error); alert(`Đã xảy ra lỗi: ${error.message}`); }
         }
 
         function initializeApp() {
-            loadingState.style.display = 'none'; contentWrapper.classList.remove('hidden');
-            const today = new Date(); const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            loadingState.style.display = 'none';
+            contentWrapper.classList.remove('hidden');
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             const formatDateToYyyyMmDd = (date) => `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-            startDateInput.value = formatDateToYyyyMmDd(firstDayOfMonth); endDateInput.value = formatDateToYyyyMmDd(lastDayOfMonth);
-            sortStates['ky'] = { key: 'stt', direction: 'asc' }; sortStates['xuat'] = { key: 'stt', direction: 'asc' };
-            renderTabs(); setActiveTab('dashboard');
+            startDateInput.value = formatDateToYyyyMmDd(firstDayOfMonth);
+            endDateInput.value = formatDateToYyyyMmDd(lastDayOfMonth);
+            sortStates['ky'] = { key: 'stt', direction: 'asc' };
+            sortStates['xuat'] = { key: 'stt', direction: 'asc' };
+            renderTabs();
+            setActiveTab('dashboard');
         }
 
-        function renderTabs() { const tabsContainer = document.getElementById('tabs-container'); tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `<button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-indigo-600 transition-colors">${tabConfig[key].name}</button>`).join(''); tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab))); }
+        function renderTabs() { const tabsContainer = document.getElementById('tabs-container'); tabsContainer.innerHTML = Object.keys(tabConfig).map(key => `<button data-tab="${key}" class="tab-button whitespace-nowrap py-3 px-4 border-b-4 border-transparent font-medium text-sm text-gray-500 hover:text-blue-700">${tabConfig[key].name}</button>`).join(''); tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab))); }
         function setActiveTab(tabKey) { activeTab = tabKey; searchInput.value = ''; document.querySelectorAll('.tab-button').forEach(btn => btn.classList.toggle('tab-active', btn.dataset.tab === tabKey)); document.querySelectorAll('.tab-content').forEach(content => content.classList.toggle('active', content.id === `${tabKey}-content`)); renderActiveTab(); }
         function renderActiveTab() { applySearchFilter(); const renderFunction = tabConfig[activeTab].renderFunc; if (renderFunction) renderFunction(); }
         function applySearchFilter() { const searchTerm = searchInput.value.toLowerCase().trim(); filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))); }
@@ -325,7 +334,7 @@
                 const validStaff = allData.nhanSu.filter(nv => (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc').map((staff, index) => ({...staff, originalIndex: index}));
                 const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort((a, b) => { const aIsVF = a.toUpperCase().startsWith('VF'); const bIsVF = b.toUpperCase().startsWith('VF'); if (aIsVF && !bIsVF) return -1; if (!aIsVF && bIsVF) return 1; return a.localeCompare(b, undefined, {numeric: true}); });
                 if (validStaff.length === 0 || carTypes.length === 0) { return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`; }
-                const dynamicTitle = `${title} (Từ ${formatDate(start)} - ${formatDate(end)})`;
+                const dynamicTitle = `${title} Từ ngày ${formatDate(start)} đến ${formatDate(end)}`;
                 const relevantContracts = filteredData.filter(hd => { const dateValue = hd[dateFieldKey]; return dateValue && dateValue.split('T')[0] >= start && dateValue.split('T')[0] <= end; });
                 let processedData = validStaff.map(staff => { const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv); let rowTotal = 0; const counts = {}; carTypes.forEach(car => { const count = staffContracts.filter(hd => hd.loại_xe === car).length; counts[car] = count; rowTotal += count; }); return { staff, counts, total: rowTotal }; });
                 const { key, direction } = sortStates[tableType];
@@ -334,10 +343,14 @@
                 let headerHtml = `<tr><th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th><th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th><th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
                 carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
                 headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
-                let bodyHtml = ''; const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {}); let grandTotal = 0;
-                processedData.forEach((item, index) => { bodyHtml += `<tr class="clickable-row"><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; carTypes.forEach(car => { const count = item.counts[car] || 0; bodyHtml += `<td class="text-center">${count > 0 ? count : ''}</td>`; columnTotals[car] += count; }); bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; grandTotal += item.total; });
-                let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`; carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`); footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
-                return `<div><h3 class="text-2xl font-semibold mb-4 text-gray-800">${dynamicTitle}</h3><div class="overflow-x-auto table-container rounded-lg border"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-indigo-50 text-indigo-800 font-bold">${footerHtml}</tfoot></table></div></div>`;
+                let bodyHtml = '';
+                const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
+                let grandTotal = 0;
+                processedData.forEach((item, index) => { bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; carTypes.forEach(car => { const count = item.counts[car] || 0; bodyHtml += `<td class="text-center">${count > 0 ? count : ''}</td>`; columnTotals[car] += count; }); bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; grandTotal += item.total; });
+                let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
+                carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
+                footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
+                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
@@ -351,31 +364,37 @@
 
         function renderDataTable(container, title, data, headers, keys, tabKey) {
              if (!container) return;
-             const { start, end } = getDateRange();
-             const dynamicTitle = `${title} (Từ ${formatDate(start)} - ${formatDate(end)})`;
-             if (data.length === 0) { container.innerHTML = `<h3 class="text-xl font-semibold p-6 border-b text-gray-800">${dynamicTitle} (0)</h3><div class="text-center p-12 text-gray-500">Không có dữ liệu phù hợp.</div>`; return; }
+             if (data.length === 0) { container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (0)</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`; return; }
             if (!sortStates[tabKey]) sortStates[tabKey] = { key: keys[0], direction: 'asc' };
             const { key: sortKey, direction: sortDir } = sortStates[tabKey];
             
-            data.sort((a, b) => { let valA = a[sortKey]; let valB = b[sortKey]; if (sortKey === 'stt') return 0; if (typeof valA === 'string' && valA.includes('/')) { const dateA = valA.split('/').reverse().join('-'); const dateB = valB.split('/').reverse().join('-'); return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA); } if (typeof valA === 'number' && typeof valB === 'number') { return sortDir === 'asc' ? valA - valB : valB - valA; } const compare = String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true }); return sortDir === 'asc' ? compare : -compare; });
+            data.sort((a, b) => {
+                let valA = a[sortKey]; let valB = b[sortKey];
+                if (sortKey === 'stt') return 0;
+                if (typeof valA === 'string' && valA.includes('/')) { const dateA = valA.split('/').reverse().join('-'); const dateB = valB.split('/').reverse().join('-'); return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA); }
+                if (typeof valA === 'number' && typeof valB === 'number') { return sortDir === 'asc' ? valA - valB : valB - valA; }
+                const compare = String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true });
+                return sortDir === 'asc' ? compare : -compare;
+            });
             
             const getSortClass = (k) => (sortKey === k ? `sorted-${sortDir}` : '');
-            let tableHtml = `<h3 class="text-xl font-semibold p-6 border-b text-gray-800">${dynamicTitle} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
-            tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => {
-                let headerClass = `p-3 sortable ${getSortClass(keys[i])}`;
-                if (keys[i] === 'ghi_chú') headerClass += ' note-column';
-                return `<th class="${headerClass}" data-sort-key="${keys[i]}" data-table-type="${tabKey}">${h}</th>`;
-            }).join('')}</tr></thead>`;
-            tableHtml += `<tbody class="bg-white">${data.map((row, index) => { const cells = keys.map(key => {
-                 let cellClass = 'p-3'; if (key === 'ghi_chú') cellClass += ' note-column';
+            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
+            tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => `<th class="p-3 sortable ${getSortClass(keys[i])}" data-sort-key="${keys[i]}" data-table-type="${tabKey}">${h}</th>`).join('')}</tr></thead>`;
+            tableHtml += `<tbody>${data.map((row, index) => { const cells = keys.map(key => {
                  let cellValue;
                  if (key === 'stt') { cellValue = index + 1; } 
-                 else { cellValue = row[key]; if (key.includes('ngày')) cellValue = formatDate(cellValue); else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) cellValue = formatCurrency(cellValue); else if (key === 'ghi_chú') cellValue = (cellValue || '').split('--------------------')[0].trim(); } 
-                 return `<td class="${cellClass}">${cellValue ?? ''}</td>`; 
+                 else { 
+                    cellValue = row[key]; 
+                    if (key.includes('ngày')) cellValue = formatDate(cellValue); 
+                    else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) cellValue = formatCurrency(cellValue);
+                    else if (key === 'ghi_chú') cellValue = (cellValue || '').split('--------------------')[0].trim();
+                 } 
+                 return `<td class="p-3">${cellValue ?? ''}</td>`; 
             }).join(''); return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`; }).join('')}</tbody>`;
-            tableHtml += `</table></div>`;
+            tableHtml += `</table></div></div>`;
             container.innerHTML = tableHtml;
         }
     </script>
 </body>
 </html>
+}
