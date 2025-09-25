@@ -48,12 +48,12 @@
         }
         .dashboard-table .car-type-header { white-space: normal; word-break: break-word; vertical-align: middle; text-align: center; }
 
-        #modal-content {
+        #modal-content, #add-modal-content { /* [CẬP NHẬT] */
             display: flex;
             flex-direction: column;
             max-height: 90vh;
         }
-        #modal-form-container {
+        #modal-form-container, #add-modal-form-container { /* [CẬP NHẬT] */
             flex-grow: 1;
             overflow-y: auto;
         }
@@ -79,13 +79,18 @@
                 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
             </div>
             <div id="content-wrapper" class="hidden">
-                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                 <div class="mb-6 p-4 bg-white rounded-lg shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"> <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                         <div><label for="start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label><input type="date" id="start-date" class="w-full border-gray-300 rounded-lg shadow-sm"></div>
                         <div><label for="end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label><input type="date" id="end-date" class="w-full border-gray-300 rounded-lg shadow-sm"></div>
                         <button id="filter-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem</button>
                     </div>
                      <div class="items-end flex"><div class="w-full"><label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm thông minh</label><div class="relative"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i class="fas fa-search text-gray-400"></i></div><input type="text" id="search-input" placeholder="Nhập thông tin cần tìm..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg"></div></div></div>
+                     <div class="items-end flex">
+                        <button id="open-add-modal-btn" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Nhập khách hàng</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-6"><div class="border-b border-gray-200"><nav id="tabs-container" class="-mb-px flex space-x-2 sm:space-x-4 overflow-x-auto"></nav></div></div>
                 <div id="tab-contents-wrapper"><div id="dashboard-content" class="tab-content space-y-8"></div><div id="donton-content" class="tab-content"></div><div id="ky-content" class="tab-content"></div><div id="xuat-content" class="tab-content"></div><div id="congno-content" class="tab-content"></div><div id="coc-content" class="tab-content"></div><div id="dagiao-content" class="tab-content"></div><div id="hoancoc-content" class="tab-content"></div></div>
@@ -93,6 +98,45 @@
         </main>
     </div>
     
+    <div id="add-modal" class="fixed inset-0 z-50 hidden">
+        <div class="fixed inset-0 bg-black bg-opacity-50" id="add-modal-overlay"></div>
+        <div class="bg-white rounded-lg shadow-xl m-4 sm:mx-auto sm:w-full sm:max-w-4xl transform scale-95 relative transition-transform duration-300" id="add-modal-content">
+            <div class="px-6 py-4 border-b flex justify-between items-center flex-shrink-0">
+                <h3 class="text-lg font-medium text-gray-900">Nhập Hợp Đồng Khách Hàng Mới</h3>
+                <button id="close-add-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+            <div id="add-modal-form-container" class="p-6 space-y-4 text-sm">
+                <details class="bg-blue-50 border border-blue-200 rounded-lg" open>
+                    <summary class="p-3 font-semibold text-blue-800 flex justify-between items-center">Điền thông minh <i class="fas fa-wand-magic-sparkles"></i></summary>
+                    <div class="p-4 border-t space-y-2">
+                        <textarea id="smart-fill-input" rows="8" class="w-full border-gray-300 rounded-md" placeholder="Dán nội dung báo cáo ký hợp đồng vào đây..."></textarea>
+                        <button id="smart-fill-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700"><i class="fas fa-cogs"></i> Xử lý dữ liệu</button>
+                    </div>
+                </details>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="form-group"><label>TVBH</label><select id="add-tvbh" class="data-input"></select></div>
+                    <div class="form-group"><label>PKD</label><input type="text" id="add-pkd" class="data-input bg-gray-100" readonly></div>
+                    <div class="form-group"><label>Loại xe</label><select id="add-loai-xe" class="data-input"></select></div>
+                    <div class="form-group"><label>Tên KH</label><input type="text" id="add-ten-kh" class="data-input"></div>
+                    <div class="form-group col-span-2"><label>Địa chỉ</label><input type="text" id="add-dia-chi" class="data-input"></div>
+                    <div class="form-group"><label>SĐT</label><input type="text" id="add-sdt" class="data-input"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="add-email" class="data-input"></div>
+                    <div class="form-group"><label>CCCD</label><input type="text" id="add-cccd" class="data-input"></div>
+                    <div class="form-group"><label>Ngày cấp CCCD</label><input type="date" id="add-ngay-cap-cccd" class="data-input"></div>
+                    <div class="form-group"><label>TT1 (Cọc)</label><input type="text" id="add-tt1" class="data-input"></div>
+                    <div class="form-group"><label>Ngày TT1 (Ngày cọc)</label><input type="date" id="add-ngay-tt1" class="data-input"></div>
+                    <div class="form-group"><label>Giá XHĐ</label><input type="text" id="add-gia-xhd" class="data-input"></div>
+                    <div class="form-group"><label>Ra lộc</label><input type="text" id="add-ra-loc" class="data-input"></div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t flex-shrink-0">
+                <button id="close-add-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
+                <button id="submit-add-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Lưu Hợp Đồng</button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="detail-modal" class="fixed inset-0 z-50 hidden">
         <div class="fixed inset-0 bg-black bg-opacity-50" id="modal-overlay"></div>
         <div class="bg-white rounded-lg shadow-xl m-4 sm:mx-auto sm:w-full sm:max-w-6xl transform scale-95 relative transition-transform duration-300" id="modal-content">
@@ -150,13 +194,16 @@
         const detailModal = document.getElementById('detail-modal');
         const modalContent = document.getElementById('modal-content');
         const tabContentsWrapper = document.getElementById('tab-contents-wrapper');
+        
+        // [THÊM MỚI] Khai báo biến cho modal mới
+        const addModal = document.getElementById('add-modal');
 
-        function formatDate(isoString) { if (!isoString) return ''; try { const date = new Date(isoString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; const correctedDate = new Date(date.getTime() + userTimezoneOffset); if (isNaN(correctedDate.getTime())) return isoString; return correctedDate.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return isoString; } }
+        function formatDate(isoString) { if (!isoString) return ''; try { const date = new Date(isoString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; const correctedDate = new Date(date.getTime() + userTimezoneOffset); if (isNaN(correctedDate.getTime())) return isoString; return correctedDate.toLocaleDateDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return isoString; } }
         function formatCurrency(value) { const number = Number(value); if (isNaN(number) || value === null || value === '') return ''; return new Intl.NumberFormat('vi-VN').format(number); }
         function showToast(message, isSuccess = true) { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`; toast.classList.remove('opacity-0'); setTimeout(() => { toast.classList.add('opacity-0'); }, 3000); };
 
-        function openModal() { detailModal.classList.remove('hidden'); document.body.classList.add('modal-is-open'); }
-        function closeModal() { detailModal.classList.add('hidden'); document.body.classList.remove('modal-is-open'); }
+        function openModal(modalEl) { modalEl.classList.remove('hidden'); document.body.classList.add('modal-is-open'); } // [CẬP NHẬT]
+        function closeModal(modalEl) { modalEl.classList.add('hidden'); document.body.classList.remove('modal-is-open'); } // [CẬP NHẬT]
         
         function setModalMode(mode) {
             const isEditMode = mode === 'edit';
@@ -223,8 +270,158 @@
             
             updateCalculatedFields();
             setModalMode('view');
-            openModal();
+            openModal(detailModal); // [CẬP NHẬT]
         }
+        
+        // [THÊM MỚI] Toàn bộ logic cho modal Nhập Khách Hàng
+        function populateAddModalDropdowns() {
+            const tvbhSelect = document.getElementById('add-tvbh');
+            const loaiXeSelect = document.getElementById('add-loai-xe');
+            
+            tvbhSelect.innerHTML = '<option value="">-- Chọn TVBH --</option>';
+            const tvbhList = allData.nhanSu.filter(nv => nv.chức_vụ === 'TVBH' && nv.trạng_thái === 'Đang làm việc');
+            tvbhList.forEach(nv => {
+                const option = document.createElement('option');
+                option.value = nv.tên_nv;
+                option.textContent = nv.tên_nv;
+                option.dataset.pkd = nv.pkd || '';
+                tvbhSelect.appendChild(option);
+            });
+
+            loaiXeSelect.innerHTML = '<option value="">-- Chọn Loại Xe --</option>';
+            const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))];
+            carTypes.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car;
+                option.textContent = car;
+                loaiXeSelect.appendChild(option);
+            });
+        }
+        
+        function handleSmartFill() {
+            const text = document.getElementById('smart-fill-input').value;
+            if (!text.trim()) {
+                showToast('Vui lòng nhập nội dung để xử lý.', false);
+                return;
+            }
+
+            const extractValue = (regex) => {
+                const match = text.match(regex);
+                return match && match[1] ? match[1].trim() : '';
+            };
+            
+            const parseDate = (dateString) => {
+                const match = dateString.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+                if (match) {
+                    const [_, day, month, year] = match;
+                    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                }
+                return '';
+            };
+
+            const fields = {
+                tvbh: extractValue(/(?:TVBH|Tư vấn bán hàng)\s*:\s*(.*)/i),
+                ten_kh: extractValue(/(?:Khách hàng|TÊN KH|Tên khách hàng)\s*:\s*(.*)/i),
+                cccd: extractValue(/(?:CCCD|Căn cước công dân)\s*:\s*([\d]+)/i),
+                ngay_cap_cccd: parseDate(extractValue(/(?:Ngày cấp|NGÀY CẤP CCCD)\s*:\s*(.*)/i)),
+                dia_chi: extractValue(/(?:Địa chỉ)\s*:\s*(.*)/i),
+                loai_xe_text: extractValue(/(?:Loại xe)\s*:\s*(.*)/i),
+                tt1: extractValue(/(?:Tiền cọc|Cọc)\s*:\s*([\d.,]+)/i).replace(/\./g, ''),
+                gia_xhd: extractValue(/(?:Giá hợp đồng và XHĐ|Giá XHĐ|Giá hợp đồng)\s*:\s*([\d.,]+)/i).replace(/\./g, ''),
+                sdt: extractValue(/(?:SĐT|Số điện thoại)\s*:\s*([\d\s.]+)/i).replace(/\s/g, '').replace(/\./g, ''),
+                email: extractValue(/(?:SĐT|Email)\s*:\s*([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/i),
+                hinh_thuc_mua: extractValue(/(?:Hình thức mua)\s*:\s*(.*)/i)
+            };
+            
+            // Set values
+            document.getElementById('add-ten-kh').value = fields.ten_kh;
+            document.getElementById('add-dia-chi').value = fields.dia_chi;
+            document.getElementById('add-cccd').value = fields.cccd;
+            document.getElementById('add-ngay-cap-cccd').value = fields.ngay_cap_cccd;
+            document.getElementById('add-tt1').value = fields.tt1;
+            document.getElementById('add-gia-xhd').value = fields.gia_xhd;
+            
+            // Logic SĐT và Email
+            if (fields.email) {
+                 document.getElementById('add-email').value = fields.email;
+            }
+            if (fields.sdt && !fields.sdt.includes('@')) {
+                 document.getElementById('add-sdt').value = fields.sdt;
+            }
+
+            // Logic chọn TVBH
+            const tvbhSelect = document.getElementById('add-tvbh');
+            for (let option of tvbhSelect.options) {
+                if (option.value === fields.tvbh) {
+                    option.selected = true;
+                    tvbhSelect.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+
+            // Logic chọn Loại Xe
+            const carModels = ["VF3", "VF5", "VF6", "VF7", "VF8", "VF9", "Minio Green", "EC Van", "Herio Green", "Nerio Green", "Limo Green"];
+            const loaiXeSelect = document.getElementById('add-loai-xe');
+            const foundCar = carModels.find(model => fields.loai_xe_text.toUpperCase().includes(model.toUpperCase()));
+            if (foundCar) {
+                 for (let option of loaiXeSelect.options) {
+                    if (option.value.toUpperCase().includes(foundCar.toUpperCase())) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+            }
+            showToast('Đã xử lý và điền thông tin!', true);
+        }
+
+        async function handleAddContract() {
+             const submitBtn = document.getElementById('submit-add-btn');
+             submitBtn.disabled = true;
+             submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
+
+             const payload = {
+                tvbh: document.getElementById('add-tvbh').value,
+                team: document.getElementById('add-pkd').value,
+                tên_kh: document.getElementById('add-ten-kh').value,
+                địa_chỉ: document.getElementById('add-dia-chi').value,
+                sđt: document.getElementById('add-sdt').value,
+                email: document.getElementById('add-email').value,
+                cccd: document.getElementById('add-cccd').value,
+                ngày_cấp_cccd: document.getElementById('add-ngay-cap-cccd').value,
+                tt1: document.getElementById('add-tt1').value.replace(/\./g, ''),
+                ngày_tt1: document.getElementById('add-ngay-tt1').value,
+                loại_xe: document.getElementById('add-loai-xe').value,
+                giá_xhđ: document.getElementById('add-gia-xhd').value.replace(/\./g, ''),
+                ra_lộc: document.getElementById('add-ra-loc').value.replace(/\./g, ''),
+             };
+             
+             if (!payload.tên_kh || !payload.sđt || !payload.tvbh) {
+                 showToast('Vui lòng điền các trường bắt buộc (TVBH, Tên KH, SĐT).', false);
+                 submitBtn.disabled = false;
+                 submitBtn.innerHTML = 'Lưu Hợp Đồng';
+                 return;
+             }
+
+             try {
+                const response = await fetch(QUAN_LY_APPS_SCRIPT_URL, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify({ action: 'addContract', data: payload }) 
+                });
+                const result = await response.json();
+                if (result.status === 'ERROR') throw new Error(result.message);
+                
+                showToast('Thêm hợp đồng mới thành công!', true);
+                closeModal(addModal);
+                fetchData(); // Tải lại dữ liệu
+            } catch (error) {
+                showToast(`Lỗi: ${error.message}`, false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Lưu Hợp Đồng';
+            }
+        }
+
 
         async function handleUpdateData() {
             const submitBtn = document.getElementById('submit-update-btn');
@@ -256,7 +453,7 @@
                 if (result.status === 'ERROR') throw new Error(result.message);
                 
                 showToast('Cập nhật thành công!', true);
-                closeModal();
+                closeModal(detailModal); // [CẬP NHẬT]
                 fetchData(); 
             } catch (error) {
                 showToast(`Lỗi cập nhật: ${error.message}`, false);
@@ -270,19 +467,38 @@
             fetchData();
             document.getElementById('filter-btn').addEventListener('click', () => renderActiveTab());
             searchInput.addEventListener('input', () => { applySearchFilter(); renderActiveTab(); });
-            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-            document.getElementById('modal-overlay').addEventListener('click', closeModal);
-            document.getElementById('close-modal-footer-btn').addEventListener('click', closeModal);
+            
+            // Sự kiện cho Detail Modal
+            document.getElementById('close-modal-btn').addEventListener('click', () => closeModal(detailModal));
+            document.getElementById('modal-overlay').addEventListener('click', () => closeModal(detailModal));
+            document.getElementById('close-modal-footer-btn').addEventListener('click', () => closeModal(detailModal));
             document.getElementById('submit-update-btn').addEventListener('click', handleUpdateData);
             document.getElementById('edit-btn').addEventListener('click', () => { if (confirm('Bạn có chắc chắn muốn chỉnh sửa hợp đồng này không?')) { setModalMode('edit'); } });
             document.getElementById('cancel-edit-btn').addEventListener('click', () => { setModalMode('view'); const rowIndex = parseInt(document.getElementById('edit-row-index').value); openDetailModal(rowIndex); });
-
-            const currencyInputs = document.querySelectorAll('.currency-input');
+            
+            // [THÊM MỚI] Sự kiện cho Add Modal
+            document.getElementById('open-add-modal-btn').addEventListener('click', () => {
+                document.getElementById('add-modal-form-container').querySelector('form, div').reset(); // Reset form
+                openModal(addModal);
+            });
+            document.getElementById('close-add-modal-btn').addEventListener('click', () => closeModal(addModal));
+            document.getElementById('add-modal-overlay').addEventListener('click', () => closeModal(addModal));
+            document.getElementById('close-add-modal-footer-btn').addEventListener('click', () => closeModal(addModal));
+            document.getElementById('add-tvbh').addEventListener('change', (e) => {
+                 const selectedOption = e.target.options[e.target.selectedIndex];
+                 document.getElementById('add-pkd').value = selectedOption.dataset.pkd || '';
+            });
+            document.getElementById('smart-fill-btn').addEventListener('click', handleSmartFill);
+            document.getElementById('submit-add-btn').addEventListener('click', handleAddContract);
+            
+            const currencyInputs = document.querySelectorAll('.currency-input, #add-tt1, #add-gia-xhd, #add-ra-loc'); // [CẬP NHẬT]
             currencyInputs.forEach(input => {
                 input.addEventListener('input', (e) => {
                     let value = e.target.value.replace(/\D/g, '');
                     e.target.value = value ? formatCurrency(value) : '';
-                    updateCalculatedFields();
+                    if(document.body.classList.contains('modal-is-open') && detailModal.style.display !== 'hidden') {
+                       updateCalculatedFields();
+                    }
                 });
             });
 
@@ -324,6 +540,9 @@
             endDateInput.value = formatDateToYyyyMmDd(lastDayOfMonth);
             sortStates['ky'] = { key: 'stt', direction: 'asc' };
             sortStates['xuat'] = { key: 'stt', direction: 'asc' };
+            
+            populateAddModalDropdowns(); // [THÊM MỚI]
+            
             renderTabs();
             setActiveTab('dashboard');
         }
@@ -334,6 +553,7 @@
         function applySearchFilter() { const searchTerm = searchInput.value.toLowerCase().trim(); filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))); }
         function getDateRange() { return { start: startDateInput.value, end: endDateInput.value }; }
 
+        // ... Các hàm renderTab khác giữ nguyên ...
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
@@ -389,7 +609,6 @@
             let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => {
                 let headerClass = `p-3 sortable ${getSortClass(keys[i])}`;
-                // Áp dụng class định dạng cột tại đây
                 if (keys[i] === 'ghi_chú') {
                     headerClass += ' ghi-chu-column';
                 } else {
@@ -401,7 +620,6 @@
             tableHtml += `<tbody>${data.map((row, index) => { 
                 const cells = keys.map(key => {
                     let cellClass = 'p-3';
-                    // Áp dụng class và tooltip tại đây
                     let titleAttr = '';
                     let cellValue = row[key] || '';
                     let displayValue = cellValue;
@@ -409,7 +627,6 @@
                     if (key === 'ghi_chú') {
                         cellClass += ' ghi-chu-column';
                         displayValue = cellValue.split('--------------------')[0].trim();
-                        // Chỉ thêm tooltip nếu nội dung đầy đủ khác với nội dung hiển thị, hoặc nếu nội dung hiển thị quá dài
                         if (cellValue.trim() !== displayValue.trim()) {
                             titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
                         }
