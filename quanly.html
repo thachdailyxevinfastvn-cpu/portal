@@ -124,10 +124,10 @@
                         <div class="form-group"><label>Email</label><input type="email" id="add-email" class="data-input"></div>
                         <div class="form-group"><label>CCCD</label><input type="text" id="add-cccd" class="data-input"></div>
                         <div class="form-group"><label>Ngày cấp CCCD</label><input type="date" id="add-ngay-cap-cccd" class="data-input"></div>
-                        <div class="form-group"><label>TT1 (Cọc)</label><input type="text" id="add-tt1" class="data-input"></div>
+                        <div class="form-group"><label>TT1 (Cọc)</label><input type="text" id="add-tt1" class="data-input currency-input"></div>
                         <div class="form-group"><label>Ngày TT1 (Ngày cọc)</label><input type="date" id="add-ngay-tt1" class="data-input"></div>
-                        <div class="form-group"><label>Giá XHĐ</label><input type="text" id="add-gia-xhd" class="data-input"></div>
-                        <div class="form-group"><label>Ra lộc</label><input type="text" id="add-ra-loc" class="data-input"></div>
+                        <div class="form-group"><label>Giá XHĐ</label><input type="text" id="add-gia-xhd" class="data-input currency-input"></div>
+                        <div class="form-group"><label>Ra lộc</label><input type="text" id="add-ra-loc" class="data-input currency-input"></div>
                     </div>
                 </form> </div>
             <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t flex-shrink-0">
@@ -199,7 +199,7 @@
         const addModal = document.getElementById('add-modal');
 
         function formatDate(isoString) { if (!isoString) return ''; try { const date = new Date(isoString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; const correctedDate = new Date(date.getTime() + userTimezoneOffset); if (isNaN(correctedDate.getTime())) return isoString; return correctedDate.toLocaleDateDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return isoString; } }
-        function formatCurrency(value) { const number = Number(value); if (isNaN(number) || value === null || value === '') return ''; return new Intl.NumberFormat('vi-VN').format(number); }
+        function formatCurrency(value) { const number = Number(String(value).replace(/\./g, '')); if (isNaN(number) || value === null || value === '') return ''; return new Intl.NumberFormat('vi-VN').format(number); }
         function showToast(message, isSuccess = true) { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`; toast.classList.remove('opacity-0'); setTimeout(() => { toast.classList.add('opacity-0'); }, 3000); };
 
         function openModal(modalEl) { modalEl.classList.remove('hidden'); document.body.classList.add('modal-is-open'); } 
@@ -277,8 +277,11 @@
             const tvbhSelect = document.getElementById('add-tvbh');
             const loaiXeSelect = document.getElementById('add-loai-xe');
             
-            tvbhSelect.innerHTML = '<option value="">-- Chọn TVBH --</option>';
-            const tvbhList = allData.nhanSu.filter(nv => nv.chức_vụ === 'TVBH' && nv.trạng_thái === 'Đang làm việc');
+            tvbhSelect.innerHTML = '<option value="">-- Chọn TVBH/TPKD --</option>';
+            // [CHỈNH SỬA] Cập nhật bộ lọc cho TVBH và TPKD đang làm việc
+            const tvbhList = allData.nhanSu.filter(nv => 
+                (nv.chức_vụ === 'TVBH' || nv.chức_vụ === 'TPKD') && nv.trạng_thái === 'Đang làm việc'
+            );
             tvbhList.forEach(nv => {
                 const option = document.createElement('option');
                 option.value = nv.tên_nv;
@@ -336,8 +339,10 @@
             document.getElementById('add-dia-chi').value = fields.dia_chi;
             document.getElementById('add-cccd').value = fields.cccd;
             document.getElementById('add-ngay-cap-cccd').value = fields.ngay_cap_cccd;
-            document.getElementById('add-tt1').value = fields.tt1;
-            document.getElementById('add-gia-xhd').value = fields.gia_xhd;
+            
+            // [CHỈNH SỬA] Định dạng số ngay sau khi điền thông minh
+            document.getElementById('add-tt1').value = formatCurrency(fields.tt1);
+            document.getElementById('add-gia-xhd').value = formatCurrency(fields.gia_xhd);
             
             if (fields.email) {
                  document.getElementById('add-email').value = fields.email;
@@ -471,7 +476,6 @@
             document.getElementById('cancel-edit-btn').addEventListener('click', () => { setModalMode('view'); const rowIndex = parseInt(document.getElementById('edit-row-index').value); openDetailModal(rowIndex); });
             
             document.getElementById('open-add-modal-btn').addEventListener('click', () => {
-                // [SỬA LỖI] Gọi reset() trên form thay vì div
                 document.getElementById('add-contract-form').reset(); 
                 openModal(addModal);
             });
@@ -485,12 +489,12 @@
             document.getElementById('smart-fill-btn').addEventListener('click', handleSmartFill);
             document.getElementById('submit-add-btn').addEventListener('click', handleAddContract);
             
-            const currencyInputs = document.querySelectorAll('.currency-input, #add-tt1, #add-gia-xhd, #add-ra-loc');
+            const currencyInputs = document.querySelectorAll('.currency-input');
             currencyInputs.forEach(input => {
                 input.addEventListener('input', (e) => {
                     let value = e.target.value.replace(/\D/g, '');
                     e.target.value = value ? formatCurrency(value) : '';
-                    if(document.body.classList.contains('modal-is-open') && detailModal.style.display !== 'hidden') {
+                    if(document.body.classList.contains('modal-is-open') && !addModal.classList.contains('hidden')) {
                        updateCalculatedFields();
                     }
                 });
