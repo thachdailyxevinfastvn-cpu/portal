@@ -62,7 +62,17 @@
             white-space: nowrap; 
         }
         .ghi-chu-column {
-            word-break: break-word; 
+            word-break: break-word;
+        }
+
+        /* [CHỈNH SỬA] CSS để tối ưu cột Ghi chú */
+        .notes-cell-content {
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Giới hạn hiển thị 2 dòng */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
         }
     </style>
 </head>
@@ -198,7 +208,33 @@
         
         const addModal = document.getElementById('add-modal');
 
-        function formatDate(isoString) { if (!isoString) return ''; try { const date = new Date(isoString); const userTimezoneOffset = date.getTimezoneOffset() * 60000; const correctedDate = new Date(date.getTime() + userTimezoneOffset); if (isNaN(correctedDate.getTime())) return isoString; return correctedDate.toLocaleDateDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }); } catch (e) { return isoString; } }
+        // [CHỈNH SỬA] Cập nhật hàm formatDate để luôn trả về dd/MM/yyyy
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            try {
+                // Xử lý cả định dạng ISO (2025-09-25T...) và dd/MM/yyyy
+                let date;
+                if (String(dateString).includes('T')) {
+                    date = new Date(dateString);
+                } else if (String(dateString).includes('/')) {
+                    const parts = dateString.split('/');
+                    // Giả định dd/MM/yyyy
+                    date = new Date(parts[2], parts[1] - 1, parts[0]);
+                } else {
+                     date = new Date(dateString);
+                }
+                
+                if (isNaN(date.getTime())) return dateString; // Trả về chuỗi gốc nếu không phải ngày hợp lệ
+                
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
         function formatCurrency(value) { const number = Number(String(value).replace(/\./g, '')); if (isNaN(number) || value === null || value === '') return ''; return new Intl.NumberFormat('vi-VN').format(number); }
         function showToast(message, isSuccess = true) { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`; toast.classList.remove('opacity-0'); setTimeout(() => { toast.classList.add('opacity-0'); }, 3000); };
 
@@ -245,8 +281,17 @@
                     displayValue = formatCurrency(value);
                     input.value = displayValue;
                 } else if (input.type === 'date') { 
-                    if (value) value = new Date(value).toISOString().split('T')[0]; 
-                    displayValue = formatDate(value);
+                    if (value) {
+                       // Chuyển đổi từ dd/MM/yyyy (từ sheet) sang yyyy-MM-dd (cho input)
+                       const parts = String(value).split('/');
+                       if (parts.length === 3) {
+                           value = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                       } else {
+                           // Giữ nguyên nếu là định dạng khác
+                           value = new Date(value).toISOString().split('T')[0];
+                       }
+                    } 
+                    displayValue = formatDate(rowData[fieldName]);
                     input.value = value;
                 } else {
                     input.value = value;
@@ -278,7 +323,6 @@
             const loaiXeSelect = document.getElementById('add-loai-xe');
             
             tvbhSelect.innerHTML = '<option value="">-- Chọn TVBH/TPKD --</option>';
-            // [CHỈNH SỬA] Cập nhật bộ lọc cho TVBH và TPKD đang làm việc
             const tvbhList = allData.nhanSu.filter(nv => 
                 (nv.chức_vụ === 'TVBH' || nv.chức_vụ === 'TPKD') && nv.trạng_thái === 'Đang làm việc'
             );
@@ -340,7 +384,6 @@
             document.getElementById('add-cccd').value = fields.cccd;
             document.getElementById('add-ngay-cap-cccd').value = fields.ngay_cap_cccd;
             
-            // [CHỈNH SỬA] Định dạng số ngay sau khi điền thông minh
             document.getElementById('add-tt1').value = formatCurrency(fields.tt1);
             document.getElementById('add-gia-xhd').value = formatCurrency(fields.gia_xhd);
             
@@ -378,11 +421,12 @@
              const submitBtn = document.getElementById('submit-add-btn');
              submitBtn.disabled = true;
              submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
-
+            
+             // [CHỈNH SỬA] Gửi đúng 'pkd', Tên KH in hoa
              const payload = {
                 tvbh: document.getElementById('add-tvbh').value,
-                team: document.getElementById('add-pkd').value,
-                tên_kh: document.getElementById('add-ten-kh').value,
+                pkd: document.getElementById('add-pkd').value, // Sửa 'team' thành 'pkd'
+                tên_kh: document.getElementById('add-ten-kh').value.toUpperCase().trim(), // IN HOA
                 địa_chỉ: document.getElementById('add-dia-chi').value,
                 sđt: document.getElementById('add-sdt').value,
                 email: document.getElementById('add-email').value,
@@ -633,8 +677,12 @@
 
                     if (key === 'stt') { displayValue = index + 1; } 
                     else if (key.includes('ngày')) { displayValue = formatDate(cellValue); } 
-                    else if (['tt1', 'giá_chốt', 'công_nợ'].includes(key)) { displayValue = formatCurrency(cellValue); }
+                    else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                      
+                    // [CHỈNH SỬA] Bọc nội dung Ghi chú trong div để áp dụng CSS
+                    if (key === 'ghi_chú') {
+                        return `<td class="${cellClass}" ${titleAttr}><div class="notes-cell-content">${displayValue}</div></td>`;
+                    }
                     return `<td class="${cellClass}" ${titleAttr}>${displayValue}</td>`; 
                 }).join(''); 
                 return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`; 
