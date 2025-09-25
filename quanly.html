@@ -61,12 +61,10 @@
         .fit-content-column {
             white-space: nowrap; 
         }
-        /* [CHỈNH SỬA] CSS cho cột Ghi chú */
+        /* [CHỈNH SỬA] CSS cho cột Ghi chú: Cho phép cuộn ngang để xem nội dung dài */
         .ghi-chu-column {
             min-width: 300px; /* Đặt chiều rộng tối thiểu */
-            white-space: nowrap; /* Ngăn không cho xuống dòng */
-            overflow: hidden;
-            text-overflow: ellipsis; /* Hiển thị ... nếu quá dài */
+            white-space: nowrap; /* Ngăn không cho xuống dòng để có thể cuộn ngang */
         }
     </style>
 </head>
@@ -243,7 +241,7 @@
         }
         
         function updateCalculatedFields() {
-            const getNumericValue = (field) => parseFloat(document.querySelector(`[data-field="${field}"]`).value.replace(/\./g, '')) || 0;
+            const getNumericValue = (field) => parseFloat(document.querySelector(`[data-field="${field}"]`).value.replace(/\D/g, '')) || 0;
             const tt1 = getNumericValue('tt1');
             const tt2 = getNumericValue('tt2');
             const tt3 = getNumericValue('tt3');
@@ -420,11 +418,11 @@
                 email: document.getElementById('add-email').value,
                 cccd: document.getElementById('add-cccd').value,
                 ngày_cấp_cccd: document.getElementById('add-ngay-cap-cccd').value,
-                tt1: document.getElementById('add-tt1').value.replace(/\./g, ''),
+                tt1: document.getElementById('add-tt1').value.replace(/\D/g, ''),
                 ngày_tt1: document.getElementById('add-ngay-tt1').value,
                 loại_xe: document.getElementById('add-loai-xe').value,
-                giá_xhđ: document.getElementById('add-gia-xhd').value.replace(/\./g, ''),
-                ra_lộc: document.getElementById('add-ra-loc').value.replace(/\./g, ''),
+                giá_xhđ: document.getElementById('add-gia-xhd').value.replace(/\D/g, ''),
+                ra_lộc: document.getElementById('add-ra-loc').value.replace(/\D/g, ''),
              };
              
              if (!payload.tên_kh || !payload.sđt || !payload.tvbh) {
@@ -466,7 +464,7 @@
             document.querySelectorAll('#modal-form-container [data-field]').forEach(input => {
                  let value = input.value;
                  if (input.classList.contains('currency-input')) {
-                    value = value.replace(/\./g, '');
+                    value = value.replace(/\D/g, '');
                  }
                  payloadData.updatedData[input.dataset.field] = value;
             });
