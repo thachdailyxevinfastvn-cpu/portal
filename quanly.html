@@ -61,18 +61,12 @@
         .fit-content-column {
             white-space: nowrap; 
         }
+        /* [CHỈNH SỬA] CSS cho cột Ghi chú */
         .ghi-chu-column {
-            word-break: break-word;
-        }
-
-        /* [CHỈNH SỬA] CSS để tối ưu cột Ghi chú */
-        .notes-cell-content {
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Giới hạn hiển thị 2 dòng */
-            -webkit-box-orient: vertical;
+            min-width: 300px; /* Đặt chiều rộng tối thiểu */
+            white-space: nowrap; /* Ngăn không cho xuống dòng */
             overflow: hidden;
-            text-overflow: ellipsis;
-            word-break: break-word;
+            text-overflow: ellipsis; /* Hiển thị ... nếu quá dài */
         }
     </style>
 </head>
@@ -208,23 +202,20 @@
         
         const addModal = document.getElementById('add-modal');
 
-        // [CHỈNH SỬA] Cập nhật hàm formatDate để luôn trả về dd/MM/yyyy
         function formatDate(dateString) {
             if (!dateString) return '';
             try {
-                // Xử lý cả định dạng ISO (2025-09-25T...) và dd/MM/yyyy
                 let date;
                 if (String(dateString).includes('T')) {
                     date = new Date(dateString);
                 } else if (String(dateString).includes('/')) {
                     const parts = dateString.split('/');
-                    // Giả định dd/MM/yyyy
                     date = new Date(parts[2], parts[1] - 1, parts[0]);
                 } else {
                      date = new Date(dateString);
                 }
                 
-                if (isNaN(date.getTime())) return dateString; // Trả về chuỗi gốc nếu không phải ngày hợp lệ
+                if (isNaN(date.getTime())) return dateString;
                 
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -282,12 +273,10 @@
                     input.value = displayValue;
                 } else if (input.type === 'date') { 
                     if (value) {
-                       // Chuyển đổi từ dd/MM/yyyy (từ sheet) sang yyyy-MM-dd (cho input)
                        const parts = String(value).split('/');
                        if (parts.length === 3) {
                            value = `${parts[2]}-${parts[1]}-${parts[0]}`;
                        } else {
-                           // Giữ nguyên nếu là định dạng khác
                            value = new Date(value).toISOString().split('T')[0];
                        }
                     } 
@@ -422,11 +411,10 @@
              submitBtn.disabled = true;
              submitBtn.innerHTML = `<span><i class="fas fa-spinner fa-spin"></i> Đang lưu...</span>`;
             
-             // [CHỈNH SỬA] Gửi đúng 'pkd', Tên KH in hoa
              const payload = {
                 tvbh: document.getElementById('add-tvbh').value,
-                pkd: document.getElementById('add-pkd').value, // Sửa 'team' thành 'pkd'
-                tên_kh: document.getElementById('add-ten-kh').value.toUpperCase().trim(), // IN HOA
+                pkd: document.getElementById('add-pkd').value,
+                tên_kh: document.getElementById('add-ten-kh').value.toUpperCase().trim(),
                 địa_chỉ: document.getElementById('add-dia-chi').value,
                 sđt: document.getElementById('add-sdt').value,
                 email: document.getElementById('add-email').value,
@@ -668,9 +656,8 @@
                     if (key === 'ghi_chú') {
                         cellClass += ' ghi-chu-column';
                         displayValue = cellValue.split('--------------------')[0].trim();
-                        if (cellValue.trim() !== displayValue.trim()) {
-                            titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
-                        }
+                        // Gán toàn bộ nội dung ghi chú cho thuộc tính title để xem khi hover
+                        titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
                     } else {
                         cellClass += ' fit-content-column';
                     }
@@ -679,10 +666,6 @@
                     else if (key.includes('ngày')) { displayValue = formatDate(cellValue); } 
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                      
-                    // [CHỈNH SỬA] Bọc nội dung Ghi chú trong div để áp dụng CSS
-                    if (key === 'ghi_chú') {
-                        return `<td class="${cellClass}" ${titleAttr}><div class="notes-cell-content">${displayValue}</div></td>`;
-                    }
                     return `<td class="${cellClass}" ${titleAttr}>${displayValue}</td>`; 
                 }).join(''); 
                 return `<tr data-row-index="${row.rowIndex}" class="border-b clickable-row">${cells}</tr>`; 
