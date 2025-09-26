@@ -61,10 +61,19 @@
         .fit-content-column {
             white-space: nowrap; 
         }
+        
+        /* [CHỈNH SỬA] CSS cho cột Ghi chú */
         .ghi-chu-column {
-            max-width: 300px; 
-            white-space: pre-wrap; 
-            word-break: break-word; 
+            max-width: 300px;
+            width: 300px;
+        }
+        .note-content-wrapper {
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Giới hạn hiển thị 3 dòng */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
         }
     </style>
 </head>
@@ -188,11 +197,11 @@
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
                     <div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div>
                     <div class="form-group"><label>Mã Phiên bản</label><span class="data-view" data-view-field="mã_phiên_bản"></span><input type="text" class="data-input" data-field="mã_phiên_bản"></div>
-                    <div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div>
+                    <div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input bg-gray-100" data-field="phiên_bản" readonly></div>
                     <div class="form-group"><label>Mã ngoại thất</label><span class="data-view" data-view-field="mã_ngoại_thất"></span><input type="text" class="data-input" data-field="mã_ngoại_thất"></div>
-                    <div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input" data-field="ngoại_thất_tv"></div>
+                    <div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input bg-gray-100" data-field="ngoại_thất_tv" readonly></div>
                     <div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div>
-                    <div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div>
+                    <div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input bg-gray-100" data-field="nội_thất_tv" readonly></div>
                     <div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div>
                     <div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div>
                     <div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div>
@@ -522,39 +531,49 @@
             }
         }
         
+        // [CHỈNH SỬA] Hàm tra cứu thông minh và linh hoạt hơn
         function setupCodeLookups() {
             const modal = document.getElementById('detail-modal');
+            const possibleCodeKeys = ['mã_phiên_bản', 'mã_ngoại_thất', 'mã_nội_thất', 'mã_màu', 'mã_code']; // Các tên cột có thể chứa mã
 
-            const createLookupHandler = (sourceFieldKey, targetFieldKey) => {
-                const sourceInput = modal.querySelector(`[data-field="${sourceFieldKey}"]`);
-                const targetInput = modal.querySelector(`[data-field="${targetFieldKey}"]`);
+            const findAndFill = (inputCode, targetInput) => {
+                const code = inputCode.trim().toUpperCase();
+                if (!code) {
+                    targetInput.value = '';
+                    return;
+                }
 
+                let foundMatch = null;
+                for (const item of allData.cacNguon) {
+                    for (const key of possibleCodeKeys) {
+                        if (item[key] && String(item[key]).trim().toUpperCase() === code) {
+                            foundMatch = item;
+                            break;
+                        }
+                    }
+                    if (foundMatch) break;
+                }
+                
+                if (foundMatch && foundMatch.tiếng_việt) {
+                    targetInput.value = foundMatch.tiếng_việt;
+                } else {
+                    targetInput.value = ''; // Xóa nếu không tìm thấy
+                }
+            };
+            
+            const addLookupListener = (sourceField, targetField) => {
+                const sourceInput = modal.querySelector(`[data-field="${sourceField}"]`);
+                const targetInput = modal.querySelector(`[data-field="${targetField}"]`);
                 if (sourceInput && targetInput) {
-                    sourceInput.addEventListener('input', (e) => {
-                        // Chuyển đổi mã nhập vào thành chữ hoa để tìm kiếm không phân biệt chữ hoa/thường
-                        const code = e.target.value.trim().toUpperCase();
-                        if (!code) {
-                            return;
-                        }
-                        
-                        // Tìm trong bảng CÁC NGUỒN, cũng chuyển đổi mã nguồn thành chữ hoa để so sánh
-                        const match = allData.cacNguon.find(item =>
-                            item[sourceFieldKey] && String(item[sourceFieldKey]).trim().toUpperCase() === code
-                        );
-
-                        if (match && match.tiếng_việt) {
-                            targetInput.value = match.tiếng_việt;
-                        } else {
-                            targetInput.value = ''; 
-                        }
-                    });
+                    sourceInput.addEventListener('input', (e) => findAndFill(e.target.value, targetInput));
                 }
             };
 
-            createLookupHandler('mã_phiên_bản', 'phiên_bản');
-            createLookupHandler('mã_ngoại_thất', 'ngoại_thất_tv');
-            createLookupHandler('mã_nội_thất', 'nội_thất_tv');
+            addLookupListener('mã_phiên_bản', 'phiên_bản');
+            addLookupListener('mã_ngoại_thất', 'ngoại_thất_tv');
+            addLookupListener('mã_nội_thất', 'nội_thất_tv');
         }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchData();
@@ -707,11 +726,8 @@
             let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => {
                 let headerClass = `p-3 sortable ${getSortClass(keys[i])}`;
-                if (keys[i] === 'ghi_chú') {
-                    headerClass += ' ghi-chu-column';
-                } else {
-                    headerClass += ' fit-content-column';
-                }
+                if (keys[i] === 'ghi_chú') { headerClass += ' ghi-chu-column'; } 
+                else { headerClass += ' fit-content-column'; }
                 return `<th class="${headerClass}" data-sort-key="${keys[i]}" data-table-type="${tabKey}">${h}</th>`;
             }).join('')}</tr></thead>`;
             
@@ -722,17 +738,19 @@
                     let cellValue = row[key] || '';
                     let displayValue = cellValue;
 
-                    if (key === 'ghi_chú') {
-                        cellClass += ' ghi-chu-column';
-                        displayValue = cellValue.split('--------------------')[0].trim();
-                        titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
-                    } else {
-                        cellClass += ' fit-content-column';
-                    }
-
                     if (key === 'stt') { displayValue = index + 1; } 
                     else if (key.includes('ngày') || key.includes('date')) { displayValue = formatDate(cellValue); } 
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
+                    
+                    if (key === 'ghi_chú') {
+                        cellClass += ' ghi-chu-column';
+                        const latestNote = cellValue.split('--------------------')[0].trim();
+                        titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
+                        // [CHỈNH SỬA] Bọc nội dung trong div để áp dụng line-clamp
+                        return `<td class="${cellClass}" ${titleAttr}><div class="note-content-wrapper">${latestNote}</div></td>`;
+                    } else {
+                        cellClass += ' fit-content-column';
+                    }
                      
                     return `<td class="${cellClass}" ${titleAttr}>${displayValue}</td>`; 
                 }).join(''); 
