@@ -764,7 +764,7 @@
                     let displayValue = cellValue;
 
                     if (key === 'stt') { displayValue = index + 1; } 
-                    else if (key.includes('ngày') || key.includes('date')) { displayValue = formatDate(cellValue); } 
+                    else if (key.includes('ngày') || key.includes('date') || key === 'dự_kiến_xhđ') { displayValue = formatDate(cellValue); } 
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                     
                     if (key === 'ghi_chú') {
