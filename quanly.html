@@ -32,6 +32,10 @@
         .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
         .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; }
+        /* [CHỈNH SỬA] Thêm table-layout: fixed để kiểm soát chiều rộng cột chặt chẽ */
+        .data-table {
+            table-layout: fixed;
+        }
         .dashboard-table th, .dashboard-table td,
         .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; }
         .sortable { cursor: pointer; position: relative; }
@@ -58,18 +62,20 @@
             overflow-y: auto;
         }
 
+        /* [CHỈNH SỬA] Tối ưu các cột nội dung ngắn để không bị vỡ layout */
         .fit-content-column {
-            white-space: nowrap; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        /* [CHỈNH SỬA] CSS cho cột Ghi chú */
         .ghi-chu-column {
             max-width: 300px;
             width: 300px;
         }
         .note-content-wrapper {
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* Giới hạn hiển thị 3 dòng */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -531,10 +537,9 @@
             }
         }
         
-        // [CHỈNH SỬA] Hàm tra cứu thông minh và linh hoạt hơn
         function setupCodeLookups() {
             const modal = document.getElementById('detail-modal');
-            const possibleCodeKeys = ['mã_phiên_bản', 'mã_ngoại_thất', 'mã_nội_thất', 'mã_màu', 'mã_code']; // Các tên cột có thể chứa mã
+            const possibleCodeKeys = ['mã_phiên_bản', 'mã_ngoại_thất', 'mã_nội_thất', 'mã_màu', 'mã_code']; 
 
             const findAndFill = (inputCode, targetInput) => {
                 const code = inputCode.trim().toUpperCase();
@@ -557,7 +562,7 @@
                 if (foundMatch && foundMatch.tiếng_việt) {
                     targetInput.value = foundMatch.tiếng_việt;
                 } else {
-                    targetInput.value = ''; // Xóa nếu không tìm thấy
+                    targetInput.value = '';
                 }
             };
             
@@ -743,11 +748,10 @@
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                     
                     if (key === 'ghi_chú') {
-                        cellClass += ' ghi-chu-column';
+                        // Class này chỉ áp dụng cho td, không phải th
                         const latestNote = cellValue.split('--------------------')[0].trim();
                         titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
-                        // [CHỈNH SỬA] Bọc nội dung trong div để áp dụng line-clamp
-                        return `<td class="${cellClass}" ${titleAttr}><div class="note-content-wrapper">${latestNote}</div></td>`;
+                        return `<td class="p-3 ghi-chu-column" ${titleAttr}><div class="note-content-wrapper">${latestNote}</div></td>`;
                     } else {
                         cellClass += ' fit-content-column';
                     }
