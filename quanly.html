@@ -61,10 +61,10 @@
         .fit-content-column {
             white-space: nowrap; 
         }
-        /* [CHỈNH SỬA] CSS cho cột Ghi chú: Tăng chiều rộng tối thiểu để dễ đọc hơn */
         .ghi-chu-column {
-            min-width: 450px; /* Đặt chiều rộng tối thiểu lớn hơn */
-            white-space: nowrap; /* Ngăn không cho xuống dòng để có thể cuộn ngang */
+            max-width: 300px; 
+            white-space: pre-wrap; 
+            word-break: break-word; 
         }
     </style>
 </head>
@@ -185,9 +185,24 @@
                     <div class="form-group"><label>Đã thanh toán</label><span class="data-view calculated-da-thanh-toan font-bold text-blue-700"></span></div>
                     <div class="form-group"><label>Công nợ</label><span class="data-view font-bold text-red-600" id="calculated-cong-no"></span></div>
                 </div></details>
-                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div><div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div><div class="form-group"><label>Mã ngoại thất</label><span class="data-view" data-view-field="mã_ngoại_thất"></span><input type="text" class="data-input" data-field="mã_ngoại_thất"></div><div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input" data-field="ngoại_thất_tv"></div><div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div><div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div><div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div><div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div><div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div><div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div><div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Thông tin Xe <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
+                    <div class="form-group"><label>Loại xe</label><span class="data-view" data-view-field="loại_xe"></span><input type="text" class="data-input" data-field="loại_xe"></div>
+                    <div class="form-group"><label>Mã Phiên bản</label><span class="data-view" data-view-field="mã_phiên_bản"></span><input type="text" class="data-input" data-field="mã_phiên_bản"></div>
+                    <div class="form-group"><label>Phiên bản</label><span class="data-view" data-view-field="phiên_bản"></span><input type="text" class="data-input" data-field="phiên_bản"></div>
+                    <div class="form-group"><label>Mã ngoại thất</label><span class="data-view" data-view-field="mã_ngoại_thất"></span><input type="text" class="data-input" data-field="mã_ngoại_thất"></div>
+                    <div class="form-group"><label>Ngoại thất TV</label><span class="data-view" data-view-field="ngoại_thất_tv"></span><input type="text" class="data-input" data-field="ngoại_thất_tv"></div>
+                    <div class="form-group"><label>Mã nội thất</label><span class="data-view" data-view-field="mã_nội_thất"></span><input type="text" class="data-input" data-field="mã_nội_thất"></div>
+                    <div class="form-group"><label>Nội thất TV</label><span class="data-view" data-view-field="nội_thất_tv"></span><input type="text" class="data-input" data-field="nội_thất_tv"></div>
+                    <div class="form-group"><label>Số khung</label><span class="data-view" data-view-field="số_khung"></span><input type="text" class="data-input" data-field="số_khung"></div>
+                    <div class="form-group"><label>Số máy</label><span class="data-view" data-view-field="số_máy"></span><input type="text" class="data-input" data-field="số_máy"></div>
+                    <div class="form-group"><label>Kho DMS</label><span class="data-view" data-view-field="kho_dms"></span><input type="text" class="data-input" data-field="kho_dms"></div>
+                    <div class="form-group"><label>Kho vật lý</label><span class="data-view" data-view-field="kho_vật_lý"></span><input type="text" class="data-input" data-field="kho_vật_lý"></div>
+                    <div class="form-group"><label>PO</label><span class="data-view" data-view-field="po"></span><input type="text" class="data-input" data-field="po"></div>
+                </div></details>
                 <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Chính sách <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>CS Nội bộ</label><span class="data-view" data-view-field="cs_nội_bộ"></span><input type="text" class="data-input" data-field="cs_nội_bộ"></div><div class="form-group"><label>Hoa hồng Sale</label><span class="data-view" data-view-field="hoa_hồng_sale"></span><input type="text" class="data-input" data-field="hoa_hồng_sale"></div><div class="form-group"><label>HH GDKD</label><span class="data-view" data-view-field="hh_gdkd"></span><input type="text" class="data-input" data-field="hh_gdkd"></div><div class="form-group"><label>HH TPKD</label><span class="data-view" data-view-field="hh_tpkd"></span><input type="text" class="data-input" data-field="hh_tpkd"></div><div class="form-group"><label>CTKM</label><span class="data-view" data-view-field="ctkm"></span><input type="text" class="data-input" data-field="ctkm"></div></div></details>
-                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid"><div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
+                <details class="bg-gray-50 rounded-lg"><summary class="p-3 font-semibold flex justify-between items-center">Vận hành <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t data-grid">
+                    <div class="form-group"><label>Ngày dự kiến XHĐ</label><span class="data-view" data-view-field="dự_kiến_xhđ"></span><input type="date" class="data-input" data-field="dự_kiến_xhđ"></div>
+                    <div class="form-group"><label>Ngày đề nghị COC</label><span class="data-view" data-view-field="ngày_đề_nghị_coc"></span><input type="date" class="data-input" data-field="ngày_đề_nghị_coc"></div><div class="form-group"><label>Ngày có COC</label><span class="data-view" data-view-field="ngày_có_coc"></span><input type="date" class="data-input" data-field="ngày_có_coc"></div><div class="form-group"><label>Ngày đăng ký xe</label><span class="data-view" data-view-field="ngày_đăng_ký_xe"></span><input type="date" class="data-input" data-field="ngày_đăng_ký_xe"></div><div class="form-group"><label>Ngày giao xe</label><span class="data-view" data-view-field="ngày_giao_xe"></span><input type="date" class="data-input" data-field="ngày_giao_xe"></div></div></details>
                 <details class="bg-gray-50 rounded-lg" open><summary class="p-3 font-semibold flex justify-between items-center">Lịch sử Ghi chú <i class="fas fa-chevron-down"></i></summary><div class="p-4 border-t space-y-3"><div class="form-group edit-mode"><label for="modal-new-note">Thêm ghi chú mới</label><textarea id="modal-new-note" rows="3" class="w-full border-gray-300 rounded-md data-input" placeholder="Nhập ghi chú mới..."></textarea></div><div class="form-group"><label>Lịch sử</label><div id="modal-notes-timeline" class="p-2 bg-white border rounded-md max-h-60 overflow-y-auto space-y-2"></div></div></div></details>
             </div>
             <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t flex-shrink-0"><button id="edit-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Chỉnh sửa</button><button id="cancel-edit-btn" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-600 hidden">Hủy bỏ</button><button id="submit-update-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 hidden">Lưu thay đổi</button><button id="close-modal-footer-btn" class="bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Đóng</button></div>
@@ -288,7 +303,7 @@
                        const parts = String(value).split('/');
                        if (parts.length === 3) {
                            value = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                       } else {
+                       } else if (String(value).includes('T')) {
                            value = new Date(value).toISOString().split('T')[0];
                        }
                     } 
@@ -506,6 +521,40 @@
                 submitBtn.innerHTML = 'Lưu thay đổi';
             }
         }
+        
+        function setupCodeLookups() {
+            const modal = document.getElementById('detail-modal');
+
+            const createLookupHandler = (sourceFieldKey, targetFieldKey) => {
+                const sourceInput = modal.querySelector(`[data-field="${sourceFieldKey}"]`);
+                const targetInput = modal.querySelector(`[data-field="${targetFieldKey}"]`);
+
+                if (sourceInput && targetInput) {
+                    sourceInput.addEventListener('input', (e) => {
+                        // Chuyển đổi mã nhập vào thành chữ hoa để tìm kiếm không phân biệt chữ hoa/thường
+                        const code = e.target.value.trim().toUpperCase();
+                        if (!code) {
+                            return;
+                        }
+                        
+                        // Tìm trong bảng CÁC NGUỒN, cũng chuyển đổi mã nguồn thành chữ hoa để so sánh
+                        const match = allData.cacNguon.find(item =>
+                            item[sourceFieldKey] && String(item[sourceFieldKey]).trim().toUpperCase() === code
+                        );
+
+                        if (match && match.tiếng_việt) {
+                            targetInput.value = match.tiếng_việt;
+                        } else {
+                            targetInput.value = ''; 
+                        }
+                    });
+                }
+            };
+
+            createLookupHandler('mã_phiên_bản', 'phiên_bản');
+            createLookupHandler('mã_ngoại_thất', 'ngoại_thất_tv');
+            createLookupHandler('mã_nội_thất', 'nội_thất_tv');
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchData();
@@ -543,6 +592,8 @@
                     }
                 });
             });
+            
+            setupCodeLookups();
 
             tabContentsWrapper.addEventListener('dblclick', (event) => { const row = event.target.closest('.clickable-row'); if (row) { const rowIndex = parseInt(row.dataset.rowIndex); if (rowIndex) openDetailModal(rowIndex); } });
             tabContentsWrapper.addEventListener('click', (event) => {
@@ -623,8 +674,8 @@
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
-        function renderDonTonTab() { const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys, 'donton'); }
-        function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky'); }
+        function renderDonTonTab() { const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'DỰ KIẾN XHĐ', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'dự_kiến_xhđ', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys, 'donton'); }
+        function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy.split('T')[0] >= start && ngayKy.split('T')[0] <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'DỰ KIẾN XHĐ', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'dự_kiến_xhđ', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky'); }
         function renderXuatTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ.split('T')[0] >= start && hd.ngày_xhđ.split('T')[0] <= end).map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})); const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys, 'xuat'); }
         function renderCongNoCocTab() { const { start, end } = getDateRange(); const data = filteredData.map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})).filter(hd => { const ngayCoCoc = hd.ngày_có_coc; return ngayCoCoc && ngayCoCoc.split('T')[0] >= start && ngayCoCoc.split('T')[0] <= end && hd.công_nợ !== 0; }); const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys, 'congno'); }
         function renderCocTab() { const { start, end } = getDateRange(); const today = new Date(); const data = filteredData.filter(hd => hd.ngày_đề_nghị_coc && !hd.ngày_có_coc).map(hd => { const deNghiDate = new Date(hd.ngày_đề_nghị_coc); if (isNaN(deNghiDate.getTime())) return { ...hd, tới_hôm_nay: '' }; return { ...hd, tới_hôm_nay: Math.floor((today - deNghiDate) / 86400000) }; }); const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ']; const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú']; renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys, 'coc'); }
@@ -640,7 +691,13 @@
             data.sort((a, b) => {
                 let valA = a[sortKey]; let valB = b[sortKey];
                 if (sortKey === 'stt') return 0;
-                if (typeof valA === 'string' && valA.includes('/')) { const dateA = valA.split('/').reverse().join('-'); const dateB = valB.split('/').reverse().join('-'); return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA); }
+                if (typeof valA === 'string' && (valA.includes('/') || valA.includes('-'))) { 
+                    try {
+                        const dateA = new Date(valA.split('/').reverse().join('-')).toISOString();
+                        const dateB = new Date(valB.split('/').reverse().join('-')).toISOString();
+                        return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+                    } catch(e) { /* fallback to string compare */ }
+                }
                 if (typeof valA === 'number' && typeof valB === 'number') { return sortDir === 'asc' ? valA - valB : valB - valA; }
                 const compare = String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true });
                 return sortDir === 'asc' ? compare : -compare;
@@ -668,14 +725,13 @@
                     if (key === 'ghi_chú') {
                         cellClass += ' ghi-chu-column';
                         displayValue = cellValue.split('--------------------')[0].trim();
-                        // Gán toàn bộ nội dung ghi chú cho thuộc tính title để xem khi hover
                         titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
                     } else {
                         cellClass += ' fit-content-column';
                     }
 
                     if (key === 'stt') { displayValue = index + 1; } 
-                    else if (key.includes('ngày')) { displayValue = formatDate(cellValue); } 
+                    else if (key.includes('ngày') || key.includes('date')) { displayValue = formatDate(cellValue); } 
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                      
                     return `<td class="${cellClass}" ${titleAttr}>${displayValue}</td>`; 
