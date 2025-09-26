@@ -58,15 +58,13 @@
             overflow-y: auto;
         }
 
-        /* [ĐIỀU CHỈNH] Trả các cột về trạng thái ban đầu, không cắt xén nội dung */
         .fit-content-column {
             white-space: nowrap;
         }
         
-        /* [ĐIỀU CHỈNH] Cố định cứng cột Ghi chú là 300px */
         .ghi-chu-column {
             width: 300px;
-            min-width: 300px; /* Thêm min-width để đảm bảo cột không bị co lại */
+            min-width: 300px; 
         }
         .note-content-wrapper {
             display: -webkit-box;
@@ -697,7 +695,8 @@
                 let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
                 carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
                 footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
-                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table" style="table-layout: fixed; width: 100%;"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
+                // [CHỈNH SỬA] Xóa bỏ style="table-layout: fixed;" khỏi bảng Dashboard
+                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
