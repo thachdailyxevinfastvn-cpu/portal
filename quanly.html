@@ -46,7 +46,16 @@
             background-color: #e5e7eb;
             z-index: 10;
         }
-        .dashboard-table .car-type-header { white-space: normal; word-break: break-word; vertical-align: middle; text-align: center; }
+        /* [CHỈNH SỬA] Giới hạn kích thước cột loại xe trên Dashboard */
+        .dashboard-table .car-type-header,
+        .dashboard-table .car-type-cell {
+            width: 70px;
+            max-width: 70px;
+            white-space: normal;
+            word-break: break-word;
+            vertical-align: middle;
+            text-align: center;
+        }
 
         #modal-content, #add-modal-content { 
             display: flex;
@@ -691,11 +700,19 @@
                 let bodyHtml = '';
                 const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
                 let grandTotal = 0;
-                processedData.forEach((item, index) => { bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; carTypes.forEach(car => { const count = item.counts[car] || 0; bodyHtml += `<td class="text-center">${count > 0 ? count : ''}</td>`; columnTotals[car] += count; }); bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; grandTotal += item.total; });
+                processedData.forEach((item, index) => { 
+                    bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; 
+                    carTypes.forEach(car => { 
+                        const count = item.counts[car] || 0; 
+                        bodyHtml += `<td class="text-center car-type-cell">${count > 0 ? count : ''}</td>`; 
+                        columnTotals[car] += count; 
+                    }); 
+                    bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; 
+                    grandTotal += item.total; 
+                });
                 let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
-                carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold">${columnTotals[car]}</td>`);
+                carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold car-type-cell">${columnTotals[car]}</td>`);
                 footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
-                // [CHỈNH SỬA] Xóa bỏ style="table-layout: fixed;" khỏi bảng Dashboard
                 return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
