@@ -32,10 +32,6 @@
         .view-mode .data-input, .edit-mode .data-view { display: none; visibility: hidden; }
 
         .dashboard-table, .data-table { border-collapse: collapse; font-size: 0.8rem; width: 100%; }
-        /* [CHỈNH SỬA] Thêm table-layout: fixed để kiểm soát chiều rộng cột chặt chẽ */
-        .data-table {
-            table-layout: fixed;
-        }
         .dashboard-table th, .dashboard-table td,
         .data-table th, .data-table td { border: 1px solid #e5e7eb; padding: 4px 8px; }
         .sortable { cursor: pointer; position: relative; }
@@ -62,16 +58,15 @@
             overflow-y: auto;
         }
 
-        /* [CHỈNH SỬA] Tối ưu các cột nội dung ngắn để không bị vỡ layout */
+        /* [ĐIỀU CHỈNH] Trả các cột về trạng thái ban đầu, không cắt xén nội dung */
         .fit-content-column {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         
+        /* [ĐIỀU CHỈNH] Cố định cứng cột Ghi chú là 300px */
         .ghi-chu-column {
-            max-width: 300px;
             width: 300px;
+            min-width: 300px; /* Thêm min-width để đảm bảo cột không bị co lại */
         }
         .note-content-wrapper {
             display: -webkit-box;
@@ -404,7 +399,7 @@
                 dia_chi: extractValue(/(?:Địa chỉ)\s*:\s*(.*)/i),
                 loai_xe_text: extractValue(/(?:Loại xe)\s*:\s*(.*)/i),
                 tt1: extractValue(/(?:Tiền cọc|Cọc)\s*:\s*([\d.,]+)/i).replace(/\./g, ''),
-                gia_xhd: extractValue(/(?:Giá hợp đồng và XHĐ|Giá XHĐ|Giá hợp đồng)\s*:\s*([\d.,]+)/i).replace(/\./g, ''),
+                gia_xhd: extractValue(/(?:Giá hợp đồng dan XHĐ|Giá XHĐ|Giá hợp đồng)\s*:\s*([\d.,]+)/i).replace(/\./g, ''),
                 sdt: extractValue(/(?:SĐT|Số điện thoại)\s*:\s*([\d\s.]+)/i).replace(/\s/g, '').replace(/\./g, ''),
                 email: extractValue(/(?:SĐT|Email)\s*:\s*([a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6})/i),
                 hinh_thuc_mua: extractValue(/(?:Hình thức mua)\s*:\s*(.*)/i)
@@ -537,11 +532,17 @@
             }
         }
         
+        // [CHỈNH SỬA] Sửa lỗi logic tra cứu, đảm bảo tìm đúng loại mã
         function setupCodeLookups() {
             const modal = document.getElementById('detail-modal');
-            const possibleCodeKeys = ['mã_phiên_bản', 'mã_ngoại_thất', 'mã_nội_thất', 'mã_màu', 'mã_code']; 
+            
+            // Phân loại các key có thể có cho từng loại mã
+            const versionKeys = ['mã_phiên_bản'];
+            const exteriorKeys = ['mã_ngoại_thất', 'mã_màu'];
+            const interiorKeys = ['mã_nội_thất', 'mã_màu'];
 
-            const findAndFill = (inputCode, targetInput) => {
+            // Hàm tra cứu giờ đây sẽ nhận một danh sách các key cụ thể để tìm kiếm
+            const findAndFill = (inputCode, targetInput, keysToSearch) => {
                 const code = inputCode.trim().toUpperCase();
                 if (!code) {
                     targetInput.value = '';
@@ -550,7 +551,8 @@
 
                 let foundMatch = null;
                 for (const item of allData.cacNguon) {
-                    for (const key of possibleCodeKeys) {
+                    // Chỉ tìm trong các key được chỉ định cho loại mã này
+                    for (const key of keysToSearch) { 
                         if (item[key] && String(item[key]).trim().toUpperCase() === code) {
                             foundMatch = item;
                             break;
@@ -566,17 +568,18 @@
                 }
             };
             
-            const addLookupListener = (sourceField, targetField) => {
+            // Gán listener, truyền vào đúng loại key cần tìm
+            const addLookupListener = (sourceField, targetField, keys) => {
                 const sourceInput = modal.querySelector(`[data-field="${sourceField}"]`);
                 const targetInput = modal.querySelector(`[data-field="${targetField}"]`);
                 if (sourceInput && targetInput) {
-                    sourceInput.addEventListener('input', (e) => findAndFill(e.target.value, targetInput));
+                    sourceInput.addEventListener('input', (e) => findAndFill(e.target.value, targetInput, keys));
                 }
             };
 
-            addLookupListener('mã_phiên_bản', 'phiên_bản');
-            addLookupListener('mã_ngoại_thất', 'ngoại_thất_tv');
-            addLookupListener('mã_nội_thất', 'nội_thất_tv');
+            addLookupListener('mã_phiên_bản', 'phiên_bản', versionKeys);
+            addLookupListener('mã_ngoại_thất', 'ngoại_thất_tv', exteriorKeys);
+            addLookupListener('mã_nội_thất', 'nội_thất_tv', interiorKeys);
         }
 
 
@@ -748,7 +751,6 @@
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                     
                     if (key === 'ghi_chú') {
-                        // Class này chỉ áp dụng cho td, không phải th
                         const latestNote = cellValue.split('--------------------')[0].trim();
                         titleAttr = `title="${cellValue.replace(/"/g, '&quot;')}"`;
                         return `<td class="p-3 ghi-chu-column" ${titleAttr}><div class="note-content-wrapper">${latestNote}</div></td>`;
