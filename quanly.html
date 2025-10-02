@@ -713,7 +713,28 @@
             };
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
-        function renderDonTonTab() { const data = filteredData.filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'DỰ KIẾN XHĐ', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'dự_kiến_xhđ', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('donton-content'), 'Danh sách đơn tồn chưa xuất', data, headers, keys, 'donton'); }
+        
+        // [CẬP NHẬT] Chỉnh sửa hàm renderDonTonTab theo yêu cầu
+        function renderDonTonTab() {
+            const data = filteredData
+                .filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc)
+                .map(hd => ({
+                    ...hd,
+                    da_thanh_toan: (parseFloat(hd.tt1) || 0) +
+                                  (parseFloat(hd.tt2) || 0) +
+                                  (parseFloat(hd.tt3) || 0) +
+                                  (parseFloat(hd.giải_ngân) || 0)
+                }));
+        
+            const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'DỰ KIẾN XHĐ', 'ĐÃ THANH TOÁN', 'GHI CHÚ'];
+            const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'dự_kiến_xhđ', 'da_thanh_toan', 'ghi_chú'];
+            
+            // Đếm số đơn có ngày dự kiến XHĐ
+            const countDuKien = data.filter(hd => hd.dự_kiến_xhđ).length;
+            const title = `Danh sách đơn tồn chưa xuất (${data.length} đơn, ${countDuKien} có ngày dự kiến)`;
+
+            renderDataTable(document.getElementById('donton-content'), title, data, headers, keys, 'donton');
+        }
         function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy >= start && ngayKy <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'DỰ KIẾN XHĐ', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'dự_kiến_xhđ', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky'); }
         function renderXuatTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ >= start && hd.ngày_xhđ <= end).map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})); const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys, 'xuat'); }
         function renderCongNoCocTab() { const { start, end } = getDateRange(); const data = filteredData.map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})).filter(hd => { const ngayCoCoc = hd.ngày_có_coc; return ngayCoCoc && ngayCoCoc >= start && ngayCoCoc <= end && hd.công_nợ !== 0; }); const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys, 'congno'); }
@@ -723,7 +744,7 @@
 
         function renderDataTable(container, title, data, headers, keys, tabKey) {
              if (!container) return;
-             if (data.length === 0) { container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (0)</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`; return; }
+             if (data.length === 0) { container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title}</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`; return; }
             if (!sortStates[tabKey]) sortStates[tabKey] = { key: keys[0], direction: 'asc' };
             const { key: sortKey, direction: sortDir } = sortStates[tabKey];
             
@@ -744,7 +765,7 @@
             });
             
             const getSortClass = (k) => (sortKey === k ? `sorted-${sortDir}` : '');
-            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title} (${data.length})</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
+            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title}</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => {
                 let headerClass = `p-3 sortable ${getSortClass(keys[i])}`;
                 if (keys[i] === 'ghi_chú') { headerClass += ' ghi-chu-column'; } 
@@ -761,7 +782,8 @@
 
                     if (key === 'stt') { displayValue = index + 1; } 
                     else if (key.includes('ngày') || key.includes('date') || key === 'dự_kiến_xhđ') { displayValue = formatDate(cellValue); } 
-                    else if (['tt1', 'giá_chốt', 'công_nợ', 'team'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
+                    // [CẬP NHẬT] Thêm 'da_thanh_toan' vào danh sách các trường cần định dạng tiền tệ
+                    else if (['tt1', 'giá_chốt', 'công_nợ', 'team', 'da_thanh_toan'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                     
                     if (key === 'ghi_chú') {
                         const latestNote = cellValue.split('--------------------')[0].trim();
