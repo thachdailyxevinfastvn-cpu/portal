@@ -46,12 +46,11 @@
             background-color: #e5e7eb;
             z-index: 10;
         }
-        /* [CHỈNH SỬA] Giới hạn kích thước cột loại xe trên Dashboard */
         .dashboard-table .car-type-header,
         .dashboard-table .car-type-cell {
             width: 70px;
             max-width: 70px;
-            min-width: 70px; /* Thêm dòng này */
+            min-width: 70px;
             white-space: normal;
             word-break: break-word;
             vertical-align: middle;
@@ -251,23 +250,28 @@
             if (!dateString) return '';
             try {
                 let date;
-                if (String(dateString).includes('T')) {
-                    date = new Date(dateString);
-                } else if (String(dateString).includes('/')) {
-                    const parts = dateString.split('/');
+                // [CHỈNH SỬA] Thay đổi logic xử lý ngày tháng để tránh lỗi múi giờ
+                const cleanDateString = String(dateString).split('T')[0]; // Lấy phần YYYY-MM-DD
+
+                if (cleanDateString.includes('/')) {
+                    const parts = cleanDateString.split('/');
+                    // Giả định định dạng là dd/mm/yyyy
                     date = new Date(parts[2], parts[1] - 1, parts[0]);
                 } else {
-                     date = new Date(dateString);
+                    // Đối với định dạng 'YYYY-MM-DD', thay '-' bằng '/' để JS diễn giải theo giờ địa phương
+                    const localDateString = cleanDateString.replace(/-/g, '/');
+                    date = new Date(localDateString);
                 }
                 
-                if (isNaN(date.getTime())) return dateString;
+                if (isNaN(date.getTime())) return dateString; // Nếu ngày không hợp lệ, trả về chuỗi gốc
                 
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
                 return `${day}/${month}/${year}`;
             } catch (e) {
-                return dateString;
+                console.error("Lỗi định dạng ngày:", e);
+                return dateString; // Trả về giá trị gốc nếu có lỗi
             }
         }
 
@@ -318,12 +322,9 @@
                     input.value = displayValue;
                 } else if (input.type === 'date') { 
                     if (value) {
-                       const parts = String(value).split('/');
-                       if (parts.length === 3) {
-                           value = `${parts[2]}-${parts[1]}-${parts[0]}`;
-                       } else if (String(value).includes('T')) {
-                           value = new Date(value).toISOString().split('T')[0];
-                       }
+                       // [CHỈNH SỬA] Đơn giản hóa việc lấy giá trị ngày tháng để gán cho input type="date"
+                       // Chỉ cần lấy phần YYYY-MM-DD từ chuỗi gốc.
+                       value = String(value).split('T')[0];
                     } 
                     displayValue = formatDate(rowData[fieldName]);
                     input.value = value;
@@ -540,16 +541,13 @@
             }
         }
         
-        // [CHỈNH SỬA] Sửa lỗi logic tra cứu, đảm bảo tìm đúng loại mã
         function setupCodeLookups() {
             const modal = document.getElementById('detail-modal');
             
-            // Phân loại các key có thể có cho từng loại mã
             const versionKeys = ['mã_phiên_bản'];
             const exteriorKeys = ['mã_ngoại_thất', 'mã_màu'];
             const interiorKeys = ['mã_nội_thất', 'mã_màu'];
 
-            // Hàm tra cứu giờ đây sẽ nhận một danh sách các key cụ thể để tìm kiếm
             const findAndFill = (inputCode, targetInput, keysToSearch) => {
                 const code = inputCode.trim().toUpperCase();
                 if (!code) {
@@ -559,7 +557,6 @@
 
                 let foundMatch = null;
                 for (const item of allData.cacNguon) {
-                    // Chỉ tìm trong các key được chỉ định cho loại mã này
                     for (const key of keysToSearch) { 
                         if (item[key] && String(item[key]).trim().toUpperCase() === code) {
                             foundMatch = item;
@@ -576,7 +573,6 @@
                 }
             };
             
-            // Gán listener, truyền vào đúng loại key cần tìm
             const addLookupListener = (sourceField, targetField, keys) => {
                 const sourceInput = modal.querySelector(`[data-field="${sourceField}"]`);
                 const targetInput = modal.querySelector(`[data-field="${targetField}"]`);
@@ -735,13 +731,21 @@
             data.sort((a, b) => {
                 let valA = a[sortKey]; let valB = b[sortKey];
                 if (sortKey === 'stt') return 0;
+                
+                // [CHỈNH SỬA] Sửa lỗi sắp xếp ngày tháng do múi giờ
                 if (typeof valA === 'string' && (valA.includes('/') || valA.includes('-'))) { 
                     try {
-                        const dateA = new Date(valA.split('/').reverse().join('-')).toISOString();
-                        const dateB = new Date(valB.split('/').reverse().join('-')).toISOString();
-                        return sortDir === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+                        // Chuyển đổi cả hai ngày về cùng một định dạng (YYYY/MM/DD) để so sánh nhất quán
+                        const dateA = new Date(String(valA).split('T')[0].replace(/-/g, '/'));
+                        const dateB = new Date(String(valB).split('T')[0].replace(/-/g, '/'));
+                        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+                            // Fallback nếu ngày không hợp lệ
+                            return String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true });
+                        }
+                        return sortDir === 'asc' ? dateA - dateB : dateB - dateA;
                     } catch(e) { /* fallback to string compare */ }
                 }
+
                 if (typeof valA === 'number' && typeof valB === 'number') { return sortDir === 'asc' ? valA - valB : valB - valA; }
                 const compare = String(valA || '').localeCompare(String(valB || ''), 'vi', { numeric: true });
                 return sortDir === 'asc' ? compare : -compare;
