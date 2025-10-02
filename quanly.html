@@ -250,28 +250,22 @@
             if (!dateString) return '';
             try {
                 let date;
-                // [CHỈNH SỬA] Thay đổi logic xử lý ngày tháng để tránh lỗi múi giờ
-                const cleanDateString = String(dateString).split('T')[0]; // Lấy phần YYYY-MM-DD
-
+                const cleanDateString = String(dateString).split('T')[0];
                 if (cleanDateString.includes('/')) {
                     const parts = cleanDateString.split('/');
-                    // Giả định định dạng là dd/mm/yyyy
                     date = new Date(parts[2], parts[1] - 1, parts[0]);
                 } else {
-                    // Đối với định dạng 'YYYY-MM-DD', thay '-' bằng '/' để JS diễn giải theo giờ địa phương
                     const localDateString = cleanDateString.replace(/-/g, '/');
                     date = new Date(localDateString);
                 }
-                
-                if (isNaN(date.getTime())) return dateString; // Nếu ngày không hợp lệ, trả về chuỗi gốc
-                
+                if (isNaN(date.getTime())) return dateString;
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
                 return `${day}/${month}/${year}`;
             } catch (e) {
                 console.error("Lỗi định dạng ngày:", e);
-                return dateString; // Trả về giá trị gốc nếu có lỗi
+                return dateString;
             }
         }
 
@@ -321,10 +315,7 @@
                     displayValue = formatCurrency(value);
                     input.value = displayValue;
                 } else if (input.type === 'date') { 
-                    // Dữ liệu từ backend giờ đã là 'YYYY-MM-DD' sạch
-                    // Gán trực tiếp cho input type="date"
                     input.value = value;
-                    // Format để hiển thị cho người dùng
                     displayValue = formatDate(value);
                 } else {
                     input.value = value;
@@ -684,7 +675,6 @@
                 const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort((a, b) => { const aIsVF = a.toUpperCase().startsWith('VF'); const bIsVF = b.toUpperCase().startsWith('VF'); if (aIsVF && !bIsVF) return -1; if (!aIsVF && bIsVF) return 1; return a.localeCompare(b, undefined, {numeric: true}); });
                 if (validStaff.length === 0 || carTypes.length === 0) { return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`; }
                 const dynamicTitle = `${title} Từ ngày ${formatDate(start)} đến ${formatDate(end)}`;
-                // Dữ liệu ngày tháng từ backend đã là 'YYYY-MM-DD', so sánh chuỗi trực tiếp là chính xác
                 const relevantContracts = filteredData.filter(hd => { const dateValue = hd[dateFieldKey]; return dateValue && dateValue >= start && dateValue <= end; });
                 let processedData = validStaff.map(staff => { const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv); let rowTotal = 0; const counts = {}; carTypes.forEach(car => { const count = staffContracts.filter(hd => hd.loại_xe === car).length; counts[car] = count; rowTotal += count; }); return { staff, counts, total: rowTotal }; });
                 const { key, direction } = sortStates[tableType];
@@ -714,7 +704,7 @@
             container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
         
-        // [CẬP NHẬT] Chỉnh sửa hàm renderDonTonTab theo yêu cầu
+        // [CẬP NHẬT THEO YÊU CẦU MỚI]
         function renderDonTonTab() {
             const data = filteredData
                 .filter(hd => hd.ngày_tt1 && !hd.ngày_xhđ && !hd.ngày_hoàn_cọc)
@@ -729,22 +719,39 @@
             const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY CỌC', 'DỰ KIẾN XHĐ', 'ĐÃ THANH TOÁN', 'GHI CHÚ'];
             const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_tt1', 'dự_kiến_xhđ', 'da_thanh_toan', 'ghi_chú'];
             
-            // Đếm số đơn có ngày dự kiến XHĐ
-            const countDuKien = data.filter(hd => hd.dự_kiến_xhđ).length;
-            const title = `Danh sách đơn tồn chưa xuất (${data.length} đơn, ${countDuKien} có ngày dự kiến)`;
+            // Lấy ngày tháng năm hiện tại
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-indexed (Tháng 1 là 0)
+
+            // Đếm số đơn có ngày dự kiến XHĐ trong tháng hiện tại
+            const countDuKienThangNay = data.filter(hd => {
+                if (!hd.dự_kiến_xhđ) return false; // Bỏ qua nếu không có ngày
+                
+                // Chuyển chuỗi YYYY-MM-DD thành đối tượng Date một cách an toàn
+                const duKienDate = new Date(hd.dự_kiến_xhđ.replace(/-/g, '/'));
+                if (isNaN(duKienDate.getTime())) return false; // Bỏ qua nếu ngày không hợp lệ
+                
+                // So sánh năm và tháng
+                return duKienDate.getFullYear() === currentYear && duKienDate.getMonth() === currentMonth;
+            }).length;
+            
+            const title = `Danh sách đơn tồn chưa xuất (${data.length} booking, dự kiến xuất tháng này ${countDuKienThangNay})`;
 
             renderDataTable(document.getElementById('donton-content'), title, data, headers, keys, 'donton');
         }
-        function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy >= start && ngayKy <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'DỰ KIẾN XHĐ', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'dự_kiến_xhđ', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng`, data, headers, keys, 'ky'); }
-        function renderXuatTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ >= start && hd.ngày_xhđ <= end).map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})); const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ`, data, headers, keys, 'xuat'); }
-        function renderCongNoCocTab() { const { start, end } = getDateRange(); const data = filteredData.map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})).filter(hd => { const ngayCoCoc = hd.ngày_có_coc; return ngayCoCoc && ngayCoCoc >= start && ngayCoCoc <= end && hd.công_nợ !== 0; }); const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC`, data, headers, keys, 'congno'); }
-        function renderCocTab() { const { start, end } = getDateRange(); const today = new Date(); const data = filteredData.filter(hd => hd.ngày_đề_nghị_coc && !hd.ngày_có_coc).map(hd => { const deNghiDate = new Date(hd.ngày_đề_nghị_coc.replace(/-/g, '/')); if (isNaN(deNghiDate.getTime())) return { ...hd, tới_hôm_nay: '' }; return { ...hd, tới_hôm_nay: Math.floor((today - deNghiDate) / 86400000) }; }); const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ']; const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú']; renderDataTable(document.getElementById('coc-content'), `Theo dõi COC`, data, headers, keys, 'coc'); }
-        function renderDaGiaoTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe >= start && hd.ngày_giao_xe <= end); const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG', 'GHI CHÚ']; const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung', 'ghi_chú']; renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe`, data, headers, keys, 'dagiao'); }
-        function renderHoanCocTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_hoàn_cọc && hd.ngày_hoàn_cọc >= start && hd.ngày_hoàn_cọc <= end); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY HOÀN CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_hoàn_cọc', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('hoancoc-content'), `Danh sách hoàn cọc`, data, headers, keys, 'hoancoc'); }
+        function renderKyTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => { const ngayKy = hd.ngày_tt1; return ngayKy && ngayKy >= start && ngayKy <= end; }); const headers = ['STT', 'NGÀY CỌC', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'DỰ KIẾN XHĐ', 'GHI CHÚ']; const keys = ['stt', 'ngày_tt1', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'dự_kiến_xhđ', 'ghi_chú']; renderDataTable(document.getElementById('ky-content'), `Danh sách ký hợp đồng (${data.length})`, data, headers, keys, 'ky'); }
+        function renderXuatTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_xhđ && hd.ngày_xhđ >= start && hd.ngày_xhđ <= end).map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})); const headers = ['STT', 'NGÀY XHĐ', 'TÊN KH', 'TVBH', 'LOẠI XE', 'PHIÊN BẢN', 'NGOẠI THẤT TV', 'NỘI THẤT TV', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'ngày_xhđ', 'tên_kh', 'tvbh', 'loại_xe', 'phiên_bản', 'ngoại_thất_tv', 'nội_thất_tv', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('xuat-content'), `Danh sách xuất HĐ (${data.length})`, data, headers, keys, 'xuat'); }
+        function renderCongNoCocTab() { const { start, end } = getDateRange(); const data = filteredData.map(hd => ({ ...hd, công_nợ: (parseFloat(hd.giá_chốt) || 0) - ((parseFloat(hd.tt1) || 0) + (parseFloat(hd.tt2) || 0) + (parseFloat(hd.tt3) || 0) + (parseFloat(hd.giải_ngân) || 0))})).filter(hd => { const ngayCoCoc = hd.ngày_có_coc; return ngayCoCoc && ngayCoCoc >= start && ngayCoCoc <= end && hd.công_nợ !== 0; }); const headers = ['STT', 'TÊN KH', 'TVBH', 'GIÁ CHỐT', 'CÔNG NỢ', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'giá_chốt', 'công_nợ', 'ghi_chú']; renderDataTable(document.getElementById('congno-content'), `Danh sách công nợ COC (${data.length})`, data, headers, keys, 'congno'); }
+        function renderCocTab() { const { start, end } = getDateRange(); const today = new Date(); const data = filteredData.filter(hd => hd.ngày_đề_nghị_coc && !hd.ngày_có_coc).map(hd => { const deNghiDate = new Date(hd.ngày_đề_nghị_coc.replace(/-/g, '/')); if (isNaN(deNghiDate.getTime())) return { ...hd, tới_hôm_nay: '' }; return { ...hd, tới_hôm_nay: Math.floor((today - deNghiDate) / 86400000) }; }); const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ']; const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú']; renderDataTable(document.getElementById('coc-content'), `Theo dõi COC (${data.length})`, data, headers, keys, 'coc'); }
+        function renderDaGiaoTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe >= start && hd.ngày_giao_xe <= end); const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG', 'GHI CHÚ']; const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung', 'ghi_chú']; renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe (${data.length})`, data, headers, keys, 'dagiao'); }
+        function renderHoanCocTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_hoàn_cọc && hd.ngày_hoàn_cọc >= start && hd.ngày_hoàn_cọc <= end); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY HOÀN CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_hoàn_cọc', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('hoancoc-content'), `Danh sách hoàn cọc (${data.length})`, data, headers, keys, 'hoancoc'); }
 
         function renderDataTable(container, title, data, headers, keys, tabKey) {
              if (!container) return;
-             if (data.length === 0) { container.innerHTML = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title}</h3><div class="text-center p-8">Không có dữ liệu.</div></div>`; return; }
+             // [CẬP NHẬT] Đổi cách hiển thị tiêu đề để không bị lặp lại số lượng
+             const titleHtml = `<h3 class="text-lg font-semibold p-4 border-b">${title}</h3>`;
+             if (data.length === 0) { container.innerHTML = `<div class="bg-white rounded-lg shadow-md">${titleHtml}<div class="text-center p-8">Không có dữ liệu.</div></div>`; return; }
             if (!sortStates[tabKey]) sortStates[tabKey] = { key: keys[0], direction: 'asc' };
             const { key: sortKey, direction: sortDir } = sortStates[tabKey];
             
@@ -752,7 +759,6 @@
                 let valA = a[sortKey]; let valB = b[sortKey];
                 if (sortKey === 'stt') return 0;
                 
-                // Vì backend đã trả về YYYY-MM-DD, việc so sánh chuỗi là đủ cho việc sắp xếp ngày
                 if (sortKey.includes('ngày') || sortKey.includes('date')) {
                     const strA = String(valA || '');
                     const strB = String(valB || '');
@@ -765,7 +771,7 @@
             });
             
             const getSortClass = (k) => (sortKey === k ? `sorted-${sortDir}` : '');
-            let tableHtml = `<div class="bg-white rounded-lg shadow-md"><h3 class="text-lg font-semibold p-4 border-b">${title}</h3><div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
+            let tableHtml = `<div class="bg-white rounded-lg shadow-md">${titleHtml}<div class="overflow-x-auto table-container"><table class="w-full text-sm data-table">`;
             tableHtml += `<thead class="bg-gray-50 text-left"><tr>${headers.map((h, i) => {
                 let headerClass = `p-3 sortable ${getSortClass(keys[i])}`;
                 if (keys[i] === 'ghi_chú') { headerClass += ' ghi-chu-column'; } 
@@ -782,7 +788,6 @@
 
                     if (key === 'stt') { displayValue = index + 1; } 
                     else if (key.includes('ngày') || key.includes('date') || key === 'dự_kiến_xhđ') { displayValue = formatDate(cellValue); } 
-                    // [CẬP NHẬT] Thêm 'da_thanh_toan' vào danh sách các trường cần định dạng tiền tệ
                     else if (['tt1', 'giá_chốt', 'công_nợ', 'team', 'da_thanh_toan'].includes(key)) { displayValue = formatCurrency(cellValue) || cellValue; }
                     
                     if (key === 'ghi_chú') {
