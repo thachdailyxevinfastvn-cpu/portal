@@ -740,7 +740,6 @@
             const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
             let grandTotal = 0;
             processedData.forEach((item, index) => { 
-                if(item.total === 0 && relevantContracts.length > 0) return; // Ẩn nhân viên không có số
                 bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; 
                 carTypes.forEach(car => { 
                     const count = item.counts[car] || 0; 
