@@ -705,10 +705,15 @@
             let processedData = validStaff.map(staff => { const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv); let rowTotal = 0; const counts = {}; carTypes.forEach(car => { const count = staffContracts.filter(hd => hd.loại_xe === car).length; counts[car] = count; rowTotal += count; }); return { staff, counts, total: rowTotal }; });
             
             const teamData = {};
+            const allTeams = [...new Set(validStaff.map(staff => staff.pkd || 'Chưa có team'))];
+            allTeams.forEach(team => {
+                teamData[team] = 0;
+            });
+
+            // Cộng dồn kết quả cho các team có dữ liệu
             processedData.forEach(item => {
-                const team = item.staff.pkd || 'Chưa có team';
                 if (item.total > 0) {
-                    if (!teamData[team]) teamData[team] = 0;
+                    const team = item.staff.pkd || 'Chưa có team';
                     teamData[team] += item.total;
                 }
             });
