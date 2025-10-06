@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f4f7fc; }
         .tab-active { border-color: #1d4ed8; color: #1d4ed8; background-color: white; font-weight: 600; }
@@ -577,6 +579,9 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
+            // [THÊM MỚI] Đăng ký plugin cho ChartJS
+            Chart.register(ChartDataLabels);
+
             fetchData();
             document.getElementById('filter-btn').addEventListener('click', () => renderActiveTab());
             searchInput.addEventListener('input', () => { applySearchFilter(); renderActiveTab(); });
@@ -666,42 +671,102 @@
         function applySearchFilter() { const searchTerm = searchInput.value.toLowerCase().trim(); filteredData = (searchTerm === '') ? allData.hopDong : allData.hopDong.filter(row => Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))); }
         function getDateRange() { return { start: startDateInput.value, end: endDateInput.value }; }
 
+        // [CẬP NHẬT THEO YÊU CẦU] - Toàn bộ hàm renderDashboardTab và hàm hỗ trợ buildPivotTable được cấu trúc lại
         function renderDashboardTab() {
             const container = document.getElementById('dashboard-content');
             const { start, end } = getDateRange();
-            if (!start || !end) { container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`; return; }
-            const buildPivotTable = (title, dateFieldKey, tableType) => {
-                const validStaff = allData.nhanSu.filter(nv => (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc').map((staff, index) => ({...staff, originalIndex: index}));
-                const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort((a, b) => { const aIsVF = a.toUpperCase().startsWith('VF'); const bIsVF = b.toUpperCase().startsWith('VF'); if (aIsVF && !bIsVF) return -1; if (!aIsVF && bIsVF) return 1; return a.localeCompare(b, undefined, {numeric: true}); });
-                if (validStaff.length === 0 || carTypes.length === 0) { return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>`; }
-                const dynamicTitle = `${title} Từ ngày ${formatDate(start)} đến ${formatDate(end)}`;
-                const relevantContracts = filteredData.filter(hd => { const dateValue = hd[dateFieldKey]; return dateValue && dateValue >= start && dateValue <= end; });
-                let processedData = validStaff.map(staff => { const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv); let rowTotal = 0; const counts = {}; carTypes.forEach(car => { const count = staffContracts.filter(hd => hd.loại_xe === car).length; counts[car] = count; rowTotal += count; }); return { staff, counts, total: rowTotal }; });
-                const { key, direction } = sortStates[tableType];
-                processedData.sort((a, b) => { let valA, valB; if (key === 'stt') { valA = a.staff.originalIndex; valB = b.staff.originalIndex; } else if (key === 'tên_nv') { valA = a.staff.tên_nv; valB = b.staff.tên_nv; } else if (key === 'team') { valA = a.staff.pkd || ''; valB = b.staff.pkd || ''; } else if (key === 'total') { valA = a.total; valB = b.total; } else { valA = a.counts[key] || 0; valB = b.counts[key] || 0; } const compare = (typeof valA === 'string') ? valA.localeCompare(valB, 'vi') : (valA > valB ? 1 : (valA < valB ? -1 : 0)); return direction === 'asc' ? compare : -compare; });
-                const getSortClass = (k) => (key === k ? `sorted-${direction}` : '');
-                let headerHtml = `<tr><th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th><th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th><th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
-                carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
-                headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
-                let bodyHtml = '';
-                const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
-                let grandTotal = 0;
-                processedData.forEach((item, index) => { 
-                    bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; 
-                    carTypes.forEach(car => { 
-                        const count = item.counts[car] || 0; 
-                        bodyHtml += `<td class="text-center car-type-cell">${count > 0 ? count : ''}</td>`; 
-                        columnTotals[car] += count; 
-                    }); 
-                    bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; 
-                    grandTotal += item.total; 
-                });
-                let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
-                carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold car-type-cell">${columnTotals[car]}</td>`);
-                footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
-                return `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3><div class="overflow-x-auto table-container" style="max-height: 600px;"><table class="w-full text-sm dashboard-table"><thead>${headerHtml}</thead><tbody class="bg-white">${bodyHtml}</tbody><tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot></table></div></div>`;
+            if (!start || !end) { 
+                container.innerHTML = `<div class="p-4 bg-yellow-100 text-yellow-800 rounded-lg">Vui lòng chọn khoảng thời gian.</div>`; 
+                return; 
+            }
+            
+            const kyResult = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky');
+            const xuatResult = buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
+
+            container.innerHTML = kyResult.html + xuatResult.html;
+
+            // Render biểu đồ sau khi HTML đã được chèn vào DOM
+            if (kyResult.chartInfo) renderBarChart(kyResult.chartInfo.id, kyResult.chartInfo.labels, kyResult.chartInfo.values);
+            if (xuatResult.chartInfo) renderBarChart(xuatResult.chartInfo.id, xuatResult.chartInfo.labels, xuatResult.chartInfo.values);
+        }
+
+        function buildPivotTable(title, dateFieldKey, tableType) {
+            const { start, end } = getDateRange();
+            const validStaff = allData.nhanSu.filter(nv => (nv.chức_vụ === 'TPKD' || nv.chức_vụ === 'TVBH') && nv.trạng_thái === 'Đang làm việc').map((staff, index) => ({...staff, originalIndex: index}));
+            const carTypes = [...new Set(allData.cacNguon.map(item => item.loại_xe).filter(Boolean))].sort((a, b) => { const aIsVF = a.toUpperCase().startsWith('VF'); const bIsVF = b.toUpperCase().startsWith('VF'); if (aIsVF && !bIsVF) return -1; if (!aIsVF && bIsVF) return 1; return a.localeCompare(b, undefined, {numeric: true}); });
+            
+            if (validStaff.length === 0 || carTypes.length === 0) {
+                 return { html: `<div class="bg-white p-4 rounded-lg shadow-md"><h3 class="text-xl font-bold mb-4">${title}</h3><p>Không có dữ liệu.</p></div>` }; 
+            }
+
+            const dynamicTitle = `${title} Từ ngày ${formatDate(start)} đến ${formatDate(end)}`;
+            const relevantContracts = filteredData.filter(hd => { const dateValue = hd[dateFieldKey]; return dateValue && dateValue >= start && dateValue <= end; });
+            
+            let processedData = validStaff.map(staff => { const staffContracts = relevantContracts.filter(hd => hd.tvbh === staff.tên_nv); let rowTotal = 0; const counts = {}; carTypes.forEach(car => { const count = staffContracts.filter(hd => hd.loại_xe === car).length; counts[car] = count; rowTotal += count; }); return { staff, counts, total: rowTotal }; });
+            
+            const teamData = {};
+            processedData.forEach(item => {
+                const team = item.staff.pkd || 'Chưa có team';
+                if (item.total > 0) {
+                    if (!teamData[team]) teamData[team] = 0;
+                    teamData[team] += item.total;
+                }
+            });
+            const sortedTeams = Object.entries(teamData).sort(([, a], [, b]) => b - a);
+            const chartLabels = sortedTeams.map(entry => entry[0]);
+            const chartValues = sortedTeams.map(entry => entry[1]);
+            const chartId = `${tableType}-chart`;
+            
+            const chartHtml = `
+                <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                    <canvas id="${chartId}" style="height: ${Math.max(150, chartLabels.length * 35)}px; width: 100%;"></canvas>
+                </div>
+            `;
+            
+            const { key, direction } = sortStates[tableType] || { key: 'stt', direction: 'asc' };
+            processedData.sort((a, b) => { let valA, valB; if (key === 'stt') { valA = a.staff.originalIndex; valB = b.staff.originalIndex; } else if (key === 'tên_nv') { valA = a.staff.tên_nv; valB = b.staff.tên_nv; } else if (key === 'team') { valA = a.staff.pkd || ''; valB = b.staff.pkd || ''; } else if (key === 'total') { valA = a.total; valB = b.total; } else { valA = a.counts[key] || 0; valB = b.counts[key] || 0; } const compare = (typeof valA === 'string') ? valA.localeCompare(valB, 'vi') : (valA > valB ? 1 : (valA < valB ? -1 : 0)); return direction === 'asc' ? compare : -compare; });
+            
+            const getSortClass = (k) => (key === k ? `sorted-${direction}` : '');
+            let headerHtml = `<tr><th class="sortable ${getSortClass('stt')}" data-sort-key="stt" data-table-type="${tableType}" style="width: 45px;">STT</th><th class="sortable ${getSortClass('tên_nv')}" data-sort-key="tên_nv" data-table-type="${tableType}" style="width: 180px;">TÊN NV</th><th class="sortable ${getSortClass('team')}" data-sort-key="team" data-table-type="${tableType}" style="width: 80px;">TEAM</th>`;
+            carTypes.forEach(car => headerHtml += `<th class="sortable car-type-header ${getSortClass(car)}" data-sort-key="${car}" data-table-type="${tableType}">${car}</th>`);
+            headerHtml += `<th class="sortable ${getSortClass('total')}" data-sort-key="total" data-table-type="${tableType}" style="width: 60px;">TỔNG</th></tr>`;
+            
+            let bodyHtml = '';
+            const columnTotals = carTypes.reduce((acc, car) => ({...acc, [car]: 0}), {});
+            let grandTotal = 0;
+            processedData.forEach((item, index) => { 
+                if(item.total === 0 && relevantContracts.length > 0) return; // Ẩn nhân viên không có số
+                bodyHtml += `<tr><td class="text-center">${index + 1}</td><td class="font-medium">${item.staff.tên_nv}</td><td>${item.staff.pkd || ''}</td>`; 
+                carTypes.forEach(car => { 
+                    const count = item.counts[car] || 0; 
+                    bodyHtml += `<td class="text-center car-type-cell">${count > 0 ? count : ''}</td>`; 
+                    columnTotals[car] += count; 
+                }); 
+                bodyHtml += `<td class="text-center font-bold bg-gray-50">${item.total}</td></tr>`; 
+                grandTotal += item.total; 
+            });
+            
+            let footerHtml = `<tr><td class="font-extrabold" colspan="3">TỔNG CỘNG</td>`;
+            carTypes.forEach(car => footerHtml += `<td class="text-center font-extrabold car-type-cell">${columnTotals[car]}</td>`);
+            footerHtml += `<td class="text-center font-extrabold">${grandTotal}</td></tr>`;
+            
+            const fullHtml = `
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4">${dynamicTitle}</h3>
+                    ${chartValues.length > 0 ? chartHtml : '<p class="text-center text-gray-500 py-4">Không có dữ liệu để vẽ biểu đồ.</p>'}
+                    <div class="overflow-x-auto table-container">
+                        <table class="w-full text-sm dashboard-table">
+                            <thead>${headerHtml}</thead>
+                            <tbody class="bg-white">${bodyHtml}</tbody>
+                            <tfoot class="bg-blue-100 text-blue-800">${footerHtml}</tfoot>
+                        </table>
+                    </div>
+                </div>`;
+
+            return { 
+                html: fullHtml,
+                chartInfo: { id: chartId, labels: chartLabels, values: chartValues }
             };
-            container.innerHTML = buildPivotTable('Bảng kết quả ký', 'ngày_tt1', 'ky') + buildPivotTable('Bảng kết quả xuất', 'ngày_xhđ', 'xuat');
         }
         
         function renderDonTonTab() {
@@ -734,7 +799,6 @@
             renderDataTable(document.getElementById('donton-content'), title, data, headers, keys, 'donton');
         }
         
-        // [CẬP NHẬT THEO YÊU CẦU]
         function renderKyTab() {
             const { start, end } = getDateRange();
             const data = filteredData.filter(hd => {
@@ -765,6 +829,60 @@
         function renderCocTab() { const { start, end } = getDateRange(); const today = new Date(); const data = filteredData.filter(hd => hd.ngày_đề_nghị_coc && !hd.ngày_có_coc).map(hd => { const deNghiDate = new Date(hd.ngày_đề_nghị_coc.replace(/-/g, '/')); if (isNaN(deNghiDate.getTime())) return { ...hd, tới_hôm_nay: '' }; return { ...hd, tới_hôm_nay: Math.floor((today - deNghiDate) / 86400000) }; }); const headers = ['STT', 'NGÀY ĐỀ NGHỊ', 'TỚI HÔM NAY', 'TÊN KH', 'TVBH', 'LOẠI XE', 'GHI CHÚ']; const keys = ['stt', 'ngày_đề_nghị_coc', 'tới_hôm_nay', 'tên_kh', 'tvbh', 'loại_xe', 'ghi_chú']; renderDataTable(document.getElementById('coc-content'), `Theo dõi COC (${data.length})`, data, headers, keys, 'coc'); }
         function renderDaGiaoTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_giao_xe && hd.ngày_giao_xe >= start && hd.ngày_giao_xe <= end); const headers = ['STT', 'NGÀY GIAO XE', 'TÊN KH', 'TVBH', 'LOẠI XE', 'SỐ KHUNG', 'GHI CHÚ']; const keys = ['stt', 'ngày_giao_xe', 'tên_kh', 'tvbh', 'loại_xe', 'số_khung', 'ghi_chú']; renderDataTable(document.getElementById('dagiao-content'), `Danh sách đã giao xe (${data.length})`, data, headers, keys, 'dagiao'); }
         function renderHoanCocTab() { const { start, end } = getDateRange(); const data = filteredData.filter(hd => hd.ngày_hoàn_cọc && hd.ngày_hoàn_cọc >= start && hd.ngày_hoàn_cọc <= end); const headers = ['STT', 'TÊN KH', 'TVBH', 'PKD', 'LOẠI XE', 'NGÀY HOÀN CỌC', 'SỐ TIỀN CỌC', 'GHI CHÚ']; const keys = ['stt', 'tên_kh', 'tvbh', 'team', 'loại_xe', 'ngày_hoàn_cọc', 'tt1', 'ghi_chú']; renderDataTable(document.getElementById('hoancoc-content'), `Danh sách hoàn cọc (${data.length})`, data, headers, keys, 'hoancoc'); }
+
+        // [THÊM MỚI] Hàm vẽ biểu đồ
+        function renderBarChart(canvasId, labels, data) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            const existingChart = Chart.getChart(canvasId);
+            if (existingChart) { existingChart.destroy(); }
+
+            const colors = [
+                'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)',
+                'rgba(255, 206, 86, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)',
+                'rgba(199, 199, 199, 0.6)'
+            ];
+            const borderColors = [
+                'rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)',
+                'rgba(255, 206, 86, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)',
+                'rgba(199, 199, 199, 1)'
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tổng số xe',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                plugins: [ChartDataLabels],
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Thi đua theo TEAM', font: { size: 16, family: 'Inter' }, color: '#374151' },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: '#1f2937',
+                            font: { weight: 'bold', family: 'Inter' }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grace: '5%' },
+                        y: { ticks: { font: { family: 'Inter' } } }
+                    }
+                }
+            });
+        }
 
         function renderDataTable(container, title, data, headers, keys, tabKey) {
              if (!container) return;
