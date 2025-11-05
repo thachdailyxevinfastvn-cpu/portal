@@ -114,11 +114,12 @@
             <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
         </div>
     </header>
+
     <main class="container mx-auto px-6 py-8">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Dashboard Theo dõi KPI</h1>
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard Kế hoạch</h1>
             <button id="open-register-kpi-modal-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                <i class="fas fa-plus"></i> Đăng ký Mục tiêu
+                <i class="fas fa-plus"></i> Đăng ký Kế hoạch
             </button>
         </div>
 
@@ -138,39 +139,39 @@
             
             <div id="kpi-loading-state" class="text-center py-20">
                 <div class="loader"></div>
-                <p class="mt-4 text-lg">Đang tải dữ liệu KPI...</p>
+                <p class="mt-4 text-lg">Đang tải dữ liệu Kế hoạch...</p>
             </div>
         
             <details id="kpi-group-banle" class="hidden" open>
                 <summary>
-                    <span><i class="fas fa-car mr-3 text-blue-600"></i>Chỉ tiêu về Bán lẻ</span>
+                    <span><i class="fas fa-car mr-3 text-blue-600"></i>Kế hoạch Bán lẻ</span>
                 </summary>
                 <div class="kpi-category-content space-y-8" id="kpi-body-banle"></div>
             </details>
             
             <details id="kpi-group-nhansu" class="hidden">
                 <summary>
-                    <span><i class="fas fa-users mr-3 text-green-600"></i>Chỉ tiêu về Nhân sự</span>
+                    <span><i class="fas fa-users mr-3 text-green-600"></i>Kế hoạch Nhân sự</span>
                 </summary>
                 <div class="kpi-category-content space-y-8" id="kpi-body-nhansu"></div>
             </details>
 
             <details id="kpi-group-thitruong" class="hidden">
                 <summary>
-                    <span><i class="fas fa-bullhorn mr-3 text-yellow-600"></i>Chỉ tiêu về Hoạt động Thị trường</span>
+                    <span><i class="fas fa-bullhorn mr-3 text-yellow-600"></i>Kế hoạch Hoạt động Thị trường</span>
                 </summary>
                 <div class="kpi-category-content space-y-8" id="kpi-body-thitruong"></div>
             </details>
             
             <details id="kpi-group-truyenthong" class="hidden">
                 <summary>
-                    <span><i class="fas fa-video mr-3 text-red-600"></i>Chỉ tiêu về Truyền thông</span>
+                    <span><i class="fas fa-video mr-3 text-red-600"></i>Kế hoạch Truyền thông</span>
                 </summary>
                 <div class="kpi-category-content space-y-8" id="kpi-body-truyenthong"></div>
             </details>
 
             <div id="kpi-no-data" class="hidden text-center text-gray-500 py-10">
-                <p>Không có mục tiêu KPI nào trong khoảng thời gian này.</p>
+                <p>Không có kế hoạch nào trong khoảng thời gian này.</p>
             </div>
 
         </div>
@@ -180,16 +181,16 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
              <form id="register-goal-form">
                 <div class="px-6 py-4 border-b">
-                    <h3 class="text-lg font-medium text-gray-900">Đăng ký Mục tiêu Mới</h3>
+                    <h3 class="text-lg font-medium text-gray-900">Đăng ký Kế hoạch Mới</h3>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="form-group">
-                        <label class="block text-sm font-medium text-gray-700">Tên mục tiêu</label>
-                        <input type="text" id="goal-name" class="w-full border-gray-300 rounded-lg shadow-sm" required placeholder="Ví dụ: Chỉ tiêu bán lẻ Tháng 12/2025">
+                        <label class="block text-sm font-medium text-gray-700">Tên Kế hoạch</label>
+                        <input type="text" id="goal-name" class="w-full border-gray-300 rounded-lg shadow-sm" required placeholder="Ví dụ: Kế hoạch bán lẻ Tháng 12/2025">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700">Loại KPI</label>
+                            <label class="block text-sm font-medium text-gray-700">Loại Kế hoạch</label>
                             <select id="goal-type" class="w-full border-gray-300 rounded-lg shadow-sm" required>
                                 <option value="Bán lẻ">Bán lẻ</option>
                                 <option value="Thị trường">Thị trường</option>
@@ -225,7 +226,7 @@
                 </div>
                 <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
                     <button type="button" class="close-modal-btn bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
-                    <button type="submit" id="submit-goal-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Lưu Mục tiêu</button>
+                    <button type="submit" id="submit-goal-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Lưu Kế hoạch</button>
                 </div>
              </form>
         </div>
@@ -236,7 +237,7 @@
     <script src="config.js"></script>
 
     <script>
-        // === DOM Elements (ĐÃ THÊM HEADER ELEMENTS) ===
+        // === DOM Elements (Đầy đủ) ===
         const userFullNameDisplay = document.getElementById('user-fullname');
         const userAvatarDisplay = document.getElementById('user-avatar');
         const logoutBtn = document.getElementById('logout-btn');
@@ -267,10 +268,10 @@
         let userChucVu = '';
         let userPKD = '';
 
-        // --- Hàm Toast, jsonpRequest, postRequest (Giữ nguyên) ---
+        // --- Các hàm tiện ích (Toast, JSONP, POST) ---
         function showToast(message, isSuccess = true) {
             toast.textContent = message;
-            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-500'}`;
             toast.classList.remove('opacity-0');
             setTimeout(() => { toast.classList.add('opacity-0'); }, 4000);
         };
@@ -318,44 +319,33 @@
             }
         }
 
-        // --- Khởi chạy khi tải trang (Sẽ chạy đúng) ---
+        // --- Khởi chạy khi tải trang ---
         window.addEventListener('load', () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
                 window.location.href = 'index.html'; 
                 return;
             }
-            
-            // BƯỚC 1: Parse dữ liệu user
             currentUser = JSON.parse(userDataString);
-            
-            // BƯỚC 2: Hiển thị thông tin header (Quan trọng)
-            // Vì HTML đã có, các dòng này sẽ KHÔNG BỊ LỖI
             userFullNameDisplay.textContent = currentUser.fullName;
             userAvatarDisplay.src = currentUser.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
-            
-            // BƯỚC 3: Lấy quyền
             userChucVu = (currentUser.chucVu || '').toLowerCase();
             userPKD = currentUser.pkd || '';
 
-            // BƯỚC 4: Set ngày mặc định
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
             document.getElementById('kpi-start-date').value = firstDay;
             document.getElementById('kpi-end-date').value = lastDay;
 
-            // BƯỚC 5: KIỂM TRA PHÂN QUYỀN (Sẽ chạy được)
             if (userChucVu === 'tpkd' || userChucVu === 'gdkd') {
-                openRegisterModalBtn.classList.remove('hidden'); // NÚT SẼ HIỆN RA!
+                openRegisterModalBtn.classList.remove('hidden');
                 populatePkdSelect();
             }
-            
-            // BƯỚC 6: Tải dữ liệu
             fetchKpiData();
         });
         
-        // === XỬ LÝ MENU HEADER (ĐÃ THÊM) ===
+        // --- Xử lý Menu Header ---
         logoutBtn.addEventListener('click', () => {
             sessionStorage.removeItem('loggedInUser');
             window.location.href = 'index.html';
@@ -363,9 +353,8 @@
         mobileMenuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
-        // === HẾT XỬ LÝ MENU ===
 
-        // --- POPULATE (Đổ dữ liệu) cho các Select (Giữ nguyên) ---
+        // --- POPULATE (Đổ dữ liệu) cho Select PKD ---
         function populatePkdSelect() {
             goalPkdSelect.innerHTML = ''; 
             if (userChucVu === 'gdkd') {
@@ -380,7 +369,7 @@
             }
         }
         
-        // --- Fetch và Render Dữ liệu KPI (ĐÃ CẬP NHẬT) ---
+        // --- Fetch và Render Dữ liệu KPI ---
         filterKpiBtn.addEventListener('click', fetchKpiData);
 
         async function fetchKpiData() {
@@ -408,16 +397,17 @@
             }
         }
         
+        // --- Render giao diện (Đã cập nhật) ---
         function renderAllKpi(kpiData) {
             Object.values(kpiBodies).forEach(body => {
-                body.innerHTML = `<p class="text-gray-500 italic p-4">Không có mục tiêu nào đang hoạt động.</p>`;
+                body.innerHTML = `<p class="text-gray-500 italic p-4">Không có kế hoạch nào đang hoạt động.</p>`;
             });
-            Object.values(kpiGroups).forEach(group => group.classList.remove('hidden')); // HIỆN TẤT CẢ KHUNG
+            Object.values(kpiGroups).forEach(group => group.classList.remove('hidden')); 
             kpiNoData.classList.add('hidden');
 
             if (!kpiData || kpiData.length === 0) {
                  kpiNoData.classList.remove('hidden');
-                 Object.values(kpiGroups).forEach(group => group.classList.add('hidden')); // Ẩn nếu không có data
+                 Object.values(kpiGroups).forEach(group => group.classList.add('hidden'));
                  return;
             }
             
@@ -432,9 +422,10 @@
             for (const loaiKPI in groupedKPIs) {
                 if (kpiBodies[loaiKPI] && groupedKPIs[loaiKPI].length > 0) {
                     hasData = true;
+                    // Render các mục tiêu
                     kpiBodies[loaiKPI].innerHTML = groupedKPIs[loaiKPI]
                         .map(goal => renderKpiGoal(goal))
-                        .join('<hr class="my-8 border-gray-200">');
+                        .join('<hr class="my-8 border-gray-200">'); // Ngăn cách giữa các mục tiêu
                 }
             }
             
@@ -444,20 +435,39 @@
             }
         }
 
+        /**
+         * Render 1 mục tiêu (đã cập nhật logic Ký/Xuất)
+         */
         function renderKpiGoal(goal) {
+            // Chỉ tiêu tổng tính theo XUẤT (từ backend)
             const percent = (goal.KetQuaTong / goal.ChiTieuTong) * 100 || 0;
             
-            let staffHtml = '<div class="mt-4 space-y-2 border-t pt-4">';
-            const sortedStaff = goal.NhanVien.sort((a, b) => b.KetQuaCaNhan - a.KetQuaCaNhan);
-            let staffCount = 0;
+            let staffHtml = `
+                <div class="mt-4 space-y-2 border-t pt-4">
+                    <div class="grid grid-cols-3 gap-4 text-sm font-semibold text-gray-600 px-2">
+                        <span>Tên Nhân viên</span>
+                        <span class="text-center">Ký</span>
+                        <span class="text-center">Xuất</span>
+                    </div>
+            `;
+            
+            // Sắp xếp NV theo tổng Ký + Xuất giảm dần
+            const sortedStaff = goal.NhanVien.sort((a, b) => 
+                (b.KetQuaCaNhan.xuat + b.KetQuaCaNhan.ky) - (a.KetQuaCaNhan.xuat + a.KetQuaCaNhan.ky)
+            );
+            
+            let staffWithActivity = 0;
             
             sortedStaff.forEach(nv => {
-                if (nv.KetQuaCaNhan > 0) {
-                     staffCount++;
+                const kq = nv.KetQuaCaNhan;
+                // Chỉ hiển thị NV có hoạt động (Ký > 0 hoặc Xuất > 0)
+                if (kq.ky > 0 || kq.xuat > 0) {
+                     staffWithActivity++;
                      staffHtml += `
-                        <div class="flex justify-between text-sm text-gray-700">
+                        <div class="grid grid-cols-3 gap-4 text-sm text-gray-800 px-2 py-1 rounded hover:bg-gray-100">
                             <span>${nv.TenNV}</span>
-                            <span class="font-medium">${nv.KetQuaCaNhan} ${goal.DonVi}</span>
+                            <span class="text-center font-medium">${kq.ky}</span>
+                            <span class="text-center font-medium text-blue-700">${kq.xuat}</span>
                         </div>
                     `;
                 }
@@ -470,11 +480,12 @@
                         <span class="font-semibold text-lg">${goal.TenMucTieu} (${goal.PKD})</span>
                     </div>
                     <div class="flex justify-between text-lg font-bold mb-1">
-                        <span>Tổng</span>
+                        <span>Tổng (Chỉ tiêu tính theo XUẤT)</span>
                         <span>${goal.KetQuaTong} / ${goal.ChiTieuTong} ${goal.DonVi}</span>
                     </div>
                     ${renderProgressBar(percent, `${percent.toFixed(0)}%`)}
-                    ${staffCount > 0 ? staffHtml : ''}
+                    
+                    ${staffWithActivity > 0 ? staffHtml : ''}
                 </div>
             `;
         }
@@ -490,7 +501,7 @@
             `;
         }
         
-        // --- Xử lý sự kiện cho Modal (Giữ nguyên) ---
+        // --- Xử lý sự kiện cho Modal ---
         openRegisterModalBtn.addEventListener('click', () => {
             registerGoalModal.style.display = 'flex';
         });
@@ -500,7 +511,7 @@
             });
         });
 
-        // --- Xử lý Submit Form (Giữ nguyên) ---
+        // --- Xử lý Submit Form ---
         document.getElementById('register-goal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-goal-btn');
@@ -519,7 +530,7 @@
                 };
                 
                 await postRequest('registerKpiGoal', data);
-                showToast('Đăng ký mục tiêu thành công!', true);
+                showToast('Đăng ký Kế hoạch thành công!', true);
                 registerGoalModal.style.display = 'none';
                 e.target.reset(); 
                 fetchKpiData(); 
@@ -528,7 +539,7 @@
                 // (showToast đã được gọi bên trong postRequest)
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Lưu Mục tiêu';
+                btn.textContent = 'Lưu Kế hoạch';
             }
         });
     </script>
