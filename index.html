@@ -3,137 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webapp Đăng nhập</title>
+    <title>VinFast Thủ Dầu Một - Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Nạp file cấu hình -->
+    
     <script src="config.js"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
         .button-loading::after { 
             content: ''; 
-            display: inline-block; 
-            width: 16px; 
-            height: 16px; 
-            border: 2px solid transparent; 
-            border-top-color: white; 
-            border-radius: 50%; 
-            animation: spin 1s linear infinite; 
-            margin-left: 10px; 
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
         }
         @keyframes spin { 
             to { transform: rotate(360deg); } 
         }
+        .lightswipe {
+            position: relative;
+            display: inline-block;
+            overflow: hidden;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+        }
+        .lightswipe::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+            transform: skewX(-25deg);
+            animation: lightswipe-effect 4s infinite linear;
+        }
+        @keyframes lightswipe-effect {
+            100% {
+                left: 150%;
+            }
+        }
     </style>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-</head>
-<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+    </head>
+<body class="flex flex-col min-h-screen">
 
-    <div id="app" class="w-full max-w-md mx-auto">
-        <div id="login-screen">
-            <div class="bg-white p-8 rounded-xl shadow-lg">
-                <h1 class="text-2xl font-bold text-center mb-1">Chào mừng!</h1>
-                <p class="text-center text-gray-500 mb-6">Vui lòng đăng nhập để vào Portal</p>
-                <form id="login-form">
-                    <div class="mb-4">
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
-                        <input type="text" id="username" name="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div id="app" class="w-full max-w-md mx-auto">
+            <div id="login-screen">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="text-center mb-6">
+                        <span class="text-3xl font-bold text-blue-700">VinFast</span>
+                        <span class="text-3xl font-bold text-gray-700">Thủ Dầu Một</span>
                     </div>
-                    <div class="mb-6">
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
-                        <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <button type="submit" id="login-button" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center h-10">
-                        Đăng nhập
-                    </button>
-                </form>
+                    <h1 class="text-2xl font-bold text-center mb-1">Chào mừng trở lại!</h1>
+                    <p class="text-center text-gray-500 mb-6">Đăng nhập vào hệ thống quản lý.</p>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại (SĐT)</label>
+                            <input type="text" id="username" name="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-5">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                            <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <button type="submit" id="login-button" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center h-10 transition-colors">
+                            Đăng nhập
+                        </button>
+                        <div class="text-center mt-4">
+                            <a href="#" id="forgot-password-link" class="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="log-container" class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative hidden">
+                    <strong class="font-bold">Nhật ký lỗi:</strong>
+                    <span class="block sm:inline" id="log-message"></span>
+                </div>
+
             </div>
         </div>
-    </div>
-
-    <!-- Hộp thông báo -->
+    </main>
+    
     <div id="message-box" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-lg transform translate-x-[120%] transition-transform duration-300">
         <p id="message-text"></p>
     </div>
 
+    <footer class="text-center py-4 text-sm text-gray-600 bg-transparent">
+        <p class="mb-1 flex justify-center items-baseline">
+            <span>Bản quyền © 2025&nbsp;</span>
+            <span class="lightswipe">Thạch Tech.</span>
+        </p>
+        <p>Hỗ trợ kỹ thuật liên hệ <a href="https://zalo.me/0888466060" target="_blank" rel="noopener noreferrer" class="font-medium text-blue-600 hover:underline">0888.46.6060</a></p>
+    </footer>
+
     <script>
-        // --- CẤU HÌNH ---
-        // Biến APPS_SCRIPT_URL giờ đây được lấy từ file config.js
-        // Không cần định nghĩa ở đây nữa.
+    // --- DOM Elements ---
+    const loginForm = document.getElementById('login-form');
+    const loginButton = document.getElementById('login-button');
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const logContainer = document.getElementById('log-container');
+    const logMessage = document.getElementById('log-message');
 
-        // --- DOM Elements ---
-        const loginForm = document.getElementById('login-form');
-        const loginButton = document.getElementById('login-button');
-        const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
+    // --- Utility Functions ---
+    function showToast(message, isSuccess = true) {
+        messageText.textContent = message;
+        messageBox.className = `fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`;
+        messageBox.classList.remove('translate-x-[120%]');
+        setTimeout(() => { messageBox.classList.add('translate-x-[120%]'); }, 4000);
+    }
+    
+    function displayLogError(message) {
+        logMessage.textContent = message;
+        logContainer.classList.remove('hidden');
+    }
 
-        // --- Functions ---
-        function showMessage(message, isSuccess = true) {
-            messageText.textContent = message;
-            messageBox.className = `fixed top-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`;
-            messageBox.classList.remove('translate-x-[120%]');
-            setTimeout(() => { messageBox.classList.add('translate-x-[120%]'); }, 3000);
+    function setButtonLoading(button, isLoading, defaultHtml) {
+        if (isLoading) {
+            button.disabled = true;
+            button.classList.add('button-loading', 'opacity-80');
+            button.innerHTML = 'Đang xử lý...';
+        } else {
+            button.disabled = false;
+            button.classList.remove('button-loading', 'opacity-80');
+            button.innerHTML = defaultHtml;
+        }
+    }
+
+    // --- Main Login Logic ---
+    function handleLogin() {
+        const originalBtnHtml = loginButton.innerHTML;
+        setButtonLoading(loginButton, true, originalBtnHtml);
+        logContainer.classList.add('hidden'); 
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+            const msg = "Vui lòng nhập đủ Số điện thoại và Mật khẩu.";
+            showToast(msg, false);
+            displayLogError(msg);
+            setButtonLoading(loginButton, false, originalBtnHtml);
+            return;
         }
 
-        function setLoading(button, isLoading) {
-            button.disabled = isLoading;
-            if (isLoading) {
-                button.classList.add('button-loading');
-            } else {
-                button.classList.remove('button-loading');
-            }
-        }
-
-        async function handleApiRequest(payload, button) {
-            if (typeof APPS_SCRIPT_URL === 'undefined' || !APPS_SCRIPT_URL) {
-                showMessage('Lỗi: Không tìm thấy URL của Apps Script trong file config.js.', false);
-                return null;
-            }
-            setLoading(button, true);
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                window[callbackName] = (data) => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    setLoading(button, false);
-                    resolve(data);
-                };
-                const script = document.createElement('script');
-                script.onerror = () => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    setLoading(button, false);
-                    showMessage('Lỗi mạng hoặc URL API không hợp lệ.', false);
-                    reject(new Error('JSONP request failed'));
-                };
-                const params = new URLSearchParams({ ...payload, callback: callbackName });
-                script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
-                document.body.appendChild(script);
+        try {
+            const params = new URLSearchParams({
+                action: 'checkUserLogin',
+                username: username, // Gửi SĐT
+                password: password,
+                callback: 'handleLoginResponse'
             });
+
+            const script = document.createElement('script');
+            
+            // Biến APPS_SCRIPT_URL được lấy từ file config.js
+            script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+
+            window.handleLoginResponse = (result) => {
+                setButtonLoading(loginButton, false, originalBtnHtml);
+                
+                const serverMessage = result.data ? result.data.message : (result.message || "Lỗi không xác định.");
+
+                if (result.status === 'SUCCESS' && result.data.isValid) {
+                    showToast("Đăng nhập thành công!", true);
+                    // Lưu thông tin user vào sessionStorage
+                    sessionStorage.setItem('loggedInUser', JSON.stringify(result.data.userInfo));
+                    
+                    const user = result.data.userInfo;
+                    const chucVu = (user.chucVu || '').trim().toLowerCase();
+                    
+                    // Phân luồng sau khi đăng nhập
+                    if (chucVu === 'gdkd' || chucVu === 'tpkd') {
+                        window.location.href = 'quanly.html'; // Trang quản lý
+                    } else {
+                        window.location.href = 'homepage.html'; // Trang nhân viên
+                    }
+
+                } else {
+                    showToast(serverMessage, false);
+                    displayLogError(`Server trả về: ${serverMessage}`);
+                }
+                document.body.removeChild(script);
+                delete window.handleLoginResponse;
+            };
+
+            script.onerror = () => { 
+                const msg = "Lỗi kết nối đến máy chủ. Kiểm tra lại URL trong config.js hoặc tình trạng mạng.";
+                showToast(msg, false);
+                displayLogError(msg);
+                if (window.handleLoginResponse) delete window.handleLoginResponse;
+            };
+            document.body.appendChild(script);
+
+        } catch (error) {
+            const msg = `Lỗi phía client: ${error.message}`;
+            showToast(msg, false);
+            displayLogError(msg);
+            setButtonLoading(loginButton, false, originalBtnHtml);
+        }
+    }
+
+    // --- Logic xử lý quên mật khẩu ---
+    function handleForgotPassword() {
+        const usernameInput = prompt("Vui lòng nhập Số điện thoại (SĐT) của bạn để khôi phục mật khẩu:");
+
+        if (!usernameInput || usernameInput.trim() === '') {
+            return;
         }
         
-        // --- Event Listener ---
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const payload = { action: 'login', username, password };
-            const result = await handleApiRequest(payload, loginButton);
+        const username = usernameInput.trim(); // Đây là SDT
+        showToast("Đang gửi yêu cầu, vui lòng chờ...", true);
 
-            if (result && result.success) {
-                // Lưu thông tin người dùng vào sessionStorage để trang homepage.html có thể truy cập
-                sessionStorage.setItem('loggedInUser', JSON.stringify({
-                    fullName: result.fullName,
-                    imageUrl: result.imageUrl
-                }));
-                // Chuyển hướng đến trang homepage
+        try {
+            const params = new URLSearchParams({
+                action: 'forgotPassword',
+                username: username, // Gửi SDT
+                callback: 'handleForgotResponse'
+            });
+
+            const script = document.createElement('script');
+            script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+
+            window.handleForgotResponse = (result) => {
+                const serverMessage = result.data ? result.data.message : "Có lỗi xảy ra.";
+                const isSuccess = result.status === 'SUCCESS' && result.data.success;
+                showToast(serverMessage, isSuccess);
+                if(!isSuccess) displayLogError(`Quên mật khẩu: ${serverMessage}`);
+
+                document.body.removeChild(script);
+                delete window.handleForgotResponse;
+            };
+
+            script.onerror = () => { 
+                const msg = "Lỗi kết nối đến máy chủ khi yêu cầu quên mật khẩu.";
+                showToast(msg, false);
+                displayLogError(msg);
+            };
+            document.body.appendChild(script);
+
+        } catch (error) {
+            const msg = `Đã xảy ra lỗi: ${error.message}`;
+            showToast(msg, false);
+            displayLogError(msg);
+        }
+    }
+
+
+    // --- Event Listeners ---
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleLogin();
+    });
+
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        handleForgotPassword();
+    });
+
+    // Tự động chuyển trang nếu đã đăng nhập
+    document.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('loggedInUser')) {
+            const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            const chucVu = (user.chucVu || '').trim().toLowerCase();
+            
+             if (chucVu === 'gdkd' || chucVu === 'tpkd') {
+                window.location.href = 'quanly.html';
+            } else {
                 window.location.href = 'homepage.html';
-            } else if (result) {
-                showMessage(result.message || 'Đăng nhập thất bại.', false);
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
