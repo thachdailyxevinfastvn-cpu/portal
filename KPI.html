@@ -271,7 +271,7 @@
         // --- Các hàm tiện ích (Toast, JSONP, POST) ---
         function showToast(message, isSuccess = true) {
             toast.textContent = message;
-            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-500'}`;
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
             toast.classList.remove('opacity-0');
             setTimeout(() => { toast.classList.add('opacity-0'); }, 4000);
         };
@@ -437,6 +437,7 @@
 
         /**
          * Render 1 mục tiêu (đã cập nhật logic Ký/Xuất)
+         * === ĐÂY LÀ HÀM ĐÃ SỬA LỖI ===
          */
         function renderKpiGoal(goal) {
             // Chỉ tiêu tổng tính theo XUẤT (từ backend)
@@ -456,21 +457,17 @@
                 (b.KetQuaCaNhan.xuat + b.KetQuaCaNhan.ky) - (a.KetQuaCaNhan.xuat + a.KetQuaCaNhan.ky)
             );
             
-            let staffWithActivity = 0;
-            
+            // *** SỬA LỖI: ***
+            // Vòng lặp này sẽ hiển thị TẤT CẢ nhân viên, kể cả người có Ký = 0 và Xuất = 0
             sortedStaff.forEach(nv => {
                 const kq = nv.KetQuaCaNhan;
-                // Chỉ hiển thị NV có hoạt động (Ký > 0 hoặc Xuất > 0)
-                if (kq.ky > 0 || kq.xuat > 0) {
-                     staffWithActivity++;
-                     staffHtml += `
-                        <div class="grid grid-cols-3 gap-4 text-sm text-gray-800 px-2 py-1 rounded hover:bg-gray-100">
-                            <span>${nv.TenNV}</span>
-                            <span class="text-center font-medium">${kq.ky}</span>
-                            <span class="text-center font-medium text-blue-700">${kq.xuat}</span>
-                        </div>
-                    `;
-                }
+                staffHtml += `
+                    <div class="grid grid-cols-3 gap-4 text-sm text-gray-800 px-2 py-1 rounded hover:bg-gray-100">
+                        <span>${nv.TenNV}</span>
+                        <span class="text-center font-medium">${kq.ky}</span>
+                        <span class="text-center font-medium text-blue-700">${kq.xuat}</span>
+                    </div>
+                `;
             });
             staffHtml += '</div>';
 
@@ -485,7 +482,7 @@
                     </div>
                     ${renderProgressBar(percent, `${percent.toFixed(0)}%`)}
                     
-                    ${staffWithActivity > 0 ? staffHtml : ''}
+                    ${goal.NhanVien.length > 0 ? staffHtml : ''} 
                 </div>
             `;
         }
