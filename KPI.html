@@ -8,93 +8,419 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-
-        /* Custom animation for the rocket */
-        @keyframes rocket-launch {
-            0% { transform: translateY(20px) rotate(-45deg); opacity: 0.8; }
-            100% { transform: translateY(-100vh) translateX(100vw) rotate(-45deg); opacity: 1; }
+        .progress-bar {
+            background-color: #e0e0e0;
+            border-radius: 99px;
+            overflow: hidden;
+            height: 1.25rem; /* 20px */
         }
-        .animate-rocket-launch {
-            animation: rocket-launch 3s ease-in-out infinite;
-            color: #ef4444; /* red-500 */
+        .progress-bar-inner {
+            background-color: #2563eb; /* blue-600 */
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            line-height: 1.25rem;
+            white-space: nowrap;
         }
+        .loader {
+            border: 4px solid #e5e7eb; 
+            border-left-color: #1d4ed8; 
+            border-radius: 50%; 
+            width: 48px; 
+            height: 48px; 
+            animation: spin 1s linear infinite; 
+            margin: auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
-<body class="bg-gray-50 overflow-hidden">
+<body class="bg-gray-50">
 
     <header class="bg-white shadow-md sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
-            <div class="hidden md:flex items-center space-x-2">
-                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
-                <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
-                <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
-                <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
-                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
-                <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">KPI</a>
-                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
-            </div>
-            <div class="flex items-center">
-                <div id="user-profile" class="flex items-center space-x-3"><span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span><img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500"></div>
-                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg></button>
-                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
-            </div>
-        </nav>
-        <div id="mobile-menu" class="md:hidden hidden bg-white border-t"><a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a><a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a><a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a><a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a><a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a><a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">KPI</a><a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a></div>
-    </header>
+        </header>
 
-    <main class="container mx-auto px-6 py-8 h-[calc(100vh-80px)] flex items-center justify-center">
-        <div class="absolute bottom-0 left-0">
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 animate-rocket-launch" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-            </svg>
+    <main class="container mx-auto px-6 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Dashboard Theo dõi KPI</h1>
+            <button id="open-register-kpi-modal-btn" class="hidden bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <i class="fas fa-plus"></i> Đăng ký Mục tiêu
+            </button>
         </div>
 
-        <section class="text-center">
-            <h1 class="text-5xl md:text-7xl font-black text-red-600 uppercase animate-pulse">
-                KPI dí sát đít rồi!
-            </h1>
-            <div class="mt-8 flex justify-center items-center space-x-4">
-                <span class="animate-spin text-4xl">🔥</span>
-                <p class="text-2xl md:text-3xl font-bold text-gray-800">
-                    Chạy số đi...
-                </p>
-                <span class="animate-spin text-4xl">🔥</span>
+        <div class="mb-6 p-4 bg-white rounded-lg shadow-sm flex flex-wrap items-end gap-4">
+            <div class="flex-auto">
+                <label for="kpi-start-date" class="block text-sm font-medium text-gray-700 mb-1">Từ ngày</label>
+                <input type="date" id="kpi-start-date" class="w-full border-gray-300 rounded-lg shadow-sm">
             </div>
-            <p class="mt-6 text-gray-500 italic">...trang này sẽ hiển thị sau.</p>
-        </section>
+            <div class="flex-auto">
+                <label for="kpi-end-date" class="block text-sm font-medium text-gray-700 mb-1">Đến ngày</label>
+                <input type="date" id="kpi-end-date" class="w-full border-gray-300 rounded-lg shadow-sm">
+            </div>
+            <button id="filter-kpi-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem</button>
+        </div>
+
+        <div id="kpi-content-wrapper" class="space-y-8">
+            <div id="kpi-loading-state" class="text-center py-20">
+                <div class="loader"></div>
+                <p class="mt-4 text-lg">Đang tải dữ liệu KPI...</p>
+            </div>
+            <div id="kpi-sections-container"></div>
+        </div>
     </main>
-    
+
+    <div id="register-goal-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+             <form id="register-goal-form">
+                <div class="px-6 py-4 border-b">
+                    <h3 class="text-lg font-medium text-gray-900">Đăng ký Mục tiêu Mới</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700">Tên mục tiêu</label>
+                        <input type="text" id="goal-name" class="w-full border-gray-300 rounded-lg shadow-sm" required placeholder="Ví dụ: Chỉ tiêu bán lẻ Tháng 12/2025">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Loại KPI</label>
+                            <select id="goal-type" class="w-full border-gray-300 rounded-lg shadow-sm" required>
+                                <option value="Bán lẻ">Bán lẻ</option>
+                                <option value="Thị trường">Thị trường</option>
+                                <option value="Truyền thông">Truyền thông</option>
+                                <option value="Nhân sự">Nhân sự</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Phòng ban (PKD)</label>
+                            <select id="goal-pkd" class="w-full border-gray-300 rounded-lg shadow-sm" required>
+                                </select>
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Chỉ tiêu Tổng</label>
+                            <input type="number" id="goal-total" class="w-full border-gray-300 rounded-lg shadow-sm" required placeholder="Ví dụ: 28">
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Đơn vị</label>
+                            <input type="text" id="goal-unit" class="w-full border-gray-300 rounded-lg shadow-sm" required placeholder="Ví dụ: xe, sự kiện, video">
+                        </div>
+                    </div>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
+                            <input type="date" id="goal-start-date" class="w-full border-gray-300 rounded-lg shadow-sm" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700">Ngày kết thúc</label>
+                            <input type="date" id="goal-end-date" class="w-full border-gray-300 rounded-lg shadow-sm" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+                    <button type="button" class="close-modal-btn bg-white border border-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50">Hủy</button>
+                    <button type="submit" id="submit-goal-btn" class="bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-green-700">Lưu Mục tiêu</button>
+                </div>
+             </form>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg opacity-0 transition-opacity duration-300"></div>
+
+    <script src="config.js"></script>
+
     <script>
+        // --- DOM Elements (Giữ nguyên) ---
         const userFullNameDisplay = document.getElementById('user-fullname');
         const userAvatarDisplay = document.getElementById('user-avatar');
-        const logoutBtn = document.getElementById('logout-btn');
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
+        // ... (các element khác)
+        const kpiContentWrapper = document.getElementById('kpi-content-wrapper');
+        const kpiLoadingState = document.getElementById('kpi-loading-state');
+        const kpiSectionsContainer = document.getElementById('kpi-sections-container');
+        const openRegisterModalBtn = document.getElementById('open-register-kpi-modal-btn');
+        const filterKpiBtn = document.getElementById('filter-kpi-btn');
+        const toast = document.getElementById('toast');
+        const registerGoalModal = document.getElementById('register-goal-modal');
+        const goalPkdSelect = document.getElementById('goal-pkd');
+        
+        // --- Biến toàn cục (Đã xóa staffList) ---
+        let currentUser = null; 
+        let userChucVu = '';
+        let userPKD = '';
 
+        // --- Hàm Toast, jsonpRequest, postRequest (Giữ nguyên) ---
+        function showToast(message, isSuccess = true) {
+            toast.textContent = message;
+            toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
+        };
+        async function jsonpRequest(payload) {
+            if (typeof APPS_SCRIPT_URL === 'undefined') {
+                showToast("Lỗi: Không tìm thấy APPS_SCRIPT_URL. Kiểm tra file config.js.", false);
+                return;
+            }
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.onerror = (e) => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP request failed'));
+                };
+                const params = new URLSearchParams({ ...payload, callback: callbackName });
+                script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
+                document.body.appendChild(script);
+            });
+        }
+        async function postRequest(action, data) {
+             try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: action,
+                        data: data,
+                        userInfo: currentUser 
+                    })
+                });
+                const result = await response.json();
+                if (result.status === 'ERROR') throw new Error(result.message);
+                return result;
+            } catch (error) {
+                console.error(`Lỗi khi POST action '${action}':`, error);
+                showToast(`Lỗi: ${error.message}`, false);
+                throw error;
+            }
+        }
+
+
+        // --- Khởi chạy khi tải trang (Giữ nguyên) ---
         window.addEventListener('load', () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
-                window.location.href = 'index.html';
+                window.location.href = 'index.html'; 
                 return;
             }
-            const userData = JSON.parse(userDataString);
-            userFullNameDisplay.textContent = userData.fullName;
-            userAvatarDisplay.src = userData.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            currentUser = JSON.parse(userDataString);
+            userFullNameDisplay.textContent = currentUser.fullName;
+            userAvatarDisplay.src = currentUser.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            userChucVu = (currentUser.chucVu || '').toLowerCase();
+            userPKD = currentUser.pkd || '';
+
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+            document.getElementById('kpi-start-date').value = firstDay;
+            document.getElementById('kpi-end-date').value = lastDay;
+
+            if (userChucVu === 'tpkd' || userChucVu === 'gdkd') {
+                openRegisterModalBtn.classList.remove('hidden');
+                populatePkdSelect();
+            }
+            fetchKpiData();
+        });
+        
+        // --- Xử lý Menu, Logout (Giữ nguyên) ---
+        // ... (code logout, mobile menu)
+
+        // --- POPULATE (Đổ dữ liệu) cho các Select ---
+        function populatePkdSelect() {
+            goalPkdSelect.innerHTML = ''; 
+            if (userChucVu === 'gdkd') {
+                // GDKD thấy 2 phòng
+                goalPkdSelect.innerHTML = `
+                    <option value="">-- Chọn PKD --</option>
+                    <option value="PKD-1">PKD-1</option>
+                    <option value="PKD-2">PKD-2</option>
+                `;
+            } else if (userChucVu === 'tpkd') {
+                // TPKD chỉ thấy PKD của mình
+                goalPkdSelect.innerHTML = `<option value="${userPKD}">${userPKD}</option>`;
+                goalPkdSelect.disabled = true;
+            }
+        }
+        
+        // (ĐÃ XÓA hàm populateStaffSelect)
+        
+        // --- Fetch và Render Dữ liệu KPI (Đã cập nhật) ---
+        filterKpiBtn.addEventListener('click', fetchKpiData);
+
+        async function fetchKpiData() {
+            kpiLoadingState.style.display = 'block';
+            kpiSectionsContainer.innerHTML = '';
+
+            try {
+                const payload = {
+                    action: 'getKpiDashboard',
+                    user: JSON.stringify(currentUser),
+                    startDate: document.getElementById('kpi-start-date').value,
+                    endDate: document.getElementById('kpi-end-date').value
+                };
+                
+                const result = await jsonpRequest(payload);
+                if (result.status === 'ERROR') throw new Error(result.message);
+                
+                // (ĐÃ XÓA logic lưu staffList)
+                
+                // Render dữ liệu
+                renderAllKpi(result.data.kpiData);
+
+            } catch (error) {
+                console.error("Lỗi tải dữ liệu KPI:", error);
+                kpiSectionsContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi tải dữ liệu: ${error.message}</p>`;
+            } finally {
+                kpiLoadingState.style.display = 'none';
+            }
+        }
+        
+        function renderAllKpi(kpiData) {
+            kpiSectionsContainer.innerHTML = ''; 
+            if (!kpiData || kpiData.length === 0) {
+                 kpiSectionsContainer.innerHTML = `<p class="text-gray-500 text-center">Không có mục tiêu KPI nào trong khoảng thời gian này.</p>`;
+                 return;
+            }
+            const groupedKPIs = kpiData.reduce((acc, goal) => {
+                const key = goal.LoaiKPI || 'Khác';
+                if (!acc[key]) acc[key] = [];
+                acc[key].push(goal);
+                return acc;
+            }, {});
+            for (const loaiKPI in groupedKPIs) {
+                kpiSectionsContainer.innerHTML += renderKpiSection(loaiKPI, groupedKPIs[loaiKPI]);
+            }
+        }
+
+        // (Hàm renderKpiSection giữ nguyên)
+        function renderKpiSection(loaiKPI, goals) {
+            let goalsHtml = goals.map(goal => renderKpiGoal(goal)).join('');
+            return `
+                <section class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-2xl font-bold text-blue-800 mb-6">${loaiKPI}</h3>
+                    <div class="space-y-8">
+                        ${goalsHtml}
+                    </div>
+                </section>
+            `;
+        }
+        
+        // (Hàm renderKpiGoal ĐÃ CẬP NHẬT)
+        function renderKpiGoal(goal) {
+            const percent = (goal.KetQuaTong / goal.ChiTieuTong) * 100 || 0;
+            
+            // (ĐÃ XÓA Nút Giao việc)
+
+            // Render danh sách kết quả nhân viên
+            let staffHtml = '<div class="mt-4 space-y-2 border-t pt-4">';
+            // Sắp xếp NV theo kết quả giảm dần
+            const sortedStaff = goal.NhanVien.sort((a, b) => b.KetQuaCaNhan - a.KetQuaCaNhan);
+            
+            sortedStaff.forEach(nv => {
+                // Chỉ hiển thị NV có kết quả
+                if (nv.KetQuaCaNhan > 0) {
+                     staffHtml += `
+                        <div class="flex justify-between text-sm text-gray-700">
+                            <span>${nv.TenNV}</span>
+                            <span class="font-medium">${nv.KetQuaCaNhan} ${goal.DonVi}</span>
+                        </div>
+                    `;
+                }
+            });
+            staffHtml += '</div>';
+
+            return `
+                <div class="kpi-goal-item">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold text-lg">${goal.TenMucTieu} (${goal.PKD})</span>
+                        </div>
+                    <div class="flex justify-between text-lg font-bold mb-1">
+                        <span>Tổng</span>
+                        <span>${goal.KetQuaTong} / ${goal.ChiTieuTong} ${goal.DonVi}</span>
+                    </div>
+                    ${renderProgressBar(percent, `${percent.toFixed(0)}%`)}
+                    
+                    ${goal.KetQuaTong > 0 ? staffHtml : ''}
+                </div>
+            `;
+        }
+        
+        // (Hàm renderProgressBar giữ nguyên)
+         function renderProgressBar(percent, text) {
+            const displayPercent = Math.min(100, Math.max(0, percent));
+            return `
+                <div class="progress-bar">
+                    <div class="progress-bar-inner" style="width: ${displayPercent}%">
+                        ${text}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- Xử lý sự kiện cho Modal (ĐÃ CẬP NHẬT) ---
+        
+        // Mở Modal Đăng ký
+        openRegisterModalBtn.addEventListener('click', () => {
+            registerGoalModal.style.display = 'flex';
         });
 
-        logoutBtn.addEventListener('click', () => {
-            sessionStorage.removeItem('loggedInUser');
-            window.location.href = 'index.html';
+        // Đóng Modal
+        document.querySelectorAll('.close-modal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.closest('.fixed').style.display = 'none';
+            });
         });
 
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+        // (ĐÃ XÓA Event Listener cho nút 'Giao việc')
+
+        // --- Xử lý Submit Form (ĐÃ CẬP NHẬT) ---
+        
+        // Form 1: Đăng ký Mục tiêu (Giữ nguyên)
+        document.getElementById('register-goal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-goal-btn');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+            
+            try {
+                const data = {
+                    TenMucTieu: document.getElementById('goal-name').value,
+                    LoaiKPI: document.getElementById('goal-type').value,
+                    PKD: document.getElementById('goal-pkd').value,
+                    ChiTieuTong: document.getElementById('goal-total').value,
+                    DonVi: document.getElementById('goal-unit').value,
+                    NgayBatDau: document.getElementById('goal-start-date').value,
+                    NgayKetThuc: document.getElementById('goal-end-date').value,
+                };
+                
+                await postRequest('registerKpiGoal', data);
+                
+                showToast('Đăng ký mục tiêu thành công!', true);
+                registerGoalModal.style.display = 'none';
+                e.target.reset(); 
+                fetchKpiData(); 
+
+            } catch (error) {
+                // (showToast đã được gọi bên trong postRequest)
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Lưu Mục tiêu';
+            }
         });
+
+        // (ĐÃ XÓA Event Listener cho Form 2 'Giao việc')
+
     </script>
 </body>
 </html>
