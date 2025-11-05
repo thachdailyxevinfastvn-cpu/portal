@@ -319,7 +319,7 @@
             }
         }
 
-        // --- Khởi chạy khi tải trang ---
+        // --- Khởi chạy khi tải trang (ĐÃ SỬA LỖI NGÀY) ---
         window.addEventListener('load', () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
@@ -332,11 +332,23 @@
             userChucVu = (currentUser.chucVu || '').toLowerCase();
             userPKD = currentUser.pkd || '';
 
+            // *** BẮT ĐẦU SỬA LỖI NGÀY MẶC ĐỊNH ***
             const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Tháng (01-12)
+            
+            // Ngày đầu tiên của tháng
+            const firstDay = `${yyyy}-${mm}-01`;
+            
+            // Ngày cuối cùng của tháng
+            // (Tạo ngày 0 của tháng tiếp theo, nó sẽ tự lùi về ngày cuối của tháng này)
+            const lastDayDate = new Date(yyyy, today.getMonth() + 1, 0);
+            const ddLast = String(lastDayDate.getDate()).padStart(2, '0');
+            const lastDay = `${yyyy}-${mm}-${ddLast}`;
+            
             document.getElementById('kpi-start-date').value = firstDay;
             document.getElementById('kpi-end-date').value = lastDay;
+            // *** KẾT THÚC SỬA LỖI NGÀY MẶC ĐỊNH ***
 
             if (userChucVu === 'tpkd' || userChucVu === 'gdkd') {
                 openRegisterModalBtn.classList.remove('hidden');
@@ -397,7 +409,7 @@
             }
         }
         
-        // --- Render giao diện (Đã cập nhật) ---
+        // --- Render giao diện ---
         function renderAllKpi(kpiData) {
             Object.values(kpiBodies).forEach(body => {
                 body.innerHTML = `<p class="text-gray-500 italic p-4">Không có kế hoạch nào đang hoạt động.</p>`;
@@ -437,7 +449,6 @@
 
         /**
          * Render 1 mục tiêu (đã cập nhật logic Ký/Xuất)
-         * === ĐÂY LÀ HÀM ĐÃ SỬA LỖI (Từ phản hồi của bạn) ===
          */
         function renderKpiGoal(goal) {
             // Chỉ tiêu tổng tính theo XUẤT (từ backend)
@@ -457,7 +468,6 @@
                 (b.KetQuaCaNhan.xuat + b.KetQuaCaNhan.ky) - (a.KetQuaCaNhan.xuat + a.KetQuaCaNhan.ky)
             );
             
-            // *** SỬA LỖI: ***
             // Vòng lặp này sẽ hiển thị TẤT CẢ nhân viên, kể cả người có Ký = 0 và Xuất = 0
             sortedStaff.forEach(nv => {
                 const kq = nv.KetQuaCaNhan;
