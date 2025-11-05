@@ -40,13 +40,80 @@
             margin: auto;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Style cho thẻ <details> */
+        details > summary {
+            list-style: none; /* Xóa mũi tên mặc định */
+            cursor: pointer;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            color: #1e40af; /* text-blue-800 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+        details > summary::after {
+            content: '\f078'; /* icon chevron-down của Font Awesome */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.2s ease-in-out;
+        }
+        details[open] > summary {
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        details[open] > summary::after {
+            transform: rotate(180deg);
+        }
+        .kpi-category-content {
+            padding: 1.5rem;
+            background-color: #f9fafb; /* gray-50 */
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 0.5rem 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
 
     <header class="bg-white shadow-md sticky top-0 z-50">
-        </header>
-
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="homepage.html" class="text-2xl font-bold text-blue-700">Portal VF</a>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="homepage.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Trang chủ</a>
+                <a href="khoxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Kho xe</a>
+                <a href="Yeucaughepxe.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Yêu cầu ghép xe</a>
+                <a href="Chinhsach.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Chính sách</a>
+                <a href="nganhang.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Ngân hàng</a>
+                <a href="KPI.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg nav-link-active">KPI</a>
+                <a href="Taovanban.html" class="px-4 py-2 text-gray-700 font-medium rounded-lg hover:bg-gray-100">Tạo văn bản</a>
+            </div>
+            <div class="flex items-center">
+                <div id="user-profile" class="flex items-center space-x-3">
+                     <span id="user-fullname" class="text-gray-800 font-semibold hidden md:block"></span>
+                     <img id="user-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
+                </div>
+                <button id="logout-btn" class="ml-4 text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </button>
+                <button id="mobile-menu-button" class="md:hidden ml-4 text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden bg-white border-t">
+            <a href="homepage.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Trang chủ</a>
+            <a href="khoxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Kho xe</a>
+            <a href="Yeucaughepxe.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Yêu cầu ghép xe</a>
+            <a href="Chinhsach.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Chính sách</a>
+            <a href="nganhang.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Ngân hàng</a>
+            <a href="KPI.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 nav-link-active">KPI</a>
+            <a href="Taovanban.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tạo văn bản</a>
+        </div>
+    </header>
     <main class="container mx-auto px-6 py-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-900">Dashboard Theo dõi KPI</h1>
@@ -67,12 +134,45 @@
             <button id="filter-kpi-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Xem</button>
         </div>
 
-        <div id="kpi-content-wrapper" class="space-y-8">
+        <div id="kpi-content-wrapper" class="space-y-4">
+            
             <div id="kpi-loading-state" class="text-center py-20">
                 <div class="loader"></div>
                 <p class="mt-4 text-lg">Đang tải dữ liệu KPI...</p>
             </div>
-            <div id="kpi-sections-container"></div>
+        
+            <details id="kpi-group-banle" class="hidden" open>
+                <summary>
+                    <span><i class="fas fa-car mr-3 text-blue-600"></i>Chỉ tiêu về Bán lẻ</span>
+                </summary>
+                <div class="kpi-category-content space-y-8" id="kpi-body-banle"></div>
+            </details>
+            
+            <details id="kpi-group-nhansu" class="hidden">
+                <summary>
+                    <span><i class="fas fa-users mr-3 text-green-600"></i>Chỉ tiêu về Nhân sự</span>
+                </summary>
+                <div class="kpi-category-content space-y-8" id="kpi-body-nhansu"></div>
+            </details>
+
+            <details id="kpi-group-thitruong" class="hidden">
+                <summary>
+                    <span><i class="fas fa-bullhorn mr-3 text-yellow-600"></i>Chỉ tiêu về Hoạt động Thị trường</span>
+                </summary>
+                <div class="kpi-category-content space-y-8" id="kpi-body-thitruong"></div>
+            </details>
+            
+            <details id="kpi-group-truyenthong" class="hidden">
+                <summary>
+                    <span><i class="fas fa-video mr-3 text-red-600"></i>Chỉ tiêu về Truyền thông</span>
+                </summary>
+                <div class="kpi-category-content space-y-8" id="kpi-body-truyenthong"></div>
+            </details>
+
+            <div id="kpi-no-data" class="hidden text-center text-gray-500 py-10">
+                <p>Không có mục tiêu KPI nào trong khoảng thời gian này.</p>
+            </div>
+
         </div>
     </main>
 
@@ -99,8 +199,7 @@
                         </div>
                         <div class="form-group">
                             <label class="block text-sm font-medium text-gray-700">Phòng ban (PKD)</label>
-                            <select id="goal-pkd" class="w-full border-gray-300 rounded-lg shadow-sm" required>
-                                </select>
+                            <select id="goal-pkd" class="w-full border-gray-300 rounded-lg shadow-sm" required></select>
                         </div>
                     </div>
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,20 +236,33 @@
     <script src="config.js"></script>
 
     <script>
-        // --- DOM Elements (Giữ nguyên) ---
+        // === DOM Elements (ĐÃ THÊM HEADER ELEMENTS) ===
         const userFullNameDisplay = document.getElementById('user-fullname');
         const userAvatarDisplay = document.getElementById('user-avatar');
-        // ... (các element khác)
-        const kpiContentWrapper = document.getElementById('kpi-content-wrapper');
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
         const kpiLoadingState = document.getElementById('kpi-loading-state');
-        const kpiSectionsContainer = document.getElementById('kpi-sections-container');
         const openRegisterModalBtn = document.getElementById('open-register-kpi-modal-btn');
         const filterKpiBtn = document.getElementById('filter-kpi-btn');
         const toast = document.getElementById('toast');
         const registerGoalModal = document.getElementById('register-goal-modal');
         const goalPkdSelect = document.getElementById('goal-pkd');
+        const kpiNoData = document.getElementById('kpi-no-data');
+        const kpiGroups = {
+            'Bán lẻ': document.getElementById('kpi-group-banle'),
+            'Nhân sự': document.getElementById('kpi-group-nhansu'),
+            'Thị trường': document.getElementById('kpi-group-thitruong'),
+            'Truyền thông': document.getElementById('kpi-group-truyenthong')
+        };
+        const kpiBodies = {
+            'Bán lẻ': document.getElementById('kpi-body-banle'),
+            'Nhân sự': document.getElementById('kpi-body-nhansu'),
+            'Thị trường': document.getElementById('kpi-body-thitruong'),
+            'Truyền thông': document.getElementById('kpi-body-truyenthong')
+        };
         
-        // --- Biến toàn cục (Đã xóa staffList) ---
         let currentUser = null; 
         let userChucVu = '';
         let userPKD = '';
@@ -160,7 +272,7 @@
             toast.textContent = message;
             toast.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transition-opacity duration-300 ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
             toast.classList.remove('opacity-0');
-            setTimeout(() => { toast.classList.add('opacity-0'); }, 3000);
+            setTimeout(() => { toast.classList.add('opacity-0'); }, 4000);
         };
         async function jsonpRequest(payload) {
             if (typeof APPS_SCRIPT_URL === 'undefined') {
@@ -206,61 +318,75 @@
             }
         }
 
-
-        // --- Khởi chạy khi tải trang (Giữ nguyên) ---
+        // --- Khởi chạy khi tải trang (Sẽ chạy đúng) ---
         window.addEventListener('load', () => {
             const userDataString = sessionStorage.getItem('loggedInUser');
             if (!userDataString) {
                 window.location.href = 'index.html'; 
                 return;
             }
+            
+            // BƯỚC 1: Parse dữ liệu user
             currentUser = JSON.parse(userDataString);
+            
+            // BƯỚC 2: Hiển thị thông tin header (Quan trọng)
+            // Vì HTML đã có, các dòng này sẽ KHÔNG BỊ LỖI
             userFullNameDisplay.textContent = currentUser.fullName;
             userAvatarDisplay.src = currentUser.imageUrl || 'https://placehold.co/40x40/EBF4FF/76A9FA?text=:)';
+            
+            // BƯỚC 3: Lấy quyền
             userChucVu = (currentUser.chucVu || '').toLowerCase();
             userPKD = currentUser.pkd || '';
 
+            // BƯỚC 4: Set ngày mặc định
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
             document.getElementById('kpi-start-date').value = firstDay;
             document.getElementById('kpi-end-date').value = lastDay;
 
+            // BƯỚC 5: KIỂM TRA PHÂN QUYỀN (Sẽ chạy được)
             if (userChucVu === 'tpkd' || userChucVu === 'gdkd') {
-                openRegisterModalBtn.classList.remove('hidden');
+                openRegisterModalBtn.classList.remove('hidden'); // NÚT SẼ HIỆN RA!
                 populatePkdSelect();
             }
+            
+            // BƯỚC 6: Tải dữ liệu
             fetchKpiData();
         });
         
-        // --- Xử lý Menu, Logout (Giữ nguyên) ---
-        // ... (code logout, mobile menu)
+        // === XỬ LÝ MENU HEADER (ĐÃ THÊM) ===
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        });
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        // === HẾT XỬ LÝ MENU ===
 
-        // --- POPULATE (Đổ dữ liệu) cho các Select ---
+        // --- POPULATE (Đổ dữ liệu) cho các Select (Giữ nguyên) ---
         function populatePkdSelect() {
             goalPkdSelect.innerHTML = ''; 
             if (userChucVu === 'gdkd') {
-                // GDKD thấy 2 phòng
                 goalPkdSelect.innerHTML = `
                     <option value="">-- Chọn PKD --</option>
                     <option value="PKD-1">PKD-1</option>
                     <option value="PKD-2">PKD-2</option>
                 `;
             } else if (userChucVu === 'tpkd') {
-                // TPKD chỉ thấy PKD của mình
                 goalPkdSelect.innerHTML = `<option value="${userPKD}">${userPKD}</option>`;
                 goalPkdSelect.disabled = true;
             }
         }
         
-        // (ĐÃ XÓA hàm populateStaffSelect)
-        
-        // --- Fetch và Render Dữ liệu KPI (Đã cập nhật) ---
+        // --- Fetch và Render Dữ liệu KPI (ĐÃ CẬP NHẬT) ---
         filterKpiBtn.addEventListener('click', fetchKpiData);
 
         async function fetchKpiData() {
             kpiLoadingState.style.display = 'block';
-            kpiSectionsContainer.innerHTML = '';
+            Object.values(kpiGroups).forEach(group => group.classList.add('hidden'));
+            kpiNoData.classList.add('hidden');
 
             try {
                 const payload = {
@@ -272,64 +398,62 @@
                 
                 const result = await jsonpRequest(payload);
                 if (result.status === 'ERROR') throw new Error(result.message);
-                
-                // (ĐÃ XÓA logic lưu staffList)
-                
-                // Render dữ liệu
                 renderAllKpi(result.data.kpiData);
 
             } catch (error) {
                 console.error("Lỗi tải dữ liệu KPI:", error);
-                kpiSectionsContainer.innerHTML = `<p class="text-red-500 text-center">Lỗi tải dữ liệu: ${error.message}</p>`;
+                kpiLoadingState.innerHTML = `<p class="text-red-500">Lỗi tải dữ liệu: ${error.message}</p>`;
             } finally {
                 kpiLoadingState.style.display = 'none';
             }
         }
         
         function renderAllKpi(kpiData) {
-            kpiSectionsContainer.innerHTML = ''; 
+            Object.values(kpiBodies).forEach(body => {
+                body.innerHTML = `<p class="text-gray-500 italic p-4">Không có mục tiêu nào đang hoạt động.</p>`;
+            });
+            Object.values(kpiGroups).forEach(group => group.classList.remove('hidden')); // HIỆN TẤT CẢ KHUNG
+            kpiNoData.classList.add('hidden');
+
             if (!kpiData || kpiData.length === 0) {
-                 kpiSectionsContainer.innerHTML = `<p class="text-gray-500 text-center">Không có mục tiêu KPI nào trong khoảng thời gian này.</p>`;
+                 kpiNoData.classList.remove('hidden');
+                 Object.values(kpiGroups).forEach(group => group.classList.add('hidden')); // Ẩn nếu không có data
                  return;
             }
+            
             const groupedKPIs = kpiData.reduce((acc, goal) => {
                 const key = goal.LoaiKPI || 'Khác';
                 if (!acc[key]) acc[key] = [];
                 acc[key].push(goal);
                 return acc;
             }, {});
+
+            let hasData = false;
             for (const loaiKPI in groupedKPIs) {
-                kpiSectionsContainer.innerHTML += renderKpiSection(loaiKPI, groupedKPIs[loaiKPI]);
+                if (kpiBodies[loaiKPI] && groupedKPIs[loaiKPI].length > 0) {
+                    hasData = true;
+                    kpiBodies[loaiKPI].innerHTML = groupedKPIs[loaiKPI]
+                        .map(goal => renderKpiGoal(goal))
+                        .join('<hr class="my-8 border-gray-200">');
+                }
+            }
+            
+            if (!hasData) {
+                 kpiNoData.classList.remove('hidden');
+                 Object.values(kpiGroups).forEach(group => group.classList.add('hidden'));
             }
         }
 
-        // (Hàm renderKpiSection giữ nguyên)
-        function renderKpiSection(loaiKPI, goals) {
-            let goalsHtml = goals.map(goal => renderKpiGoal(goal)).join('');
-            return `
-                <section class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-2xl font-bold text-blue-800 mb-6">${loaiKPI}</h3>
-                    <div class="space-y-8">
-                        ${goalsHtml}
-                    </div>
-                </section>
-            `;
-        }
-        
-        // (Hàm renderKpiGoal ĐÃ CẬP NHẬT)
         function renderKpiGoal(goal) {
             const percent = (goal.KetQuaTong / goal.ChiTieuTong) * 100 || 0;
             
-            // (ĐÃ XÓA Nút Giao việc)
-
-            // Render danh sách kết quả nhân viên
             let staffHtml = '<div class="mt-4 space-y-2 border-t pt-4">';
-            // Sắp xếp NV theo kết quả giảm dần
             const sortedStaff = goal.NhanVien.sort((a, b) => b.KetQuaCaNhan - a.KetQuaCaNhan);
+            let staffCount = 0;
             
             sortedStaff.forEach(nv => {
-                // Chỉ hiển thị NV có kết quả
                 if (nv.KetQuaCaNhan > 0) {
+                     staffCount++;
                      staffHtml += `
                         <div class="flex justify-between text-sm text-gray-700">
                             <span>${nv.TenNV}</span>
@@ -344,19 +468,17 @@
                 <div class="kpi-goal-item">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-semibold text-lg">${goal.TenMucTieu} (${goal.PKD})</span>
-                        </div>
+                    </div>
                     <div class="flex justify-between text-lg font-bold mb-1">
                         <span>Tổng</span>
                         <span>${goal.KetQuaTong} / ${goal.ChiTieuTong} ${goal.DonVi}</span>
                     </div>
                     ${renderProgressBar(percent, `${percent.toFixed(0)}%`)}
-                    
-                    ${goal.KetQuaTong > 0 ? staffHtml : ''}
+                    ${staffCount > 0 ? staffHtml : ''}
                 </div>
             `;
         }
         
-        // (Hàm renderProgressBar giữ nguyên)
          function renderProgressBar(percent, text) {
             const displayPercent = Math.min(100, Math.max(0, percent));
             return `
@@ -368,25 +490,17 @@
             `;
         }
         
-        // --- Xử lý sự kiện cho Modal (ĐÃ CẬP NHẬT) ---
-        
-        // Mở Modal Đăng ký
+        // --- Xử lý sự kiện cho Modal (Giữ nguyên) ---
         openRegisterModalBtn.addEventListener('click', () => {
             registerGoalModal.style.display = 'flex';
         });
-
-        // Đóng Modal
         document.querySelectorAll('.close-modal-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 btn.closest('.fixed').style.display = 'none';
             });
         });
 
-        // (ĐÃ XÓA Event Listener cho nút 'Giao việc')
-
-        // --- Xử lý Submit Form (ĐÃ CẬP NHẬT) ---
-        
-        // Form 1: Đăng ký Mục tiêu (Giữ nguyên)
+        // --- Xử lý Submit Form (Giữ nguyên) ---
         document.getElementById('register-goal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-goal-btn');
@@ -405,7 +519,6 @@
                 };
                 
                 await postRequest('registerKpiGoal', data);
-                
                 showToast('Đăng ký mục tiêu thành công!', true);
                 registerGoalModal.style.display = 'none';
                 e.target.reset(); 
@@ -418,9 +531,6 @@
                 btn.textContent = 'Lưu Mục tiêu';
             }
         });
-
-        // (ĐÃ XÓA Event Listener cho Form 2 'Giao việc')
-
     </script>
 </body>
 </html>
