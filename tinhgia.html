@@ -15,7 +15,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
-        
         .input-currency:focus {
             outline: none;
             border-color: #2563eb;
@@ -63,10 +62,10 @@
                     <label class="font-bold text-gray-700 md:col-span-1 text-lg">Chọn dòng xe:</label>
                     <div class="md:col-span-2">
                         <select id="loai-xe" class="w-full text-lg font-semibold text-blue-800 border-2 border-blue-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none shadow-sm" onchange="calculatePrice()">
-                            <option value="5.0">Xe khác (VF3, 5, 6, e34) - CK 5%</option>
-                            <option value="6.5">VF 7 - CK 6.5%</option>
-                            <option value="7.5">VF 8 - CK 7.5%</option>
-                            <option value="8.0">VF 9 - CK 8.0%</option>
+                            <option value="5.0" data-group="other">Xe khác (VF3, 5, 6, e34) - CK 5%</option>
+                            <option value="6.5" data-group="vf7">VF 7 - CK 6.5%</option>
+                            <option value="7.5" data-group="vf89">VF 8 - CK 7.5%</option>
+                            <option value="8.0" data-group="vf89">VF 9 - CK 8.0%</option>
                         </select>
                         <p class="text-xs text-green-600 mt-1 italic">* Đã bao gồm 2% thưởng Đại lý mới</p>
                     </div>
@@ -149,15 +148,20 @@
             </div>
             
             <div class="p-6 md:p-8 space-y-6">
-                <div class="bg-green-50 p-4 rounded-lg border border-green-200 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <span class="block text-gray-600 text-sm">Mức chiết khấu (đã +2% ĐL mới):</span>
-                        <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">5%</span>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                        <div>
+                            <span class="block text-gray-600 text-sm">Mức chiết khấu cơ sở:</span>
+                            <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">5%</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-gray-600 text-sm">Tổng chiết khấu thực nhận:</span>
+                            <span class="text-xs text-gray-500 italic mb-1">(CK Cơ sở - Chi phí chia sẻ)</span>
+                            <span id="hien-thi-tong-ck" class="text-2xl font-bold text-green-700">0</span>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <span class="block text-gray-600 text-sm">Tổng chiết khấu nhận về:</span>
-                        <span class="text-xs text-gray-500 italic mb-1">(Giá xuất hóa đơn * % Chiết khấu)</span>
-                        <span id="hien-thi-tong-ck" class="text-2xl font-bold text-green-700">0</span>
+                    <div id="sharing-cost-row" class="text-right text-red-500 text-sm font-medium hidden">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Đã trừ chi phí chia sẻ: <span id="sharing-cost-val">0</span>
                     </div>
                 </div>
 
@@ -181,7 +185,7 @@
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-2">
                     <div class="text-left">
                         <span class="block text-gray-800 font-bold text-xl">Lợi nhuận chưa hoa hồng:</span>
-                        <span class="text-sm text-gray-500">(Tổng chiết khấu - TVBH giảm - Cty giảm)</span>
+                        <span class="text-sm text-gray-500">(Tổng CK thực nhận - TVBH giảm - Cty giảm)</span>
                     </div>
                     <div class="text-right">
                         <span id="ket-qua-loi-nhuan" class="block text-4xl font-bold text-green-600">0</span>
@@ -200,11 +204,12 @@
 
     <script>
         // --- 1. CONFIG DATA ---
+        // Các ID này quan trọng để định danh chương trình khi tính toán chi phí chia sẻ
         const PROGRAM_OPTIONS = [
             { id: 'mau_nang_cao', name: 'Màu nâng cao (Nhập tay)', type: 'manual_pt51' },
-            { id: 'thu_cu', name: 'Thu cũ đổi mới (Nhập tay)', type: 'manual_deduct' },
-            { id: 'ca_qd', name: 'Công an và Quân đội (3%)', type: 'percent', val: 3 },
-            { id: 'cbnv', name: 'CBNV (2%)', type: 'percent', val: 2 },
+            { id: 'thu_cu', name: 'Thu cũ đổi mới (Nhập tay)', type: 'manual_deduct' }, // Có chia sẻ chi phí
+            { id: 'ca_qd', name: 'Công an và Quân đội (1.5%)', type: 'percent', val: 1.5 }, // Có chia sẻ chi phí
+            { id: 'cbnv', name: 'CBNV Đại lý (1%)', type: 'percent', val: 1 }, // Có chia sẻ chi phí
             { id: 'vf7_plus', name: 'Ưu đãi VF 7 Plus (50tr)', type: 'fixed_deduct', val: 50000000 },
             { id: 'bh_tv', name: 'Bảo hiểm TV VF3, VF5 (Lấy BH)', type: 'insurance' },
             { id: 'quy_doi_bh', name: 'Quy đổi BHTV VF3, VF5 (Nhập tay)', type: 'manual_pt51' }
@@ -238,7 +243,6 @@
                 if(user.imageUrl) document.getElementById('user-avatar').src = user.imageUrl;
             }
 
-            // Fill Select Options
             const selects = document.querySelectorAll('.program-select');
             selects.forEach(select => {
                 PROGRAM_OPTIONS.forEach(opt => {
@@ -254,7 +258,6 @@
                 window.location.href = 'index.html';
             });
             
-            // Run calculation initially
             calculatePrice();
         });
 
@@ -294,19 +297,24 @@
             // === PHẦN 1: GIÁ XUẤT HÓA ĐƠN ===
             const listPrice = parseNumber(document.getElementById('gia-niem-yet').value);
             
-            let basePercent = 4; // 4% MLTTVN
+            let basePercent = 4; 
             let additionalPercent = 0;
             let fixedDeduction = 0;
             let pt51Total = 0;
 
             const rows = document.querySelectorAll('.program-row');
+            // Mảng lưu danh sách các ID chương trình đã chọn để tính chi phí chia sẻ ở bước sau
+            const selectedProgramIds = [];
+
             rows.forEach(row => {
                 const select = row.querySelector('.program-select');
                 const input = row.querySelector('.program-value');
                 const inputValue = parseNumber(input.value);
-                const program = PROGRAM_OPTIONS.find(p => p.id === select.value);
+                const selectedId = select.value;
+                const program = PROGRAM_OPTIONS.find(p => p.id === selectedId);
                 
                 if (program) {
+                    selectedProgramIds.push(selectedId); // Lưu lại ID
                     if (program.type === 'percent') additionalPercent += program.val;
                     else if (program.type === 'fixed_deduct') fixedDeduction += program.val;
                     else if (program.type === 'manual_deduct') fixedDeduction += inputValue;
@@ -330,22 +338,57 @@
             document.getElementById('ket-qua-pt51').textContent = formatNumber(pt51Total);
 
 
-            // === PHẦN 2: TÍNH LỢI NHUẬN ===
+            // === PHẦN 2: TÍNH LỢI NHUẬN & CHI PHÍ CHIA SẺ ===
             
-            // Lấy % chiết khấu từ Dropdown Dòng xe (Value đã +2%)
-            const carDiscountRate = parseFloat(document.getElementById('loai-xe').value);
+            const carSelect = document.getElementById('loai-xe');
+            const carDiscountRate = parseFloat(carSelect.value);
+            const carGroup = carSelect.options[carSelect.selectedIndex].getAttribute('data-group'); // vf89, vf7, other
+            
             document.getElementById('hien-thi-phan-tram-ck').textContent = carDiscountRate.toString().replace('.',',') + '%';
 
-            // Tính Tổng chiết khấu nhận về = Giá xuất hóa đơn * %
-            const totalCommission = invoicePrice * (carDiscountRate / 100);
-            document.getElementById('hien-thi-tong-ck').textContent = formatNumber(totalCommission.toFixed(0));
+            // 1. Tính tổng chiết khấu thô (Gross Commission)
+            const grossCommission = invoicePrice * (carDiscountRate / 100);
 
-            // Lấy giảm giá TVBH và Công ty
+            // 2. Tính Chi phí chia sẻ (Sharing Cost) - Phần đại lý bị trừ
+            let totalSharingCost = 0;
+
+            selectedProgramIds.forEach(id => {
+                if (id === 'thu_cu') {
+                    // Thu cũ đổi mới: VF8/9 chịu 2%, Xe khác chịu 1% trên DOANH THU BÁN LẺ (Giá xuất hóa đơn)
+                    if (carGroup === 'vf89') {
+                        totalSharingCost += invoicePrice * 0.02;
+                    } else {
+                        totalSharingCost += invoicePrice * 0.01;
+                    }
+                }
+                else if (id === 'cbnv') {
+                    // CBNV: Đại lý chịu 1% (Theo prompt mới là 1%, Prompt cũ là 1% MSRP, lấy theo MSRP cho an toàn)
+                    totalSharingCost += listPrice * 0.01;
+                }
+                else if (id === 'ca_qd') {
+                    // CA/QĐ: Đại lý chịu 1.5% MSRP
+                    totalSharingCost += listPrice * 0.015;
+                }
+            });
+
+            // 3. Tính Tổng chiết khấu thực nhận (Net Commission)
+            const netCommission = grossCommission - totalSharingCost;
+            document.getElementById('hien-thi-tong-ck').textContent = formatNumber(netCommission.toFixed(0));
+
+            // Hiển thị cảnh báo số tiền bị trừ nếu có
+            const sharingRow = document.getElementById('sharing-cost-row');
+            if (totalSharingCost > 0) {
+                sharingRow.classList.remove('hidden');
+                document.getElementById('sharing-cost-val').textContent = `-${formatNumber(totalSharingCost.toFixed(0))} VNĐ`;
+            } else {
+                sharingRow.classList.add('hidden');
+            }
+
+            // 4. Tính Lợi nhuận cuối
             const tvbhDiscount = parseNumber(document.getElementById('tvbh-giam').value);
             const companyDiscount = parseNumber(document.getElementById('congty-giam').value);
 
-            // Tính Lợi nhuận = Tổng CK - Giảm TVBH - Giảm Cty
-            let finalProfit = totalCommission - tvbhDiscount - companyDiscount;
+            let finalProfit = netCommission - tvbhDiscount - companyDiscount;
             
             document.getElementById('ket-qua-loi-nhuan').textContent = formatNumber(finalProfit.toFixed(0));
         }
