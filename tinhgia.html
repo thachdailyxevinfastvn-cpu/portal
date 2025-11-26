@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tính Giá Xe - Portal VF</title>
+    <title>Tính Giá Xe & Lợi Nhuận</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; }
         .nav-link-active { background-color: #eef2ff; color: #1d4ed8; font-weight: 600; }
         
-        /* Hiệu ứng focus cho ô nhập liệu */
         .input-currency:focus {
             outline: none;
             border-color: #2563eb;
@@ -50,22 +49,34 @@
     </header>
 
     <main class="container mx-auto px-4 py-8 flex-grow">
-        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mb-8">
             <div class="bg-blue-700 px-6 py-4">
                 <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-calculator"></i> Bảng Tính Giá Xe & Xuất Hóa Đơn
+                    <i class="fas fa-calculator"></i> Bảng Tính Giá Xuất Hóa Đơn
                 </h1>
             </div>
 
             <div class="p-6 md:p-8 space-y-6">
                 
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <label class="font-bold text-gray-700 md:col-span-1 text-lg">Chọn dòng xe:</label>
+                    <div class="md:col-span-2">
+                        <select id="loai-xe" class="w-full text-lg font-semibold text-blue-800 border-2 border-blue-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none shadow-sm" onchange="calculatePrice()">
+                            <option value="3.0">Các dòng xe khác (VF3, VF5, VF6, e34)</option>
+                            <option value="4.5">VF 7 (Chiết khấu 4,5%)</option>
+                            <option value="5.5">VF 8 (Chiết khấu 5,5%)</option>
+                            <option value="6.0">VF 9 (Chiết khấu 6%)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center border-b pb-6">
                     <label class="font-bold text-gray-700 md:col-span-1 text-lg">Giá bán niêm yết:</label>
-                    <div class="md:col-span-2 relative">
-                        <input type="text" id="gia-niem-yet" placeholder="Nhập giá xe (VD: 1.000.000.000)" 
+                    <div class="md:col-span-2">
+                        <input type="text" id="gia-niem-yet" placeholder="Nhập giá xe..." 
                             class="w-full text-xl font-bold text-blue-800 border-2 border-blue-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none text-right shadow-sm"
                             oninput="formatCurrencyInput(this); calculatePrice()">
-                        <span class="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-400 font-medium">VNĐ</span>
                     </div>
                 </div>
 
@@ -80,54 +91,23 @@
                     <div id="program-container" class="space-y-3">
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center program-row">
                             <label class="md:col-span-2 text-sm font-medium text-gray-600">Chương trình 1:</label>
-                            <div class="md:col-span-6">
-                                <select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onchange="handleProgramChange(this)">
-                                    <option value="">-- Không áp dụng --</option>
-                                    </select>
-                            </div>
-                            <div class="md:col-span-4">
-                                <input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập số tiền..." oninput="formatCurrencyInput(this); calculatePrice()">
-                                <span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span>
-                            </div>
+                            <div class="md:col-span-6"><select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500" onchange="handleProgramChange(this)"><option value="">-- Không áp dụng --</option></select></div>
+                            <div class="md:col-span-4"><input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập tiền..." oninput="formatCurrencyInput(this); calculatePrice()"><span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span></div>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center program-row">
                             <label class="md:col-span-2 text-sm font-medium text-gray-600">Chương trình 2:</label>
-                            <div class="md:col-span-6">
-                                <select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onchange="handleProgramChange(this)">
-                                    <option value="">-- Không áp dụng --</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-4">
-                                <input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập số tiền..." oninput="formatCurrencyInput(this); calculatePrice()">
-                                <span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span>
-                            </div>
+                            <div class="md:col-span-6"><select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500" onchange="handleProgramChange(this)"><option value="">-- Không áp dụng --</option></select></div>
+                            <div class="md:col-span-4"><input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập tiền..." oninput="formatCurrencyInput(this); calculatePrice()"><span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span></div>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center program-row">
                             <label class="md:col-span-2 text-sm font-medium text-gray-600">Chương trình 3:</label>
-                            <div class="md:col-span-6">
-                                <select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onchange="handleProgramChange(this)">
-                                    <option value="">-- Không áp dụng --</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-4">
-                                <input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập số tiền..." oninput="formatCurrencyInput(this); calculatePrice()">
-                                <span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span>
-                            </div>
+                            <div class="md:col-span-6"><select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500" onchange="handleProgramChange(this)"><option value="">-- Không áp dụng --</option></select></div>
+                            <div class="md:col-span-4"><input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập tiền..." oninput="formatCurrencyInput(this); calculatePrice()"><span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span></div>
                         </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center program-row">
                             <label class="md:col-span-2 text-sm font-medium text-gray-600">Chương trình 4:</label>
-                            <div class="md:col-span-6">
-                                <select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" onchange="handleProgramChange(this)">
-                                    <option value="">-- Không áp dụng --</option>
-                                </select>
-                            </div>
-                            <div class="md:col-span-4">
-                                <input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập số tiền..." oninput="formatCurrencyInput(this); calculatePrice()">
-                                <span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span>
-                            </div>
+                            <div class="md:col-span-6"><select class="program-select w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500" onchange="handleProgramChange(this)"><option value="">-- Không áp dụng --</option></select></div>
+                            <div class="md:col-span-4"><input type="text" class="program-value w-full border border-gray-300 rounded px-3 py-2 text-sm text-right hidden" placeholder="Nhập tiền..." oninput="formatCurrencyInput(this); calculatePrice()"><span class="program-fixed-text w-full block text-right text-sm font-medium text-gray-500 py-2">0 VNĐ</span></div>
                         </div>
                     </div>
                 </div>
@@ -138,16 +118,14 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div class="text-left">
                             <span class="block text-gray-600 font-medium text-lg">Giá xuất hóa đơn cho Khách lẻ:</span>
-                            <span class="text-xs text-gray-400">(Giá niêm yết - Tổng % giảm - Các chương trình trừ tiền)</span>
+                            <span class="text-xs text-gray-400">(Giá niêm yết - Tổng giảm - Các chương trình)</span>
                         </div>
                         <div class="text-right">
                             <span id="ket-qua-xuat-hoa-don" class="block text-3xl font-bold text-red-600">0</span>
                             <span class="text-sm text-gray-500">VNĐ</span>
                         </div>
                     </div>
-
                     <div class="h-px bg-gray-300 my-2"></div>
-
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div class="text-left">
                             <span class="block text-gray-600 font-medium text-lg">Giá trị PT51:</span>
@@ -159,13 +137,60 @@
                         </div>
                     </div>
                 </div>
-
-            </div>
-            
-            <div class="bg-gray-100 px-6 py-4 text-center text-sm text-gray-500">
-                * Bảng tính chỉ mang tính chất tham khảo. Vui lòng kiểm tra lại chính sách hiện hành.
             </div>
         </div>
+
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-green-700 px-6 py-4">
+                <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-hand-holding-dollar"></i> Tính Lợi Nhuận
+                </h1>
+            </div>
+            
+            <div class="p-6 md:p-8 space-y-6">
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <span class="block text-gray-600 text-sm">Mức chiết khấu áp dụng:</span>
+                        <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">3%</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-gray-600 text-sm">Tổng chiết khấu nhận về:</span>
+                        <span class="text-xs text-gray-500 italic mb-1">(Giá xuất hóa đơn * % Chiết khấu)</span>
+                        <span id="hien-thi-tong-ck" class="text-2xl font-bold text-green-700">0</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">TVBH giảm giá:</label>
+                        <input type="text" id="tvbh-giam" placeholder="Nhập số tiền..." 
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:border-green-500 focus:outline-none text-right"
+                            oninput="formatCurrencyInput(this); calculatePrice()">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Công ty giảm giá:</label>
+                        <input type="text" id="congty-giam" placeholder="Nhập số tiền..." 
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:border-green-500 focus:outline-none text-right"
+                            oninput="formatCurrencyInput(this); calculatePrice()">
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 pt-2">
+                    <div class="text-left">
+                        <span class="block text-gray-800 font-bold text-xl">Lợi nhuận chưa hoa hồng:</span>
+                        <span class="text-sm text-gray-500">(Tổng chiết khấu - TVBH giảm - Cty giảm)</span>
+                    </div>
+                    <div class="text-right">
+                        <span id="ket-qua-loi-nhuan" class="block text-4xl font-bold text-green-600">0</span>
+                        <span class="text-sm text-gray-500">VNĐ</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </main>
 
     <footer class="text-center py-4 text-sm text-gray-600 bg-white border-t mt-4">
@@ -173,7 +198,7 @@
     </footer>
 
     <script>
-        // --- 1. KHỞI TẠO DỮ LIỆU CHƯƠNG TRÌNH ---
+        // --- 1. CONFIG DATA ---
         const PROGRAM_OPTIONS = [
             { id: 'mau_nang_cao', name: 'Màu nâng cao (Nhập tay)', type: 'manual_pt51' },
             { id: 'thu_cu', name: 'Thu cũ đổi mới (Nhập tay)', type: 'manual_deduct' },
@@ -184,22 +209,18 @@
             { id: 'quy_doi_bh', name: 'Quy đổi BHTV VF3, VF5 (Nhập tay)', type: 'manual_pt51' }
         ];
 
-        // --- 2. HÀM TIỆN ÍCH ---
-
-        // Định dạng tiền tệ hiển thị (1000 -> 1.000)
+        // --- 2. UTILS ---
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
-        // Parse chuỗi tiền tệ về số (1.000 -> 1000)
         function parseNumber(str) {
             if(!str) return 0;
             return parseInt(str.replace(/\./g, '')) || 0;
         }
 
-        // Xử lý khi user nhập liệu (tự thêm dấu chấm)
         function formatCurrencyInput(input) {
-            let value = input.value.replace(/\./g, '').replace(/[^\d]/g, ''); // Xóa dấu chấm cũ và ký tự lạ
+            let value = input.value.replace(/\./g, '').replace(/[^\d]/g, '');
             if (!value) {
                 input.value = '';
                 return;
@@ -207,21 +228,16 @@
             input.value = formatNumber(value);
         }
 
-        // --- 3. LOGIC CHÍNH ---
-
+        // --- 3. INIT & EVENTS ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Check Login
             const userDataString = sessionStorage.getItem('loggedInUser');
-            if (!userDataString) {
-                // Nếu chưa đăng nhập, uncomment dòng dưới để redirect
-                // window.location.href = 'index.html'; 
-            } else {
+            if (userDataString) {
                 const user = JSON.parse(userDataString);
                 document.getElementById('user-fullname').textContent = user.fullName || 'User';
                 if(user.imageUrl) document.getElementById('user-avatar').src = user.imageUrl;
             }
 
-            // Fill Options vào Select Box
+            // Fill Select Options
             const selects = document.querySelectorAll('.program-select');
             selects.forEach(select => {
                 PROGRAM_OPTIONS.forEach(opt => {
@@ -232,21 +248,21 @@
                 });
             });
 
-            // Logout Event
             document.getElementById('logout-btn').addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
                 window.location.href = 'index.html';
             });
+            
+            // Run calculation initially
+            calculatePrice();
         });
 
-        // Xử lý khi chọn chương trình
         function handleProgramChange(selectElement) {
             const row = selectElement.closest('.program-row');
             const input = row.querySelector('.program-value');
             const fixedText = row.querySelector('.program-fixed-text');
             const selectedId = selectElement.value;
 
-            // Reset input
             input.value = '';
             input.classList.add('hidden');
             fixedText.textContent = '';
@@ -256,7 +272,6 @@
 
             if (program) {
                 if (program.type === 'manual_deduct' || program.type === 'manual_pt51') {
-                    // Nếu là loại nhập tay -> Hiển thị ô input
                     input.classList.remove('hidden');
                     fixedText.classList.add('hidden');
                     input.focus();
@@ -265,85 +280,73 @@
                 } else if (program.type === 'fixed_deduct') {
                     fixedText.textContent = `-${formatNumber(program.val)} VNĐ`;
                 } else if (program.type === 'insurance') {
-                    fixedText.textContent = "Khách hàng lấy bảo hiểm (0đ trừ)";
+                    fixedText.textContent = "Lấy bảo hiểm (0đ)";
                 }
             } else {
                 fixedText.textContent = "0 VNĐ";
             }
-
             calculatePrice();
         }
 
-        // Hàm tính toán cốt lõi
+        // --- 4. CORE LOGIC ---
         function calculatePrice() {
-            // 1. Lấy giá niêm yết
+            // === PHẦN 1: GIÁ XUẤT HÓA ĐƠN ===
             const listPrice = parseNumber(document.getElementById('gia-niem-yet').value);
+            
+            let basePercent = 4; // 4% MLTTVN
+            let additionalPercent = 0;
+            let fixedDeduction = 0;
+            let pt51Total = 0;
 
-            // 2. Khởi tạo các biến tính toán
-            let basePercent = 4; // Mặc định 4% MLTTVN
-            let additionalPercent = 0; // % cộng thêm (CA, QĐ, CBNV)
-            let fixedDeduction = 0; // Số tiền trừ thẳng (Thu cũ, VF7 Plus)
-            let pt51Total = 0; // PT51 (Màu, Quy đổi BH)
-
-            // 3. Duyệt qua 4 chương trình đã chọn
             const rows = document.querySelectorAll('.program-row');
             rows.forEach(row => {
                 const select = row.querySelector('.program-select');
                 const input = row.querySelector('.program-value');
-                const selectedId = select.value;
                 const inputValue = parseNumber(input.value);
-
-                const program = PROGRAM_OPTIONS.find(p => p.id === selectedId);
+                const program = PROGRAM_OPTIONS.find(p => p.id === select.value);
                 
                 if (program) {
-                    switch (program.type) {
-                        case 'percent':
-                            additionalPercent += program.val;
-                            break;
-                        case 'fixed_deduct': // VD: VF7 Plus 50tr
-                            fixedDeduction += program.val;
-                            break;
-                        case 'manual_deduct': // VD: Thu cũ đổi mới
-                            fixedDeduction += inputValue;
-                            break;
-                        case 'manual_pt51': // VD: Màu, Quy đổi BH (Vào PT51, ko trừ giá xe)
-                            pt51Total += inputValue;
-                            break;
-                        case 'insurance':
-                            // Không làm gì cả
-                            break;
-                    }
+                    if (program.type === 'percent') additionalPercent += program.val;
+                    else if (program.type === 'fixed_deduct') fixedDeduction += program.val;
+                    else if (program.type === 'manual_deduct') fixedDeduction += inputValue;
+                    else if (program.type === 'manual_pt51') pt51Total += inputValue;
                 }
             });
 
-            // 4. Tính toán Logic
-            // Tổng % giảm = 4% + % từ ctrinh
             const totalPercent = basePercent + additionalPercent;
-            
-            // Giá trị giảm theo % (Dựa trên giá niêm yết)
             const percentDiscountAmount = listPrice * (totalPercent / 100);
-
-            // Hiển thị text "Giảm 4%..."
-            // Nếu có cộng dồn thì hiển thị rõ: (4% + 3%) = 7%
-            let displayPercentText = `4% (${formatNumber(listPrice * 0.04)} đ)`;
+            
+            let displayPercentText = `- ${formatNumber(percentDiscountAmount)} VNĐ (4%)`;
             if (additionalPercent > 0) {
                 displayPercentText = `Tổng ${totalPercent}% (4% + ${additionalPercent}%) = -${formatNumber(percentDiscountAmount)} đ`;
-            } else {
-                displayPercentText = `- ${formatNumber(percentDiscountAmount)} VNĐ (4%)`;
             }
             document.getElementById('display-giam-4').textContent = displayPercentText;
 
-
-            // Giá xuất hóa đơn = Giá Niêm Yết - (Tiền giảm %) - (Tiền giảm số cố định)
-            // Lưu ý: PT51 KHÔNG TRỪ vào giá xe theo yêu cầu
             let invoicePrice = listPrice - percentDiscountAmount - fixedDeduction;
-
-            // Xử lý âm
             if (invoicePrice < 0) invoicePrice = 0;
 
-            // 5. Cập nhật UI kết quả
             document.getElementById('ket-qua-xuat-hoa-don').textContent = formatNumber(invoicePrice.toFixed(0));
             document.getElementById('ket-qua-pt51').textContent = formatNumber(pt51Total);
+
+
+            // === PHẦN 2: TÍNH LỢI NHUẬN ===
+            
+            // Lấy % chiết khấu từ Dropdown Dòng xe
+            const carDiscountRate = parseFloat(document.getElementById('loai-xe').value);
+            document.getElementById('hien-thi-phan-tram-ck').textContent = carDiscountRate.toString().replace('.',',') + '%';
+
+            // Tính Tổng chiết khấu nhận về = Giá xuất hóa đơn * %
+            const totalCommission = invoicePrice * (carDiscountRate / 100);
+            document.getElementById('hien-thi-tong-ck').textContent = formatNumber(totalCommission.toFixed(0));
+
+            // Lấy giảm giá TVBH và Công ty
+            const tvbhDiscount = parseNumber(document.getElementById('tvbh-giam').value);
+            const companyDiscount = parseNumber(document.getElementById('congty-giam').value);
+
+            // Tính Lợi nhuận = Tổng CK - Giảm TVBH - Giảm Cty
+            let finalProfit = totalCommission - tvbhDiscount - companyDiscount;
+            
+            document.getElementById('ket-qua-loi-nhuan').textContent = formatNumber(finalProfit.toFixed(0));
         }
 
     </script>
