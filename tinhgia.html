@@ -63,11 +63,12 @@
                     <label class="font-bold text-gray-700 md:col-span-1 text-lg">Chọn dòng xe:</label>
                     <div class="md:col-span-2">
                         <select id="loai-xe" class="w-full text-lg font-semibold text-blue-800 border-2 border-blue-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none shadow-sm" onchange="calculatePrice()">
-                            <option value="3.0">Các dòng xe khác (VF3, VF5, VF6, e34)</option>
-                            <option value="4.5">VF 7 (Chiết khấu 4,5%)</option>
-                            <option value="5.5">VF 8 (Chiết khấu 5,5%)</option>
-                            <option value="6.0">VF 9 (Chiết khấu 6%)</option>
+                            <option value="5.0">Xe khác (VF3, 5, 6, e34) - CK 5%</option>
+                            <option value="6.5">VF 7 - CK 6.5%</option>
+                            <option value="7.5">VF 8 - CK 7.5%</option>
+                            <option value="8.0">VF 9 - CK 8.0%</option>
                         </select>
+                        <p class="text-xs text-green-600 mt-1 italic">* Đã bao gồm 2% thưởng Đại lý mới</p>
                     </div>
                 </div>
 
@@ -150,8 +151,8 @@
             <div class="p-6 md:p-8 space-y-6">
                 <div class="bg-green-50 p-4 rounded-lg border border-green-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <span class="block text-gray-600 text-sm">Mức chiết khấu áp dụng:</span>
-                        <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">3%</span>
+                        <span class="block text-gray-600 text-sm">Mức chiết khấu (đã +2% ĐL mới):</span>
+                        <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">5%</span>
                     </div>
                     <div class="text-right">
                         <span class="block text-gray-600 text-sm">Tổng chiết khấu nhận về:</span>
@@ -331,7 +332,7 @@
 
             // === PHẦN 2: TÍNH LỢI NHUẬN ===
             
-            // Lấy % chiết khấu từ Dropdown Dòng xe
+            // Lấy % chiết khấu từ Dropdown Dòng xe (Value đã +2%)
             const carDiscountRate = parseFloat(document.getElementById('loai-xe').value);
             document.getElementById('hien-thi-phan-tram-ck').textContent = carDiscountRate.toString().replace('.',',') + '%';
 
