@@ -63,12 +63,11 @@
                     <label class="font-bold text-gray-700 md:col-span-1 text-lg">Chọn dòng xe:</label>
                     <div class="md:col-span-2">
                         <select id="loai-xe" class="w-full text-lg font-semibold text-blue-800 border-2 border-blue-200 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none shadow-sm" onchange="calculatePrice()">
-                            <option value='{"rate": 5.0, "code": "other"}'>Xe khác (VF3, 5, 6, e34) - CK 5.0%</option>
-                            <option value='{"rate": 6.5, "code": "vf7"}'>VF 7 - CK 6.5%</option>
-                            <option value='{"rate": 7.5, "code": "vf8"}'>VF 8 - CK 7.5%</option>
-                            <option value='{"rate": 8.0, "code": "vf9"}'>VF 9 - CK 8.0%</option>
+                            <option value='{"rate": 5.0, "code": "other"}'>Xe khác (VF3, VF5, VF6, e34)</option>
+                            <option value='{"rate": 6.5, "code": "vf7"}'>VF 7</option>
+                            <option value='{"rate": 7.5, "code": "vf8"}'>VF 8</option>
+                            <option value='{"rate": 8.0, "code": "vf9"}'>VF 9</option>
                         </select>
-                        <p class="text-xs text-green-600 mt-1 italic">* Mức chiết khấu đã bao gồm 2% thưởng Đại lý mới</p>
                     </div>
                 </div>
 
@@ -82,10 +81,10 @@
                 </div>
 
                 <div class="space-y-4">
-                    <h3 class="font-semibold text-gray-600 uppercase text-sm tracking-wide">Các chương trình ưu đãi</h3>
+                    <h3 class="font-semibold text-gray-600 uppercase text-sm tracking-wide">Các chương trình ưu đãi khách hàng</h3>
                     
                     <div class="flex items-center justify-between bg-blue-50 p-3 rounded-lg border border-blue-100">
-                        <span class="font-medium text-blue-900"><i class="fas fa-check-circle text-blue-500 mr-2"></i>Giảm 4% MLTTVN</span>
+                        <span class="font-medium text-blue-900"><i class="fas fa-percent text-blue-500 mr-2"></i>Ưu đãi khách hàng (Cố định 4%)</span>
                         <span id="display-giam-4" class="font-bold text-gray-700">0 VNĐ</span>
                     </div>
 
@@ -119,7 +118,7 @@
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div class="text-left">
                             <span class="block text-gray-600 font-medium text-lg">Giá xuất hóa đơn cho Khách lẻ:</span>
-                            <span class="text-xs text-gray-400">(Giá niêm yết - Tổng giảm - Các chương trình)</span>
+                            <span class="text-xs text-gray-400">(Giá niêm yết - % Ưu đãi khách hàng - Trừ tiền trực tiếp)</span>
                         </div>
                         <div class="text-right">
                             <span id="ket-qua-xuat-hoa-don" class="block text-3xl font-bold text-red-600">0</span>
@@ -144,20 +143,20 @@
         <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-green-700 px-6 py-4">
                 <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fas fa-hand-holding-dollar"></i> Tính Lợi Nhuận
+                    <i class="fas fa-hand-holding-dollar"></i> Tính Lợi Nhuận (Dealer)
                 </h1>
             </div>
             
             <div class="p-6 md:p-8 space-y-6">
                 <div class="bg-green-50 p-4 rounded-lg border border-green-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <span class="block text-gray-600 text-sm font-semibold">Chiết khấu thực nhận:</span>
+                        <span class="block text-gray-600 text-sm font-semibold">Chiết khấu lợi nhuận:</span>
                         <div id="cong-thuc-ck" class="text-xs text-red-500 mt-1"></div>
                         <span id="hien-thi-phan-tram-ck" class="text-xl font-bold text-green-700">0%</span>
                     </div>
                     <div class="text-right">
                         <span class="block text-gray-600 text-sm">Tổng tiền chiết khấu:</span>
-                        <span class="text-xs text-gray-500 italic mb-1">(Giá xuất HĐ * % Thực nhận)</span>
+                        <span class="text-xs text-gray-500 italic mb-1">(Giá xuất HĐ * % CK Lợi nhuận)</span>
                         <span id="hien-thi-tong-ck" class="text-2xl font-bold text-green-700">0</span>
                     </div>
                 </div>
@@ -281,8 +280,7 @@
                     input.focus();
                 } else if (program.type === 'percent') {
                     // Hiển thị cả thông tin % khách nhận và % đại lý share (nếu có)
-                    let text = `Giảm thêm ${program.val}%`;
-                    if(program.share) text += ` (ĐL chia sẻ ${program.share}%)`;
+                    let text = `${program.val}% Ưu đãi khách hàng`;
                     fixedText.textContent = text;
                 } else if (program.type === 'fixed_deduct') {
                     fixedText.textContent = `-${formatNumber(program.val)} VNĐ`;
@@ -321,7 +319,7 @@
                 const program = PROGRAM_OPTIONS.find(p => p.id === select.value);
                 
                 if (program) {
-                    // 1. Tính lợi ích KHÁCH HÀNG
+                    // 1. Tính lợi ích KHÁCH HÀNG (Ưu đãi khách hàng)
                     if (program.type === 'percent') {
                         additionalCustomerPercent += program.val;
                     } 
@@ -356,9 +354,9 @@
             const totalCustomerPercent = basePercent + additionalCustomerPercent;
             const percentDiscountAmount = listPrice * (totalCustomerPercent / 100);
             
-            let displayPercentText = `- ${formatNumber(percentDiscountAmount)} VNĐ (4%)`;
+            let displayPercentText = `- ${formatNumber(percentDiscountAmount)} VNĐ (4% Ưu đãi khách hàng)`;
             if (additionalCustomerPercent > 0) {
-                displayPercentText = `Tổng ${totalCustomerPercent}% (4% + ${additionalCustomerPercent}%) = -${formatNumber(percentDiscountAmount)} đ`;
+                displayPercentText = `Tổng ${totalCustomerPercent}% Ưu đãi khách hàng (4% + ${additionalCustomerPercent}%) = -${formatNumber(percentDiscountAmount)} đ`;
             }
             document.getElementById('display-giam-4').textContent = displayPercentText;
 
@@ -371,7 +369,7 @@
 
             // === PHẦN 2: TÍNH LỢI NHUẬN ===
             
-            // 1. Tính Chiết khấu thực nhận
+            // 1. Tính Chiết khấu thực nhận (Chiết khấu lợi nhuận)
             const baseCommissionRate = carData.rate;
             const finalCommissionRate = baseCommissionRate - totalSharePercent;
 
